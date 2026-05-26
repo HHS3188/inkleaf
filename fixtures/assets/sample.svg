@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" role="img" aria-label="HMark fixture image">
+  <rect width="320" height="180" fill="#1f2937"/>
+  <rect x="24" y="24" width="272" height="132" rx="10" fill="#f8fafc"/>
+  <circle cx="78" cy="86" r="28" fill="#3b82f6"/>
+  <path d="M124 124 166 76l38 38 22-24 42 34z" fill="#16a34a"/>
+  <text x="32" y="44" fill="#111827" font-family="Arial, sans-serif" font-size="18" font-weight="700">HMark Fixture</text>
+</svg>

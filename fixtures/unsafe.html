@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+  <body>
+    <h1>Unsafe HTML Fixture</h1>
+    <script>window.__hmarkUnsafe = true</script>
+    <iframe src="https://example.com"></iframe>
+    <svg><script>alert(1)</script></svg>
+    <p><a href="javascript:alert(1)" onclick="alert(1)">blocked link</a></p>
+    <p><img src="./assets/sample.svg" onerror="alert(1)" alt="local svg"></p>
+  </body>
+</html>
