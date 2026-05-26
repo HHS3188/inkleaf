@@ -27,6 +27,24 @@ pnpm build
 
 `pnpm build` requires a working Rust/Cargo toolchain because it invokes Tauri packaging.
 
+## Project-Local Rust/Cargo
+
+This checkout can keep Rust under `.tools/` so the system PATH and global user directories are not modified:
+
+```powershell
+$ProjectRoot = (Get-Location).Path
+$env:RUSTUP_HOME = Join-Path $ProjectRoot ".tools\rustup"
+$env:CARGO_HOME = Join-Path $ProjectRoot ".tools\cargo"
+$env:PATH = "$env:CARGO_HOME\bin;$env:PATH"
+.\.tools\downloads\rustup-init.exe -y --no-modify-path --default-toolchain stable
+```
+
+`.tools/` is local machine state and must not be committed. The same environment variables must be set in any terminal that runs `cargo`, `pnpm build`, or `pnpm dev`.
+
+Windows Tauri builds still need system-level Microsoft C++ Build Tools with the Visual C++ toolchain, because the MSVC Rust target requires `link.exe`. That dependency cannot be installed safely inside this project directory. WebView2 is also a system runtime dependency for desktop execution.
+
+See `docs/local-toolchain-tauri-validation.md` for the current validation result.
+
 ## Windows Default App
 
 Installer builds can register file associations for Markdown, TXT, and HTML. HMark does not force itself as the default application. Use Settings -> Set as default opener to open Windows default-app settings and choose HMark per file type.
