@@ -1,32 +1,28 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
 import type { SingleInstancePayload } from '../app/App'
 import { useDocumentStore } from '../features/document/document-store'
 import { useEditorStore, type EditorMode } from '../features/editor/editor-store'
 import { useSettingsStore } from '../features/settings/settings-store'
+import { ErrorBoundary } from './ErrorBoundary'
 import { ErrorState } from './ErrorState'
 import { EmptyState } from './EmptyState'
 import { TitleBar } from './TitleBar'
 import { Toolbar } from './Toolbar'
+import { ReaderView } from '../features/reader/ReaderView'
+import { SourceEditor } from '../features/editor/SourceEditor'
+import { SplitEditor } from '../features/editor/SplitEditor'
 
+// 面板组件（非即时渲染）保留懒加载
 const DiagnosticsPanel = lazy(() =>
   import('../features/diagnostics/DiagnosticsPanel').then((module) => ({
     default: module.DiagnosticsPanel,
   })),
 )
-const ReaderView = lazy(() =>
-  import('../features/reader/ReaderView').then((module) => ({ default: module.ReaderView })),
-)
 const SettingsPanel = lazy(() =>
   import('../features/settings/SettingsPanel').then((module) => ({
     default: module.SettingsPanel,
   })),
-)
-const SourceEditor = lazy(() =>
-  import('../features/editor/SourceEditor').then((module) => ({ default: module.SourceEditor })),
-)
-const SplitEditor = lazy(() =>
-  import('../features/editor/SplitEditor').then((module) => ({ default: module.SplitEditor })),
 )
 const OutlinePanel = lazy(() =>
   import('../features/outline/OutlinePanel').then((module) => ({ default: module.OutlinePanel })),
@@ -177,9 +173,9 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       {error ? <ErrorState message={error} onDismiss={() => setError(null)} /> : null}
 
       <div className="workspace">
-        <Suspense fallback={<div className="loading-state">正在加载工作区...</div>}>
+        <ErrorBoundary>
           {loading ? <div className="loading-state">正在打开文件...</div> : renderWorkspace()}
-        </Suspense>
+        </ErrorBoundary>
       </div>
 
       {settingsOpen ? (

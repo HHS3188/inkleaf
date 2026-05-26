@@ -14,10 +14,23 @@ HMark is a local-first Windows desktop reader and source workspace for Markdown,
 - Recent files, reader settings, theme, zoom, and diagnostics panel.
 - Windows file association config for installer builds.
 
+## Quick Start
+
+```powershell
+cd "D:\Project main\多功能文本阅读器"
+.\scripts\dev.ps1
+```
+
+This loads VS/MSVC environment, sets up local Rust/Cargo, and starts Tauri dev mode.
+
 ## Commands
 
-```bash
-pnpm install
+```powershell
+.\scripts\dev.ps1          # 启动开发
+.\scripts\check.ps1        # 全量检查（typecheck + lint + test + vite build + cargo check）
+.\scripts\build.ps1        # 构建 release exe/MSI/NSIS
+
+# 或单独运行：
 pnpm typecheck
 pnpm lint
 pnpm test
