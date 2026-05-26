@@ -7,9 +7,10 @@ import { SourceEditor } from './SourceEditor'
 type SplitEditorProps = {
   document: CurrentDocument
   settings: ReaderSettings
+  onEditRequest?: (line?: number) => void
 }
 
-export function SplitEditor({ document, settings }: SplitEditorProps) {
+export function SplitEditor({ document, settings, onEditRequest }: SplitEditorProps) {
   return (
     <ErrorBoundary compact>
       <div className="split-editor">
@@ -17,7 +18,7 @@ export function SplitEditor({ document, settings }: SplitEditorProps) {
           <SourceEditor documentPath={document.path} content={document.content} />
         </section>
         <section className="split-pane preview-pane" aria-label="Preview">
-          <ReaderView document={document} settings={settings} />
+          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} />
         </section>
       </div>
     </ErrorBoundary>

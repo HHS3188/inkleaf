@@ -12,6 +12,8 @@ import { useEditorStore } from './editor-store'
 type SourceEditorProps = {
   documentPath: string | null
   content: string
+  targetLine?: number
+  onTargetLineHandled?: () => void
 }
 
 type CopiedAssetResult = {
@@ -20,13 +22,19 @@ type CopiedAssetResult = {
   file_name: string
 }
 
-export function SourceEditor({ documentPath, content }: SourceEditorProps) {
+export function SourceEditor({
+  documentPath,
+  content,
+  targetLine,
+  onTargetLineHandled,
+}: SourceEditorProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
   const contentRef = useRef(content)
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
   const searchRequest = useEditorStore((state) => state.searchRequest)
+  const focusRequest = useEditorStore((state) => state.focusRequest)
 
   useEffect(() => {
     contentRef.current = content
@@ -123,6 +131,25 @@ export function SourceEditor({ documentPath, content }: SourceEditorProps) {
       viewRef.current.focus()
     }
   }, [searchRequest])
+
+  useEffect(() => {
+    if (focusRequest > 0 && viewRef.current) {
+      viewRef.current.focus()
+    }
+  }, [focusRequest])
+
+  useEffect(() => {
+    if (targetLine && targetLine > 0 && viewRef.current) {
+      const view = viewRef.current
+      const line = view.state.doc.line(Math.min(targetLine, view.state.doc.lines))
+      view.dispatch({
+        selection: { anchor: line.from, head: line.from },
+        scrollIntoView: true,
+      })
+      view.focus()
+      onTargetLineHandled?.()
+    }
+  }, [targetLine, onTargetLineHandled])
 
   return <div className="source-editor" ref={hostRef} />
 }

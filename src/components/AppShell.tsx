@@ -28,6 +28,9 @@ const SourceEditor = lazy(() =>
 const SplitEditor = lazy(() =>
   import('../features/editor/SplitEditor').then((module) => ({ default: module.SplitEditor })),
 )
+const OutlinePanel = lazy(() =>
+  import('../features/outline/OutlinePanel').then((module) => ({ default: module.OutlinePanel })),
+)
 
 type AppShellProps = {
   initialArgs: string[]
@@ -53,6 +56,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const updateSettings = useSettingsStore((state) => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+  const [outlineOpen, setOutlineOpen] = useState(false)
+  const [targetLine, setTargetLine] = useState<number | undefined>(undefined)
 
   const handleSave = useCallback(async (): Promise<boolean> => {
     if (!document) return true
@@ -166,6 +171,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         }
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenDiagnostics={() => setDiagnosticsOpen(true)}
+        onToggleOutline={() => setOutlineOpen(!outlineOpen)}
       />
 
       {error ? <ErrorState message={error} onDismiss={() => setError(null)} /> : null}
@@ -200,6 +206,11 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
           />
         </Suspense>
       ) : null}
+      {outlineOpen ? (
+        <Suspense fallback={null}>
+          <OutlinePanel onClose={() => setOutlineOpen(false)} />
+        </Suspense>
+      ) : null}
     </div>
   )
 
@@ -214,15 +225,27 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       )
     }
 
+    const handleEditRequest = (line?: number) => {
+      setTargetLine(line)
+      setMode('source')
+    }
+
     if (mode === 'source') {
-      return <SourceEditor documentPath={document.path} content={document.content} />
+      return (
+        <SourceEditor
+          documentPath={document.path}
+          content={document.content}
+          targetLine={targetLine}
+          onTargetLineHandled={() => setTargetLine(undefined)}
+        />
+      )
     }
 
     if (mode === 'split') {
-      return <SplitEditor document={document} settings={settings} />
+      return <SplitEditor document={document} settings={settings} onEditRequest={handleEditRequest} />
     }
 
-    return <ReaderView document={document} settings={settings} />
+    return <ReaderView document={document} settings={settings} onEditRequest={handleEditRequest} />
   }
 }
 

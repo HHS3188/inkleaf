@@ -26,7 +26,7 @@ export const defaultSettings: ReaderSettings = {
   accentColor: 'blue',
   fontSize: 16,
   lineHeight: 1.7,
-  readingWidth: 860,
+  readingWidth: 980,
   zoom: 100,
   autoRenderTxtImages: true,
   allowRemoteImages: false,

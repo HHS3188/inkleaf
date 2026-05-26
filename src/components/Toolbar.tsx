@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Bug,
   FolderOpen,
   Minus,
@@ -29,6 +30,7 @@ type ToolbarProps = {
   onToggleTheme: () => void
   onOpenSettings: () => void
   onOpenDiagnostics: () => void
+  onToggleOutline: () => void
 }
 
 export function Toolbar({
@@ -44,6 +46,7 @@ export function Toolbar({
   onToggleTheme,
   onOpenSettings,
   onOpenDiagnostics,
+  onToggleOutline,
 }: ToolbarProps) {
   return (
     <div className="toolbar" role="toolbar">
@@ -135,6 +138,15 @@ export function Toolbar({
         </button>
         <button type="button" className="icon-button" onClick={onOpenDiagnostics} title="诊断">
           <Bug size={17} aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          className="icon-button"
+          onClick={onToggleOutline}
+          disabled={!document}
+          title="大纲"
+        >
+          <BookOpen size={17} aria-hidden="true" />
         </button>
         <button type="button" className="icon-button" onClick={onOpenSettings} title="设置">
           <Settings size={17} aria-hidden="true" />
