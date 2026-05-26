@@ -9,7 +9,7 @@ export function isSupportedImagePath(path: string): boolean {
 }
 
 export function isDataImageSource(source: string): boolean {
-  return /^data:image\/[a-z0-9.+-]+;base64,/i.test(source)
+  return /^data:image\/(?!svg\+xml\b)[a-z0-9.+-]+;base64,/i.test(source)
 }
 
 export function isRemoteSource(source: string): boolean {

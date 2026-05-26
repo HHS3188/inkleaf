@@ -35,6 +35,13 @@ describe('resolveImageSource', () => {
       }).status,
     ).toBe('valid')
     expect(
+      resolveImageSource('data:image/svg+xml;base64,AAAA', {
+        documentPath: null,
+        allowRemoteImages: false,
+        toAssetUrl,
+      }).status,
+    ).toBe('blocked-scheme')
+    expect(
       resolveImageSource('data:text/html;base64,AAAA', {
         documentPath: null,
         allowRemoteImages: false,

@@ -33,6 +33,7 @@
     "active": true,
     "targets": "all",
     "category": "Utility",
+    "icon": ["icons/icon.ico"],
     "fileAssociations": [
       {
         "name": "Markdown Document",
@@ -50,7 +51,7 @@
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper",
-        "silent": true
+        "silent": false
       }
     }
   }

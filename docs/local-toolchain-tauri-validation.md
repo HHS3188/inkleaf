@@ -2,7 +2,7 @@
 
 ## Local Rust Layout
 
-The local Rust toolchain is configured with:
+Rust is kept inside this checkout:
 
 ```powershell
 $env:RUSTUP_HOME = "<project>\\.tools\\rustup"
@@ -22,66 +22,38 @@ The installer was run with:
 .\.tools\downloads\rustup-init.exe -y --no-modify-path --default-toolchain stable
 ```
 
-No system PATH mutation is required.
+This does not modify the system PATH and does not install Rust into the default user profile.
 
 ## Verified Toolchain
 
-- `rustc 1.95.0`
-- `cargo 1.95.0`
+- `rustc 1.95.0 (59807616e 2026-04-14)`
+- `cargo 1.95.0 (f2d3ce0bd 2026-03-21)`
 - `stable-x86_64-pc-windows-msvc`
-- `stable-x86_64-pc-windows-gnu` was also tested as a project-local fallback.
 
-## Validation Results
+The project-local GNU fallback was tested previously but was not used for final validation because it lacked a full MinGW runtime. The supported Windows desktop path is MSVC.
+
+## MSVC Environment
+
+Validated Visual Studio path:
+
+```txt
+E:\Microsoft Visual Studio
+```
+
+Validated tools after importing `VsDevCmd.bat`:
+
+```txt
+link.exe: E:\Microsoft Visual Studio\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\link.exe
+cl.exe: E:\Microsoft Visual Studio\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\cl.exe
+rc.exe: C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe
+```
+
+## Current Validation Results
 
 Passing:
 
 ```powershell
 pnpm install
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm vite build
-```
-
-Blocked:
-
-```powershell
-cargo check
-pnpm build
-pnpm dev
-```
-
-MSVC failure:
-
-```txt
-linker `link.exe` not found
-the msvc targets depend on the msvc linker but `link.exe` was not found
-```
-
-GNU fallback failure:
-
-```txt
-cannot find crtbegin.o
-cannot find crtend.o
-```
-
-The first GNU attempt also hit non-ASCII path handling inside `dlltool`; a temporary `subst` drive avoided that path issue but still lacked the complete MinGW runtime objects.
-
-## Required System Dependency
-
-Install Microsoft C++ Build Tools or Visual Studio 2017+ with the Visual C++ workload. This is a system-level dependency and was not installed automatically.
-
-Recommended manual path:
-
-1. Install Visual Studio Build Tools.
-2. Select the C++ desktop build tools workload.
-3. Ensure MSVC toolchain and Windows SDK are installed.
-4. Open a fresh terminal.
-5. Re-run the project-local Rust environment setup.
-6. Run:
-
-```powershell
-cd "D:\Project main\多功能文本阅读器"
 pnpm typecheck
 pnpm lint
 pnpm test
@@ -93,4 +65,34 @@ pnpm build
 pnpm dev
 ```
 
-WebView2 runtime may also be required for desktop execution if it is not already installed on the machine.
+Build outputs:
+
+```txt
+src-tauri/target/release/hmark.exe
+src-tauri/target/release/bundle/msi/HMark_0.1.0_x64_en-US.msi
+src-tauri/target/release/bundle/nsis/HMark_0.1.0_x64-setup.exe
+```
+
+## Fixed During Validation
+
+- Added missing `src-tauri/icons/icon.ico`, required by Tauri Windows resources.
+- Set WebView2 bootstrapper to non-silent mode.
+- Ignored `src-tauri/gen/` schema output as generated state.
+- Split frontend production chunks and lazy-loaded large UI surfaces.
+- Blocked `data:image/svg+xml` images while keeping local SVG files as ordinary image references.
+
+## Desktop Smoke
+
+- Release `hmark.exe` opened `fixtures/sample.md`.
+- A second release launch with `fixtures/sample.txt` reused the existing process, validating single-instance behavior at the process level.
+- `pnpm dev` launched a Tauri `HMark` desktop window after debug compilation.
+
+## Remaining Manual QA
+
+Terminal automation cannot inspect every native WebView interaction. A user should still visually verify:
+
+- Source edit, dirty marker, Ctrl+S save, and reopen persistence.
+- Split mode live preview while editing.
+- Image preview copy/open-folder actions.
+- Dragging an image into Source mode copies it to `<document>.assets/`.
+- Default-app settings opens Windows Settings.

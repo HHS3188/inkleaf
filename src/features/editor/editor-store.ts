@@ -4,14 +4,14 @@ export type EditorMode = 'reader' | 'source' | 'split'
 
 type EditorState = {
   mode: EditorMode
-  searchOpen: boolean
+  searchRequest: number
   setMode: (mode: EditorMode) => void
-  setSearchOpen: (open: boolean) => void
+  requestSearch: () => void
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
   mode: 'reader',
-  searchOpen: false,
+  searchRequest: 0,
   setMode: (mode) => set({ mode }),
-  setSearchOpen: (searchOpen) => set({ searchOpen }),
+  requestSearch: () => set((state) => ({ searchRequest: state.searchRequest + 1 })),
 }))

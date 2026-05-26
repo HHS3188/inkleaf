@@ -1,3 +1,4 @@
+import { convertFileSrc } from '@tauri-apps/api/core'
 import type { SingleInstancePayload } from '../../app/App'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -20,6 +21,7 @@ export function DiagnosticsPanel({
   settings,
 }: DiagnosticsPanelProps) {
   if (!openPanel) return null
+  const assetUrlProbe = document?.path ? safeConvertFileSrc(document.path) : null
 
   return (
     <aside className="side-panel diagnostics-panel" aria-label="诊断">
@@ -38,11 +40,20 @@ export function DiagnosticsPanel({
           fileAssociations: ['.md', '.markdown', '.mdown', '.txt', '.html', '.htm'],
           defaultAppGuide: 'ms-settings:defaultapps',
           eventName: 'open-file-from-args',
+          assetUrlProbe,
         }}
       />
       <DiagnosticBlock title="Settings" value={settings} />
     </aside>
   )
+}
+
+function safeConvertFileSrc(path: string): string {
+  try {
+    return convertFileSrc(path)
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error)
+  }
 }
 
 function DiagnosticBlock({ title, value }: { title: string; value: unknown }) {

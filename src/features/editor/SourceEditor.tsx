@@ -2,10 +2,9 @@ import { useEffect, useRef } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
-import { defaultKeymap } from '@codemirror/commands'
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
 import { highlightSelectionMatches, openSearchPanel, searchKeymap } from '@codemirror/search'
-import { basicSetup } from 'codemirror'
 import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
 import { useEditorStore } from './editor-store'
@@ -27,7 +26,7 @@ export function SourceEditor({ documentPath, content }: SourceEditorProps) {
   const contentRef = useRef(content)
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
-  const searchOpen = useEditorStore((state) => state.searchOpen)
+  const searchRequest = useEditorStore((state) => state.searchRequest)
 
   useEffect(() => {
     contentRef.current = content
@@ -40,11 +39,11 @@ export function SourceEditor({ documentPath, content }: SourceEditorProps) {
     const state = EditorState.create({
       doc: contentRef.current,
       extensions: [
-        basicSetup,
+        history(),
         EditorView.lineWrapping,
         markdown(),
         highlightSelectionMatches(),
-        keymap.of([...defaultKeymap, ...searchKeymap]),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             updateContent(update.state.doc.toString())
@@ -119,11 +118,11 @@ export function SourceEditor({ documentPath, content }: SourceEditorProps) {
   }, [content])
 
   useEffect(() => {
-    if (searchOpen && viewRef.current) {
+    if (searchRequest > 0 && viewRef.current) {
       openSearchPanel(viewRef.current)
       viewRef.current.focus()
     }
-  }, [searchOpen])
+  }, [searchRequest])
 
   return <div className="source-editor" ref={hostRef} />
 }
