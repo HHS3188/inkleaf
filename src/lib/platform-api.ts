@@ -1,0 +1,135 @@
+// ── Platform abstraction: Electron / Browser ─────────────────────────
+// All desktop IPC goes through this module, so individual components
+// never access window.electronAPI directly.
+
+// ── Types ─────────────────────────────────────────────────────────────
+
+export type ReadTextFileResult = {
+  path: string
+  file_name: string
+  extension: string
+  size: number
+  modified_ms: number | null
+  encoding: string
+  content: string
+}
+
+export type CopiedAssetResult = {
+  absolute_path: string
+  relative_path: string
+  file_name: string
+}
+
+export type SingleInstancePayload = {
+  args: string[]
+  cwd: string
+}
+
+export interface DialogFilter {
+  name: string
+  extensions: string[]
+}
+
+// ── Runtime detection ─────────────────────────────────────────────────
+
+declare global {
+  interface Window {
+    electronAPI?: {
+      readTextFile: (p: string) => Promise<ReadTextFileResult>
+      writeTextFile: (p: string, c: string) => Promise<void>
+      pathExists: (p: string) => Promise<boolean>
+      copyImageToAssets: (d: string, i: string) => Promise<CopiedAssetResult>
+      openExternal: (url: string) => Promise<void>
+      showItemInFolder: (p: string) => Promise<void>
+      showOpenDialog: (o: {
+        multiple?: boolean
+        filters?: DialogFilter[]
+      }) => Promise<string | string[] | null>
+      showSaveDialog: (o: {
+        defaultPath?: string
+        filters?: DialogFilter[]
+      }) => Promise<string | null>
+      showMessageDialog: (o: {
+        title: string
+        message: string
+        kind?: string
+      }) => Promise<void>
+      getInitialArgs: () => Promise<string[]>
+      onFileOpen: (cb: (p: SingleInstancePayload) => void) => () => void
+    }
+  }
+}
+
+export function isElectronRuntime(): boolean {
+  return typeof window !== 'undefined' && 'electronAPI' in window
+}
+
+function api() {
+  if (!window.electronAPI) throw new Error('Electron API not available')
+  return window.electronAPI
+}
+
+// ── Public API ────────────────────────────────────────────────────────
+
+export async function readTextFile(p: string): Promise<ReadTextFileResult> {
+  return api().readTextFile(p)
+}
+
+export async function writeTextFile(p: string, content: string): Promise<void> {
+  return api().writeTextFile(p, content)
+}
+
+export async function pathExists(p: string): Promise<boolean> {
+  return api().pathExists(p)
+}
+
+export async function copyImageToAssets(
+  documentPath: string,
+  imagePath: string,
+): Promise<CopiedAssetResult> {
+  return api().copyImageToAssets(documentPath, imagePath)
+}
+
+export async function showOpenDialog(options: {
+  multiple?: boolean
+  filters?: DialogFilter[]
+}): Promise<string | string[] | null> {
+  return api().showOpenDialog(options)
+}
+
+export async function showSaveDialog(options: {
+  defaultPath?: string
+  filters?: DialogFilter[]
+}): Promise<string | null> {
+  return api().showSaveDialog(options)
+}
+
+export async function showMessageDialog(options: {
+  title: string
+  message: string
+  kind?: string
+}): Promise<void> {
+  return api().showMessageDialog(options)
+}
+
+export async function openExternal(url: string): Promise<void> {
+  return api().openExternal(url)
+}
+
+export async function showItemInFolder(p: string): Promise<void> {
+  return api().showItemInFolder(p)
+}
+
+export async function getInitialArgs(): Promise<string[]> {
+  return api().getInitialArgs()
+}
+
+export function onFileOpen(
+  cb: (payload: SingleInstancePayload) => void,
+): () => void {
+  return api().onFileOpen(cb)
+}
+
+export function fileToAssetUrl(p: string): string {
+  return 'hmark:///' + p.replace(/\\/g, '/')
+}

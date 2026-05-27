@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
-import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
-import type { SingleInstancePayload } from '../app/App'
+import type { SingleInstancePayload } from '../lib/platform-api'
+import { showOpenDialog, showSaveDialog } from '../lib/platform-api'
 import { useDocumentStore } from '../features/document/document-store'
 import { useEditorStore, type EditorMode } from '../features/editor/editor-store'
 import { useSettingsStore } from '../features/settings/settings-store'
@@ -60,7 +60,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     try {
       const targetPath =
         document.path ||
-        (await saveDialog({
+        (await showSaveDialog({
           defaultPath: document.fileName,
           filters: fileFilters,
         }))
@@ -84,7 +84,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const handleOpen = useCallback(async () => {
     if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave))) return
     try {
-      const selected = await openDialog({
+      const selected = await showOpenDialog({
         multiple: false,
         filters: fileFilters,
       })

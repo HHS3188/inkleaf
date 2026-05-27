@@ -1,5 +1,4 @@
-import { message } from '@tauri-apps/plugin-dialog'
-import { open } from '@tauri-apps/plugin-shell'
+import { showMessageDialog, openExternal } from '../../lib/platform-api'
 import { Trash2 } from 'lucide-react'
 import { clearRecentFiles } from '../document/recent-files'
 import { accentLabels } from '../theme/themes'
@@ -25,8 +24,8 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
     const text =
       '请在 Windows 设置 -> 应用 -> 默认应用 中，按文件类型为 .md/.txt/.html 选择 HMark。便携版不会强制注册默认应用。'
     try {
-      await message(text, { title: '设置默认打开器', kind: 'info' })
-      await open('ms-settings:defaultapps')
+      await showMessageDialog({ title: '设置默认打开器', message: text, kind: 'info' })
+      await openExternal('ms-settings:defaultapps')
     } catch {
       await navigator.clipboard?.writeText(text)
     }

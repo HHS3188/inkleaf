@@ -1,6 +1,6 @@
 import { Fragment, createElement, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { open } from '@tauri-apps/plugin-shell'
+import { openExternal } from '../../lib/platform-api'
 import type { ReaderSettings } from '../settings/settings-store'
 import { sanitizeHtmlContent } from '../markdown/sanitize-html'
 import { classifyLink } from '../markdown/link-handling'
@@ -122,7 +122,7 @@ function renderNode(
         onClick={(event) => {
           if (kind === 'external' && href) {
             event.preventDefault()
-            void open(href)
+            void openExternal(href)
           }
         }}
       >

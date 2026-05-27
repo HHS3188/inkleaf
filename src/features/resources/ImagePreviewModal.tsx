@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { showItemInFolder } from '../../lib/platform-api'
 import { Copy, ExternalLink, X } from 'lucide-react'
 import type { ResolvedImageSource } from './image-path-resolver'
 
@@ -33,7 +33,7 @@ export function ImagePreviewModal({ image, onClose }: ImagePreviewModalProps) {
 
   const openFolder = () => {
     if (!image.source.absolutePath) return
-    void invoke('open_in_file_manager', { path: image.source.absolutePath })
+    void showItemInFolder(image.source.absolutePath)
   }
 
   return (

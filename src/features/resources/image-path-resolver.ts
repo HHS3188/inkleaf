@@ -1,4 +1,4 @@
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { fileToAssetUrl } from '../../lib/platform-api'
 import { fileUrlToPath, getDirectoryName, joinPath, normalizePathSegments } from '../../lib/path-utils'
 import {
   isDataImageSource,
@@ -147,7 +147,7 @@ function sourceToLocalPath(source: string, documentPath: string | null): string 
 
 function safeConvertFileSrc(path: string): string {
   try {
-    return convertFileSrc(path)
+    return fileToAssetUrl(path)
   } catch {
     return `asset://${path.replace(/\\/g, '/')}`
   }

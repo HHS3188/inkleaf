@@ -1,5 +1,5 @@
-import { convertFileSrc } from '@tauri-apps/api/core'
-import type { SingleInstancePayload } from '../../app/App'
+import { fileToAssetUrl } from '../../lib/platform-api'
+import type { SingleInstancePayload } from '../../lib/platform-api'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
 
@@ -50,7 +50,7 @@ export function DiagnosticsPanel({
 
 function safeConvertFileSrc(path: string): string {
   try {
-    return convertFileSrc(path)
+    return fileToAssetUrl(path)
   } catch (error) {
     return error instanceof Error ? error.message : String(error)
   }

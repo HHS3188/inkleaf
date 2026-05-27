@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, MouseEvent } from 'react'
-import { open } from '@tauri-apps/plugin-shell'
+import { openExternal } from '../../lib/platform-api'
 import type { ReaderSettings } from '../settings/settings-store'
 import { classifyLink, normalizeAnchor } from './link-handling'
 import { ResourceImage } from '../resources/ResourceImage'
@@ -37,7 +37,7 @@ export function createMarkdownComponents({
         }
         if (kind === 'external') {
           event.preventDefault()
-          void open(href)
+          void openExternal(href)
         }
         if (kind === 'blocked') {
           event.preventDefault()

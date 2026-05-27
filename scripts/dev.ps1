@@ -1,12 +1,7 @@
-$ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot
 
-Write-Host "=== HMark Dev ===" -ForegroundColor Cyan
-Write-Host "Project: $ProjectRoot" -ForegroundColor DarkGray
+Write-Host "=== HMark Electron Dev ===" -ForegroundColor Cyan
+Write-Host "Starting Vite + Electron..." -ForegroundColor Cyan
 
-. (Join-Path $PSScriptRoot "bootstrap-env.ps1")
-Initialize-HMarkEnv -ProjectRoot $ProjectRoot
-
-Write-Host "Starting pnpm dev..." -ForegroundColor Cyan
 pnpm dev

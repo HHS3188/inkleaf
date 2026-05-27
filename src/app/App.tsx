@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
-import { listen } from '@tauri-apps/api/event'
-import { invoke } from '@tauri-apps/api/core'
 import { AppShell } from '../components/AppShell'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { useDocumentStore } from '../features/document/document-store'
 import { getFirstOpenableArg } from '../features/document/open-document'
 import { applyReaderSettings, useSettingsStore } from '../features/settings/settings-store'
-import { isTauriRuntime } from '../lib/tauri-runtime'
-
-export type SingleInstancePayload = {
-  args: string[]
-  cwd: string
-}
+import { getInitialArgs, onFileOpen, type SingleInstancePayload } from '../lib/platform-api'
 
 export function App() {
   const openDocument = useDocumentStore((state) => state.openDocument)
@@ -32,14 +25,7 @@ export function App() {
   useEffect(() => {
     let active = true
 
-    if (!isTauriRuntime()) {
-      setInitialArgs([])
-      return () => {
-        active = false
-      }
-    }
-
-    invoke<string[]>('get_initial_args')
+    getInitialArgs()
       .then((args) => {
         if (!active) return
         setInitialArgs(args)
@@ -56,19 +42,13 @@ export function App() {
   }, [openDocument])
 
   useEffect(() => {
-    if (!isTauriRuntime()) return undefined
-
-    const unlisten = listen<SingleInstancePayload>('open-file-from-args', (event) => {
-      setLastSingleInstancePayload(event.payload)
-      const filePath = getFirstOpenableArg(event.payload.args)
+    return onFileOpen((payload) => {
+      setLastSingleInstancePayload(payload)
+      const filePath = getFirstOpenableArg(payload.args)
       if (filePath) {
         void openDocument(filePath)
       }
     })
-
-    return () => {
-      void unlisten.then((dispose) => dispose())
-    }
   }, [openDocument])
 
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { copyImageToAssets } from '../../lib/platform-api'
 import { EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
@@ -14,12 +14,6 @@ type SourceEditorProps = {
   content: string
   targetLine?: number
   onTargetLineHandled?: () => void
-}
-
-type CopiedAssetResult = {
-  absolute_path: string
-  relative_path: string
-  file_name: string
 }
 
 export function SourceEditor({
@@ -172,10 +166,7 @@ async function handleImageDrop(
   }
 
   try {
-    const result = await invoke<CopiedAssetResult>('copy_image_to_assets', {
-      documentPath,
-      imagePath: filePath,
-    })
+    const result = await copyImageToAssets(documentPath, filePath)
     const insert = `![image](${result.relative_path})`
     const selection = view.state.selection.main
     view.dispatch({

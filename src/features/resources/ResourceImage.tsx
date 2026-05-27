@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { pathExists } from '../../lib/platform-api'
 import type { ReaderSettings } from '../settings/settings-store'
 import { MissingImageCard } from './MissingImageCard'
 import { resolveImageSource, type ResolvedImageSource } from './image-path-resolver'
@@ -43,7 +43,7 @@ export function ResourceImage({
     }
 
     setExists(null)
-    invoke<boolean>('path_exists', { path: resolved.absolutePath })
+    pathExists(resolved.absolutePath)
       .then((value) => {
         if (active) setExists(value)
       })

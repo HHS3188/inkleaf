@@ -1,6 +1,6 @@
-import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 import { detectFileType } from '../../lib/file-type'
+import { readTextFile, writeTextFile } from '../../lib/platform-api'
 import { addRecentFile } from './recent-files'
 import type { CurrentDocument, ReadTextFileResult } from './document-types'
 
@@ -44,7 +44,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   openDocument: async (path) => {
     set({ loading: true, error: null })
     try {
-      const result = await invoke<ReadTextFileResult>('read_text_file', { path })
+      const result = await readTextFile(path)
       const document = createDocumentFromReadResult(result)
       addRecentFile({
         path: document.path,
@@ -80,7 +80,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     if (!targetPath) return null
 
     try {
-      await invoke('write_text_file', { path: targetPath, content: document.content })
+      await writeTextFile(targetPath, document.content)
       const savedAt = Date.now()
       set((state) => {
         if (!state.current) return { lastSavedPath: targetPath }
