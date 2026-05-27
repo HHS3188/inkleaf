@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { I18N, Locale } from './types'
 import { zhCN } from './locales/zh-CN'
 import { enUS } from './locales/en-US'
+import { isElectronRuntime, setAppLocale } from '../lib/platform-api'
 
 const LOCALE_STORAGE_KEY = 'hmark-locale'
 
@@ -50,6 +51,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   // update <html lang="...">
   useEffect(() => {
     document.documentElement.lang = locale
+    if (isElectronRuntime()) {
+      setAppLocale(locale)
+    }
   }, [locale])
 
   const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t])

@@ -73,6 +73,18 @@ export interface I18N {
   'editor.dragDropNoPath': string
   'editor.loading': string
 
+  // ── Find ───────────────────────────────────────────────────
+  'find.title': string
+  'find.placeholder': string
+  'find.previous': string
+  'find.next': string
+  'find.matchCase': string
+  'find.wholeWord': string
+  'find.close': string
+  'find.noResults': string
+  'find.scopeSource': string
+  'find.scopePreview': string
+
   // ── Image Preview ──────────────────────────────────────────
   'image.preview': string
   'image.copyPath': string

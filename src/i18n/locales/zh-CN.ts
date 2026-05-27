@@ -73,6 +73,18 @@ export const zhCN: I18N = {
   'editor.dragDropNoPath': '没有可用的本地图片路径；请在 Electron 桌面运行时拖入图片。',
   'editor.loading': '正在加载工作区...',
 
+  // Find
+  'find.title': '查找',
+  'find.placeholder': '查找内容',
+  'find.previous': '上一个',
+  'find.next': '下一个',
+  'find.matchCase': '区分大小写',
+  'find.wholeWord': '整词匹配',
+  'find.close': '关闭查找',
+  'find.noResults': '无匹配结果',
+  'find.scopeSource': '查找源码',
+  'find.scopePreview': '查找预览',
+
   // Image Preview
   'image.preview': '图片预览',
   'image.copyPath': '复制路径',

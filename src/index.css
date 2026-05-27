@@ -592,16 +592,19 @@ button:disabled {
 
 .reader-view {
   height: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--bg);
 }
 
 .reader-surface {
-  width: min(var(--reader-width), calc(100vw - 72px));
+  width: min(var(--reader-width), 100%);
   margin: 0 auto;
-  padding: 32px 0 96px;
+  padding: 32px clamp(20px, 4vw, 72px) 96px;
   font-size: calc(var(--reader-font-size) * var(--reader-zoom));
   line-height: var(--reader-line-height);
   transform-origin: top center;
+  overflow-wrap: break-word;
 }
 
 .reader-surface img {
@@ -688,6 +691,7 @@ button:disabled {
 }
 
 .markdown-body pre {
+  max-width: 100%;
   overflow: auto;
   margin: 0 0 14px;
   border: 1px solid var(--border);
@@ -705,7 +709,10 @@ button:disabled {
 }
 
 .markdown-body table {
-  width: 100%;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
   margin: 0 0 14px;
   border-collapse: collapse;
 }
@@ -757,6 +764,7 @@ button:disabled {
 
 .html-reader pre,
 .txt-reader pre {
+  max-width: 100%;
   overflow: auto;
   margin: 0 0 14px;
   border: 1px solid var(--border);
@@ -767,7 +775,10 @@ button:disabled {
 }
 
 .html-reader table {
-  width: 100%;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
 }
 
@@ -788,7 +799,8 @@ button:disabled {
   font-size: 13px;
 }
 
-.source-editor {
+.source-editor-shell {
+  position: relative;
   height: 100%;
   min-height: 0;
   border: 1px solid transparent;
@@ -796,9 +808,105 @@ button:disabled {
   transition: border-color 0.15s;
 }
 
-.source-editor:focus-within {
+.source-editor-shell:focus-within {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.source-editor {
+  height: 100%;
+  min-height: 0;
+}
+
+.find-bar {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: min(680px, calc(100% - 24px));
+  min-height: 36px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.find-scope {
+  flex-shrink: 0;
+  padding: 0 5px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.find-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: clamp(180px, 28vw, 320px);
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--editor-bg);
+  color: var(--muted);
+}
+
+.find-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.find-input::placeholder {
+  color: var(--muted);
+}
+
+.find-count {
+  min-width: 48px;
+  color: var(--muted);
+  font-family: var(--mono-font);
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-count.empty {
+  min-width: 72px;
+  color: var(--danger);
+  font-family: inherit;
+}
+
+.find-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.find-icon-button:hover:not(:disabled),
+.find-toggle.active {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+
+.find-toggle.active {
+  color: var(--accent);
 }
 
 .split-editor {
@@ -865,8 +973,12 @@ button:disabled {
 
 .preview-pane {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   background: var(--bg);
+}
+
+.preview-pane .reader-surface {
+  padding-inline: clamp(24px, 3vw, 56px);
 }
 
 .resource-image-button {
@@ -1174,6 +1286,18 @@ button:disabled {
   }
 
   .reader-surface {
-    width: calc(100vw - 32px);
+    width: 100%;
+    padding-inline: clamp(16px, 5vw, 28px);
+  }
+
+  .find-bar {
+    right: 8px;
+    left: 8px;
+    flex-wrap: wrap;
+    max-width: none;
+  }
+
+  .find-input-wrap {
+    flex: 1 1 180px;
   }
 }

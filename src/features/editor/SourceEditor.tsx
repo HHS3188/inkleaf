@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { copyImageToAssets } from '../../lib/platform-api'
 import { EditorState } from '@codemirror/state'
 import {
@@ -11,10 +11,18 @@ import {
 } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
-import { highlightSelectionMatches, openSearchPanel, searchKeymap } from '@codemirror/search'
+import { SearchQuery, highlightSelectionMatches, search, setSearchQuery } from '@codemirror/search'
+import { useT } from '../../i18n'
+import { FindBar } from '../../components/FindBar'
 import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
 import { useEditorStore } from './editor-store'
+import {
+  findTextMatches,
+  getNextMatchIndex,
+  getSelectedMatchIndex,
+  type FindDirection,
+} from './search-utils'
 
 type SourceEditorProps = {
   documentPath: string | null
@@ -29,17 +37,131 @@ export function SourceEditor({
   targetLine,
   onTargetLineHandled,
 }: SourceEditorProps) {
+  const t = useT()
+  const shellRef = useRef<HTMLDivElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
   const contentRef = useRef(content)
+  const findOpenRef = useRef(false)
+  const findStateRef = useRef({ query: '', matchCase: false, wholeWord: false })
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
   const searchRequest = useEditorStore((state) => state.searchRequest)
   const focusRequest = useEditorStore((state) => state.focusRequest)
+  const [findOpen, setFindOpen] = useState(false)
+  const [findQuery, setFindQueryState] = useState('')
+  const [matchCase, setMatchCaseState] = useState(false)
+  const [wholeWord, setWholeWordState] = useState(false)
+  const [findFocusKey, setFindFocusKey] = useState(0)
+  const [findResult, setFindResult] = useState({ current: 0, total: 0 })
 
   useEffect(() => {
     contentRef.current = content
   }, [content])
+
+  useEffect(() => {
+    findOpenRef.current = findOpen
+  }, [findOpen])
+
+  const setFindQuery = useCallback((query: string) => {
+    findStateRef.current = { ...findStateRef.current, query }
+    setFindQueryState(query)
+  }, [])
+
+  const setFindMatchCase = useCallback((value: boolean) => {
+    findStateRef.current = { ...findStateRef.current, matchCase: value }
+    setMatchCaseState(value)
+  }, [])
+
+  const setFindWholeWord = useCallback((value: boolean) => {
+    findStateRef.current = { ...findStateRef.current, wholeWord: value }
+    setWholeWordState(value)
+  }, [])
+
+  const syncFindState = useCallback((targetIndex?: number) => {
+    const view = viewRef.current
+    if (!view) return
+
+    const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
+    const searchQuery = new SearchQuery({
+      search: query,
+      caseSensitive,
+      literal: true,
+      wholeWord: word,
+    })
+    const matches = findTextMatches(view.state.doc.toString(), query, {
+      matchCase: caseSensitive,
+      wholeWord: word,
+    })
+    const selection = view.state.selection.main
+    const selectedIndex =
+      typeof targetIndex === 'number'
+        ? targetIndex
+        : getSelectedMatchIndex(matches, { from: selection.from, to: selection.to })
+    const target = selectedIndex >= 0 ? matches[selectedIndex] : undefined
+
+    view.dispatch(
+      target
+        ? {
+            effects: setSearchQuery.of(searchQuery),
+            selection: { anchor: target.from, head: target.to },
+            scrollIntoView: true,
+          }
+        : {
+            effects: setSearchQuery.of(searchQuery),
+          },
+    )
+
+    setFindResult({
+      current: selectedIndex >= 0 ? selectedIndex + 1 : 0,
+      total: matches.length,
+    })
+  }, [])
+
+  const openFindBar = useCallback(() => {
+    const view = viewRef.current
+    if (view) {
+      const selection = view.state.selection.main
+      const selectedText = selection.empty
+        ? ''
+        : view.state.sliceDoc(selection.from, selection.to)
+      if (selectedText && !selectedText.includes('\n')) {
+        setFindQuery(selectedText)
+      }
+    }
+    setFindOpen(true)
+    setFindFocusKey((value) => value + 1)
+    requestAnimationFrame(() => syncFindState())
+  }, [setFindQuery, syncFindState])
+
+  const closeFindBar = useCallback(() => {
+    const view = viewRef.current
+    if (view) {
+      view.dispatch({
+        effects: setSearchQuery.of(new SearchQuery({ search: '' })),
+      })
+    }
+    setFindOpen(false)
+    requestAnimationFrame(() => viewRef.current?.focus())
+  }, [])
+
+  const moveFindMatch = useCallback((direction: FindDirection) => {
+    const view = viewRef.current
+    if (!view) return
+
+    const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
+    const matches = findTextMatches(view.state.doc.toString(), query, {
+      matchCase: caseSensitive,
+      wholeWord: word,
+    })
+    const selection = view.state.selection.main
+    const targetIndex = getNextMatchIndex(
+      matches,
+      { from: selection.from, to: selection.to },
+      direction,
+    )
+    syncFindState(targetIndex)
+  }, [syncFindState])
 
   useEffect(() => {
     const host = hostRef.current
@@ -55,8 +177,27 @@ export function SourceEditor({
         highlightActiveLineGutter(),
         EditorView.lineWrapping,
         markdown(),
+        search(),
         highlightSelectionMatches(),
-        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+        keymap.of([
+          {
+            key: 'Mod-f',
+            run: () => {
+              openFindBar()
+              return true
+            },
+          },
+          {
+            key: 'Escape',
+            run: () => {
+              if (!findOpenRef.current) return false
+              closeFindBar()
+              return true
+            },
+          },
+          ...defaultKeymap,
+          ...historyKeymap,
+        ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             updateContent(update.state.doc.toString())
@@ -116,40 +257,13 @@ export function SourceEditor({
             fontFamily: 'var(--mono-font)',
             cursor: 'text',
           },
-          '.cm-panels': {
-            backgroundColor: 'var(--surface)',
-            color: 'var(--text)',
-            borderColor: 'var(--border)',
+          '.cm-searchMatch': {
+            backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',
+            outline: '1px solid color-mix(in srgb, #eab308 42%, transparent)',
           },
-          '.cm-panel.cm-search': {
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            alignItems: 'center',
-            padding: '8px 10px',
-            backgroundColor: 'var(--surface)',
-            color: 'var(--text)',
-            borderColor: 'var(--border)',
-          },
-          '.cm-panel.cm-search input': {
-            minHeight: '26px',
-            border: '1px solid var(--border)',
-            borderRadius: '5px',
-            padding: '2px 7px',
-            backgroundColor: 'var(--editor-bg)',
-            color: 'var(--text)',
-          },
-          '.cm-panel.cm-search button': {
-            minHeight: '26px',
-            border: '1px solid var(--border)',
-            borderRadius: '5px',
-            padding: '2px 8px',
-            backgroundColor: 'var(--surface-subtle)',
-            color: 'var(--text)',
-          },
-          '.cm-panel.cm-search label': {
-            color: 'var(--muted)',
-            fontSize: '12px',
+          '.cm-searchMatch-selected': {
+            backgroundColor: 'color-mix(in srgb, var(--accent) 34%, transparent)',
+            outline: '1px solid color-mix(in srgb, var(--accent) 60%, transparent)',
           },
           '&.cm-focused': {
             outline: 'none',
@@ -182,7 +296,7 @@ export function SourceEditor({
       view.destroy()
       viewRef.current = null
     }
-  }, [documentPath, setError, updateContent])
+  }, [closeFindBar, documentPath, openFindBar, setError, updateContent])
 
   useEffect(() => {
     const view = viewRef.current
@@ -193,14 +307,14 @@ export function SourceEditor({
         changes: { from: 0, to: current.length, insert: content },
       })
     }
-  }, [content])
+    if (findOpen) syncFindState()
+  }, [content, findOpen, syncFindState])
 
   useEffect(() => {
     if (searchRequest > 0 && viewRef.current) {
-      openSearchPanel(viewRef.current)
-      viewRef.current.focus()
+      openFindBar()
     }
-  }, [searchRequest])
+  }, [openFindBar, searchRequest])
 
   useEffect(() => {
     if (focusRequest > 0 && viewRef.current) {
@@ -221,16 +335,39 @@ export function SourceEditor({
     }
   }, [targetLine, onTargetLineHandled])
 
+  useEffect(() => {
+    if (!findOpen) return
+    syncFindState(findQuery ? 0 : undefined)
+  }, [findOpen, findQuery, matchCase, syncFindState, wholeWord])
+
   return (
     <div
-      className="source-editor"
-      ref={hostRef}
+      className="source-editor-shell"
+      ref={shellRef}
       onMouseDown={(event) => {
-        if (event.target === hostRef.current) {
+        if (event.target === shellRef.current) {
           viewRef.current?.focus()
         }
       }}
-    />
+    >
+      <div className="source-editor" ref={hostRef} />
+      <FindBar
+        open={findOpen}
+        query={findQuery}
+        matchCase={matchCase}
+        wholeWord={wholeWord}
+        current={findResult.current}
+        total={findResult.total}
+        scopeLabel={t('find.scopeSource')}
+        focusKey={findFocusKey}
+        onQueryChange={setFindQuery}
+        onMatchCaseChange={setFindMatchCase}
+        onWholeWordChange={setFindWholeWord}
+        onPrevious={() => moveFindMatch('previous')}
+        onNext={() => moveFindMatch('next')}
+        onClose={closeFindBar}
+      />
+    </div>
   )
 }
 

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, net, protocol, shell } = require('electron')
+const { app, BrowserWindow, Menu, dialog, ipcMain, net, protocol, shell } = require('electron')
 const fs = require('fs/promises')
 const path = require('path')
 const crypto = require('crypto')
@@ -31,8 +31,172 @@ const openPayloadQueue = createOpenPayloadQueue((payload) => {
   }
 })
 
+let menuLocale = normalizeMenuLocale(app.getLocale())
+
+const menuCopy = {
+  'zh-CN': {
+    file: '文件',
+    open: '打开...',
+    save: '保存',
+    closeDocument: '关闭文档',
+    quit: '退出',
+    edit: '编辑',
+    undo: '撤销',
+    redo: '重做',
+    cut: '剪切',
+    copy: '复制',
+    paste: '粘贴',
+    selectAll: '全选',
+    find: '查找',
+    view: '查看',
+    reload: '重新加载',
+    forceReload: '强制重新加载',
+    resetZoom: '实际大小',
+    zoomIn: '放大',
+    zoomOut: '缩小',
+    toggleDevTools: '开发者工具',
+    window: '窗口',
+    minimize: '最小化',
+    closeWindow: '关闭窗口',
+    help: '帮助',
+    settings: '设置',
+    about: '关于 HMark',
+    aboutMessage: 'HMark 本地 Markdown / TXT / HTML 阅读编辑器',
+  },
+  'en-US': {
+    file: 'File',
+    open: 'Open...',
+    save: 'Save',
+    closeDocument: 'Close Document',
+    quit: 'Quit',
+    edit: 'Edit',
+    undo: 'Undo',
+    redo: 'Redo',
+    cut: 'Cut',
+    copy: 'Copy',
+    paste: 'Paste',
+    selectAll: 'Select All',
+    find: 'Find',
+    view: 'View',
+    reload: 'Reload',
+    forceReload: 'Force Reload',
+    resetZoom: 'Actual Size',
+    zoomIn: 'Zoom In',
+    zoomOut: 'Zoom Out',
+    toggleDevTools: 'Developer Tools',
+    window: 'Window',
+    minimize: 'Minimize',
+    closeWindow: 'Close Window',
+    help: 'Help',
+    settings: 'Settings',
+    about: 'About HMark',
+    aboutMessage: 'HMark local Markdown / TXT / HTML reader and editor',
+  },
+}
+
 function getMainWindow() {
   return mainWindow
+}
+
+function normalizeMenuLocale(locale) {
+  return String(locale || '').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US'
+}
+
+function sendMenuCommand(command) {
+  const win = getMainWindow()
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('menu-command', command)
+  }
+}
+
+function buildApplicationMenu(locale = menuLocale) {
+  menuLocale = normalizeMenuLocale(locale)
+  const label = menuCopy[menuLocale]
+  const template = [
+    {
+      label: label.file,
+      submenu: [
+        {
+          label: label.open,
+          accelerator: 'CmdOrCtrl+O',
+          click: () => sendMenuCommand('open'),
+        },
+        {
+          label: label.save,
+          accelerator: 'CmdOrCtrl+S',
+          click: () => sendMenuCommand('save'),
+        },
+        {
+          label: label.closeDocument,
+          accelerator: 'CmdOrCtrl+W',
+          click: () => sendMenuCommand('close-document'),
+        },
+        { type: 'separator' },
+        { role: 'quit', label: label.quit },
+      ],
+    },
+    {
+      label: label.edit,
+      submenu: [
+        { role: 'undo', label: label.undo },
+        { role: 'redo', label: label.redo },
+        { type: 'separator' },
+        { role: 'cut', label: label.cut },
+        { role: 'copy', label: label.copy },
+        { role: 'paste', label: label.paste },
+        { role: 'selectAll', label: label.selectAll },
+        { type: 'separator' },
+        {
+          label: label.find,
+          accelerator: 'CmdOrCtrl+F',
+          click: () => sendMenuCommand('find'),
+        },
+      ],
+    },
+    {
+      label: label.view,
+      submenu: [
+        { role: 'reload', label: label.reload },
+        { role: 'forceReload', label: label.forceReload },
+        { role: 'toggleDevTools', label: label.toggleDevTools },
+        { type: 'separator' },
+        { role: 'resetZoom', label: label.resetZoom },
+        { role: 'zoomIn', label: label.zoomIn },
+        { role: 'zoomOut', label: label.zoomOut },
+      ],
+    },
+    {
+      label: label.window,
+      submenu: [
+        { role: 'minimize', label: label.minimize },
+        { role: 'close', label: label.closeWindow },
+      ],
+    },
+    {
+      label: label.help,
+      submenu: [
+        {
+          label: label.settings,
+          click: () => sendMenuCommand('settings'),
+        },
+        {
+          label: label.about,
+          click: () => {
+            const win = getMainWindow()
+            const options = {
+              type: 'info',
+              title: label.about,
+              message: label.aboutMessage,
+            }
+            if (win) dialog.showMessageBox(win, options)
+            else dialog.showMessageBox(options)
+          },
+        },
+      ],
+    },
+  ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 function hasOpenableArg(args) {
@@ -228,6 +392,11 @@ ipcMain.on('renderer-ready', (event) => {
   openPayloadQueue.markRendererReady()
 })
 
+ipcMain.on('app:set-locale', (event, locale) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return
+  buildApplicationMenu(locale)
+})
+
 // ── IPC: Dialogs ─────────────────────────────────────────────────────
 
 ipcMain.handle('dialog:open-file', async (_event, options) => {
@@ -315,6 +484,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  buildApplicationMenu()
   createWindow()
 
   if (hasOpenableArg(process.argv)) {

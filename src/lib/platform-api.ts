@@ -25,6 +25,8 @@ export type SingleInstancePayload = {
   cwd: string
 }
 
+export type MenuCommand = 'open' | 'save' | 'close-document' | 'find' | 'settings'
+
 export interface DialogFilter {
   name: string
   extensions: string[]
@@ -56,7 +58,9 @@ declare global {
       }) => Promise<void>
       getInitialArgs: () => Promise<string[]>
       notifyRendererReady: () => void
+      setAppLocale: (locale: string) => void
       onFileOpen: (cb: (p: SingleInstancePayload) => void) => () => void
+      onMenuCommand: (cb: (command: MenuCommand) => void) => () => void
     }
   }
 }
@@ -129,10 +133,18 @@ export function notifyRendererReady(): void {
   return api().notifyRendererReady()
 }
 
+export function setAppLocale(locale: string): void {
+  return api().setAppLocale(locale)
+}
+
 export function onFileOpen(
   cb: (payload: SingleInstancePayload) => void,
 ): () => void {
   return api().onFileOpen(cb)
+}
+
+export function onMenuCommand(cb: (command: MenuCommand) => void): () => void {
+  return api().onMenuCommand(cb)
 }
 
 export function fileToAssetUrl(p: string): string {

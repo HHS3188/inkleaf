@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useT } from '../i18n'
 import type { SingleInstancePayload } from '../lib/platform-api'
-import { showOpenDialog, showSaveDialog } from '../lib/platform-api'
+import { isElectronRuntime, onMenuCommand, showOpenDialog, showSaveDialog } from '../lib/platform-api'
 import { useDocumentStore } from '../features/document/document-store'
 import { useEditorStore, type EditorMode } from '../features/editor/editor-store'
 import { useSettingsStore } from '../features/settings/settings-store'
@@ -143,6 +143,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [document, handleOpen, handleSave, handleSearch, setMode])
+
+  useEffect(() => {
+    if (!isElectronRuntime()) return
+    return onMenuCommand((command) => {
+      if (command === 'open') void handleOpen()
+      if (command === 'save') void handleSave()
+      if (command === 'close-document') void handleCloseDocument()
+      if (command === 'find') handleSearch()
+      if (command === 'settings') setSettingsOpen(true)
+    })
+  }, [handleCloseDocument, handleOpen, handleSave, handleSearch])
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {

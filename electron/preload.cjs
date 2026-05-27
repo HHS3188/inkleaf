@@ -25,11 +25,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App operations
   getInitialArgs: () => ipcRenderer.invoke('get-initial-args'),
   notifyRendererReady: () => ipcRenderer.send('renderer-ready'),
+  setAppLocale: (locale) => ipcRenderer.send('app:set-locale', locale),
 
   // Single instance events
   onFileOpen: (callback) => {
     const handler = (_event, payload) => callback(payload)
     ipcRenderer.on('open-file-from-args', handler)
     return () => ipcRenderer.removeListener('open-file-from-args', handler)
+  },
+  onMenuCommand: (callback) => {
+    const handler = (_event, command) => callback(command)
+    ipcRenderer.on('menu-command', handler)
+    return () => ipcRenderer.removeListener('menu-command', handler)
   },
 })

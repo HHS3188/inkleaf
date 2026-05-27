@@ -73,6 +73,18 @@ export const enUS: I18N = {
   'editor.dragDropNoPath': 'No local image path available; drag images when running in Electron desktop.',
   'editor.loading': 'Loading workspace...',
 
+  // Find
+  'find.title': 'Find',
+  'find.placeholder': 'Find text',
+  'find.previous': 'Previous',
+  'find.next': 'Next',
+  'find.matchCase': 'Match case',
+  'find.wholeWord': 'Whole word',
+  'find.close': 'Close find',
+  'find.noResults': 'No results',
+  'find.scopeSource': 'Search source',
+  'find.scopePreview': 'Search preview',
+
   // Image Preview
   'image.preview': 'Preview',
   'image.copyPath': 'Copy Path',
