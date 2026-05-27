@@ -12,6 +12,6 @@ export function applyTheme(mode: ThemeMode, accent: AccentColor) {
 
   root.dataset.theme = resolved
   root.style.setProperty('--accent', accentValues[accent])
-  localStorage.setItem('hmark-theme', resolved)
-  localStorage.setItem('hmark-accent', accentValues[accent])
+  localStorage.setItem('inkleaf-theme', resolved)
+  localStorage.setItem('inkleaf-accent', accentValues[accent])
 }

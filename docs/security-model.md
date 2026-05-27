@@ -1,8 +1,15 @@
 # Security Model
 
-## CSP
+## Runtime Boundary
 
-The Tauri config avoids `default-src *` and disallows frames. Styles use `unsafe-inline` because the app applies user reader settings through CSS variables and CodeMirror injects runtime styles. Scripts remain restricted to `self`.
+InkLeaf uses Electron with `contextIsolation: true`, `nodeIntegration: false`, and a narrow preload API. Renderer code does not receive direct Node.js access; file, dialog, shell, and app-close operations go through explicit IPC handlers.
+
+## Navigation and Protocols
+
+- The app allows its own packaged file URL in production and the Vite dev URL in development.
+- `window.open` is denied by default.
+- Local image rendering uses the custom `inkleaf://` protocol instead of direct renderer `file://` access.
+- External links are opened through Electron shell handling only after link classification.
 
 ## HTML and Markdown
 
@@ -10,15 +17,16 @@ The Tauri config avoids `default-src *` and disallows frames. Styles use `unsafe
 - HTML files are sanitized with DOMPurify before rendering.
 - `script`, `iframe`, `object`, `embed`, `svg`, and `math` are forbidden in HTML reader sanitization.
 - `on*` event handlers and inline styles are stripped.
-- `javascript:`, `data:`, and `file:` links are blocked by link handling. `data:` is only allowed for `data:image/*` image sources.
+- `javascript:`, unsafe `data:`, and direct `file:` links are blocked by link handling.
 
 ## Images
 
-- Local images use `convertFileSrc`.
-- Direct `file://` rendering is not used.
 - Remote images are disabled by default and must be enabled in Settings.
-- SVG files are only referenced as images; user SVG content is never read and inlined into the DOM.
+- Local image paths are resolved relative to the current document path where possible.
+- User SVG files are referenced as image resources and are not inlined into the DOM.
 
-## Rust Paths
+## File Safety
 
-Rust commands canonicalize user-provided file paths before reading, copying, or opening them. Commands return errors instead of panicking on invalid user paths.
+- Open, Save, Save As, Close, app quit, and single-instance file-open paths all pass through the dirty guard.
+- Auto-save never writes untitled documents because they have no path.
+- Auto-recovery snapshots are local app data and do not overwrite user files.

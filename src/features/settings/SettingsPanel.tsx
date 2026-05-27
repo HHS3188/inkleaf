@@ -4,7 +4,13 @@ import { Trash2 } from 'lucide-react'
 import { clearRecentFiles } from '../document/recent-files'
 import { accentLabels } from '../theme/themes'
 import type { AccentColor, ThemeMode } from '../theme/theme-types'
-import { useSettingsStore } from './settings-store'
+import {
+  autoSaveIntervals,
+  fontOptions,
+  useSettingsStore,
+  type AutoSaveInterval,
+  type FontChoice,
+} from './settings-store'
 
 type SettingsPanelProps = {
   openPanel: boolean
@@ -68,9 +74,56 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
         </select>
       </label>
 
+      <label>
+        {t('settings.bodyFont')}
+        <select
+          value={settings.bodyFont}
+          onChange={(event) => updateSettings({ bodyFont: event.target.value as FontChoice })}
+        >
+          {fontOptions.map((font) => (
+            <option value={font.value} key={font.value}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        {t('settings.monoFont')}
+        <select
+          value={settings.monoFont}
+          onChange={(event) => updateSettings({ monoFont: event.target.value as FontChoice })}
+        >
+          {fontOptions.map((font) => (
+            <option value={font.value} key={font.value}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <RangeControl label={t('settings.fontSize')} value={settings.fontSize} min={12} max={28} step={1} suffix="px" onChange={(fontSize) => updateSettings({ fontSize })} />
       <RangeControl label={t('settings.lineHeight')} value={settings.lineHeight} min={1.2} max={2.4} step={0.1} suffix="" onChange={(lineHeight) => updateSettings({ lineHeight })} />
       <RangeControl label={t('settings.readingWidth')} value={settings.readingWidth} min={560} max={1280} step={20} suffix="px" onChange={(readingWidth) => updateSettings({ readingWidth })} />
+
+      <label className="check-row">
+        <input type="checkbox" checked={settings.wordWrap} onChange={(event) => updateSettings({ wordWrap: event.target.checked })} />
+        {t('settings.wordWrap')}
+      </label>
+
+      <label>
+        {t('settings.autoSave')}
+        <select
+          value={settings.autoSaveInterval}
+          onChange={(event) => updateSettings({ autoSaveInterval: Number(event.target.value) as AutoSaveInterval })}
+        >
+          {autoSaveIntervals.map((value) => (
+            <option value={value} key={value}>
+              {formatAutoSaveInterval(value, t)}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <label className="check-row">
         <input type="checkbox" checked={settings.autoRenderTxtImages} onChange={(event) => updateSettings({ autoRenderTxtImages: event.target.checked })} />
@@ -97,6 +150,13 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
       </button>
     </aside>
   )
+}
+
+function formatAutoSaveInterval(value: AutoSaveInterval, t: ReturnType<typeof useT>) {
+  if (value === 30) return t('settings.autoSave.30s')
+  if (value === 60) return t('settings.autoSave.1m')
+  if (value === 300) return t('settings.autoSave.5m')
+  return t('settings.autoSave.off')
 }
 
 type RangeControlProps = {

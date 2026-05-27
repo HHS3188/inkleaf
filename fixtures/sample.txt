@@ -1,4 +1,4 @@
-HMark TXT fixture
+InkLeaf TXT fixture
 
 Local image link:
 ./assets/sample.svg

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { copyImageToAssets } from '../../lib/platform-api'
-import { EditorState } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import {
   EditorView,
   drawSelection,
@@ -9,7 +9,14 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view'
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  redo,
+  selectAll,
+  undo,
+} from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
 import { SearchQuery, highlightSelectionMatches, search, setSearchQuery } from '@codemirror/search'
 import { useT } from '../../i18n'
@@ -27,37 +34,60 @@ import {
 type SourceEditorProps = {
   documentPath: string | null
   content: string
+  wordWrap: boolean
   targetLine?: number
   onTargetLineHandled?: () => void
+  onOpenGotoLine?: () => void
 }
 
 export function SourceEditor({
   documentPath,
   content,
+  wordWrap,
   targetLine,
   onTargetLineHandled,
+  onOpenGotoLine,
 }: SourceEditorProps) {
   const t = useT()
   const shellRef = useRef<HTMLDivElement | null>(null)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const wrapCompartmentRef = useRef(new Compartment())
+  const wordWrapRef = useRef(wordWrap)
   const contentRef = useRef(content)
   const findOpenRef = useRef(false)
   const findStateRef = useRef({ query: '', matchCase: false, wholeWord: false })
+  const handledCommandIdRef = useRef(0)
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
   const searchRequest = useEditorStore((state) => state.searchRequest)
   const focusRequest = useEditorStore((state) => state.focusRequest)
+  const commandRequest = useEditorStore((state) => state.commandRequest)
+  const setCursorPosition = useEditorStore((state) => state.setCursorPosition)
   const [findOpen, setFindOpen] = useState(false)
   const [findQuery, setFindQueryState] = useState('')
+  const [replaceOpen, setReplaceOpen] = useState(false)
+  const [replaceValue, setReplaceValue] = useState('')
   const [matchCase, setMatchCaseState] = useState(false)
   const [wholeWord, setWholeWordState] = useState(false)
   const [findFocusKey, setFindFocusKey] = useState(0)
   const [findResult, setFindResult] = useState({ current: 0, total: 0 })
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     contentRef.current = content
   }, [content])
+
+  useEffect(() => {
+    wordWrapRef.current = wordWrap
+    const view = viewRef.current
+    if (!view) return
+    view.dispatch({
+      effects: wrapCompartmentRef.current.reconfigure(
+        wordWrap ? EditorView.lineWrapping : [],
+      ),
+    })
+  }, [wordWrap])
 
   useEffect(() => {
     findOpenRef.current = findOpen
@@ -118,7 +148,7 @@ export function SourceEditor({
     })
   }, [])
 
-  const openFindBar = useCallback(() => {
+  const openFindBar = useCallback((withReplace = false) => {
     const view = viewRef.current
     if (view) {
       const selection = view.state.selection.main
@@ -129,6 +159,7 @@ export function SourceEditor({
         setFindQuery(selectedText)
       }
     }
+    setReplaceOpen(withReplace)
     setFindOpen(true)
     setFindFocusKey((value) => value + 1)
     requestAnimationFrame(() => syncFindState())
@@ -163,6 +194,149 @@ export function SourceEditor({
     syncFindState(targetIndex)
   }, [syncFindState])
 
+  const replaceNextMatch = useCallback(() => {
+    const view = viewRef.current
+    if (!view) return
+    const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
+    const matches = findTextMatches(view.state.doc.toString(), query, {
+      matchCase: caseSensitive,
+      wholeWord: word,
+    })
+    if (matches.length === 0) return
+
+    const selection = view.state.selection.main
+    let targetIndex = getSelectedMatchIndex(matches, { from: selection.from, to: selection.to })
+    if (targetIndex < 0) {
+      targetIndex = getNextMatchIndex(matches, { from: selection.from, to: selection.to }, 'next')
+    }
+    const target = matches[targetIndex]
+    if (!target) return
+
+    view.dispatch({
+      changes: { from: target.from, to: target.to, insert: replaceValue },
+      selection: { anchor: target.from + replaceValue.length },
+      scrollIntoView: true,
+    })
+    requestAnimationFrame(() => syncFindState())
+  }, [replaceValue, syncFindState])
+
+  const replaceAllMatches = useCallback(() => {
+    const view = viewRef.current
+    if (!view) return
+    const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
+    const matches = findTextMatches(view.state.doc.toString(), query, {
+      matchCase: caseSensitive,
+      wholeWord: word,
+    })
+    if (matches.length === 0) return
+    view.dispatch({
+      changes: matches.map((match) => ({
+        from: match.from,
+        to: match.to,
+        insert: replaceValue,
+      })),
+    })
+    requestAnimationFrame(() => syncFindState())
+  }, [replaceValue, syncFindState])
+
+  const updateCursorPosition = useCallback((view: EditorView) => {
+    const head = view.state.selection.main.head
+    const line = view.state.doc.lineAt(head)
+    setCursorPosition({
+      line: line.number,
+      column: head - line.from + 1,
+    })
+  }, [setCursorPosition])
+
+  const copySelection = useCallback(async (cutSelection = false) => {
+    const view = viewRef.current
+    if (!view) return
+    const selection = view.state.selection.main
+    if (selection.empty) return
+    const selectedText = view.state.sliceDoc(selection.from, selection.to)
+    await navigator.clipboard?.writeText(selectedText)
+    if (cutSelection) {
+      view.dispatch({
+        changes: { from: selection.from, to: selection.to, insert: '' },
+        selection: { anchor: selection.from },
+      })
+      view.focus()
+    }
+  }, [])
+
+  const pasteText = useCallback(async () => {
+    const view = viewRef.current
+    if (!view) return
+    const text = await navigator.clipboard?.readText()
+    if (!text) return
+    const selection = view.state.selection.main
+    view.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: text },
+      selection: { anchor: selection.from + text.length },
+      scrollIntoView: true,
+    })
+    view.focus()
+  }, [])
+
+  const insertTextAtSelection = useCallback((text: string) => {
+    const view = viewRef.current
+    if (!view) return
+    const selection = view.state.selection.main
+    view.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: text },
+      selection: { anchor: selection.from + text.length },
+      scrollIntoView: true,
+    })
+    view.focus()
+  }, [])
+
+  const runSourceCommand = useCallback((command: string) => {
+    const view = viewRef.current
+    if (!view) return
+    if (command === 'undo') {
+      undo(view)
+      return
+    }
+    if (command === 'redo') {
+      redo(view)
+      return
+    }
+    if (command === 'cut') {
+      void copySelection(true)
+      return
+    }
+    if (command === 'copy') {
+      void copySelection(false)
+      return
+    }
+    if (command === 'paste') {
+      void pasteText()
+      return
+    }
+    if (command === 'select-all') {
+      selectAll(view)
+      return
+    }
+    if (command === 'find') {
+      openFindBar(false)
+      return
+    }
+    if (command === 'replace') {
+      openFindBar(true)
+      return
+    }
+    if (command === 'goto-line') {
+      onOpenGotoLine?.()
+      return
+    }
+    if (command === 'insert-date-time') {
+      insertTextAtSelection(new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date()))
+    }
+  }, [copySelection, insertTextAtSelection, onOpenGotoLine, openFindBar, pasteText])
+
   useEffect(() => {
     const host = hostRef.current
     if (!host || viewRef.current) return
@@ -175,7 +349,7 @@ export function SourceEditor({
         drawSelection(),
         highlightActiveLine(),
         highlightActiveLineGutter(),
-        EditorView.lineWrapping,
+        wrapCompartmentRef.current.of(wordWrapRef.current ? EditorView.lineWrapping : []),
         markdown(),
         search(),
         highlightSelectionMatches(),
@@ -183,7 +357,21 @@ export function SourceEditor({
           {
             key: 'Mod-f',
             run: () => {
-              openFindBar()
+              openFindBar(false)
+              return true
+            },
+          },
+          {
+            key: 'Mod-h',
+            run: () => {
+              openFindBar(true)
+              return true
+            },
+          },
+          {
+            key: 'Mod-g',
+            run: () => {
+              onOpenGotoLine?.()
               return true
             },
           },
@@ -202,13 +390,16 @@ export function SourceEditor({
           if (update.docChanged) {
             updateContent(update.state.doc.toString())
           }
+          if (update.docChanged || update.selectionSet) {
+            updateCursorPosition(update.view)
+          }
         }),
         EditorView.theme({
           '&': {
             height: '100%',
             backgroundColor: 'var(--editor-bg)',
             color: 'var(--text)',
-            fontSize: '14px',
+            fontSize: 'var(--editor-font-size)',
           },
           '.cm-content': {
             fontFamily: 'var(--mono-font)',
@@ -274,6 +465,7 @@ export function SourceEditor({
 
     const view = new EditorView({ state, parent: host })
     viewRef.current = view
+    updateCursorPosition(view)
 
     const handleDragOver = (event: DragEvent) => {
       if (event.dataTransfer?.types.includes('Files')) {
@@ -299,7 +491,7 @@ export function SourceEditor({
       view.destroy()
       viewRef.current = null
     }
-  }, [closeFindBar, documentPath, openFindBar, setError, t, updateContent])
+  }, [closeFindBar, documentPath, onOpenGotoLine, openFindBar, setError, t, updateContent, updateCursorPosition])
 
   useEffect(() => {
     const view = viewRef.current
@@ -315,9 +507,15 @@ export function SourceEditor({
 
   useEffect(() => {
     if (searchRequest > 0 && viewRef.current) {
-      openFindBar()
+      openFindBar(false)
     }
   }, [openFindBar, searchRequest])
+
+  useEffect(() => {
+    if (!commandRequest || commandRequest.id === handledCommandIdRef.current) return
+    handledCommandIdRef.current = commandRequest.id
+    runSourceCommand(commandRequest.command)
+  }, [commandRequest, runSourceCommand])
 
   useEffect(() => {
     if (focusRequest > 0 && viewRef.current) {
@@ -343,10 +541,25 @@ export function SourceEditor({
     syncFindState(findQuery ? 0 : undefined)
   }, [findOpen, findQuery, matchCase, syncFindState, wholeWord])
 
+  useEffect(() => {
+    if (!contextMenu) return
+    const close = () => setContextMenu(null)
+    window.addEventListener('pointerdown', close)
+    window.addEventListener('keydown', close)
+    return () => {
+      window.removeEventListener('pointerdown', close)
+      window.removeEventListener('keydown', close)
+    }
+  }, [contextMenu])
+
   return (
     <div
       className="source-editor-shell"
       ref={shellRef}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        setContextMenu({ x: event.clientX, y: event.clientY })
+      }}
       onMouseDown={(event) => {
         if (event.target === shellRef.current) {
           viewRef.current?.focus()
@@ -359,6 +572,8 @@ export function SourceEditor({
         query={findQuery}
         matchCase={matchCase}
         wholeWord={wholeWord}
+        replaceOpen={replaceOpen}
+        replaceValue={replaceValue}
         current={findResult.current}
         total={findResult.total}
         scopeLabel={t('find.scopeSource')}
@@ -366,11 +581,49 @@ export function SourceEditor({
         onQueryChange={setFindQuery}
         onMatchCaseChange={setFindMatchCase}
         onWholeWordChange={setFindWholeWord}
+        onReplaceOpenChange={setReplaceOpen}
+        onReplaceChange={setReplaceValue}
+        onReplaceNext={replaceNextMatch}
+        onReplaceAll={replaceAllMatches}
         onPrevious={() => moveFindMatch('previous')}
         onNext={() => moveFindMatch('next')}
         onClose={closeFindBar}
       />
+      {contextMenu ? (
+        <div
+          className="context-menu"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          role="menu"
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <ContextMenuItem label={t('menu.undo')} onSelect={() => { runSourceCommand('undo'); setContextMenu(null) }} />
+          <ContextMenuItem label={t('menu.redo')} onSelect={() => { runSourceCommand('redo'); setContextMenu(null) }} />
+          <div className="context-menu-separator" />
+          <ContextMenuItem label={t('menu.cut')} onSelect={() => { runSourceCommand('cut'); setContextMenu(null) }} />
+          <ContextMenuItem label={t('menu.copy')} onSelect={() => { runSourceCommand('copy'); setContextMenu(null) }} />
+          <ContextMenuItem label={t('menu.paste')} onSelect={() => { runSourceCommand('paste'); setContextMenu(null) }} />
+          <ContextMenuItem label={t('menu.selectAll')} onSelect={() => { runSourceCommand('select-all'); setContextMenu(null) }} />
+          <div className="context-menu-separator" />
+          <ContextMenuItem label={t('menu.find')} onSelect={() => { runSourceCommand('find'); setContextMenu(null) }} />
+          <ContextMenuItem label={t('menu.gotoLine')} onSelect={() => { runSourceCommand('goto-line'); setContextMenu(null) }} />
+        </div>
+      ) : null}
     </div>
+  )
+}
+
+function ContextMenuItem({ label, onSelect }: { label: string; onSelect: () => void }) {
+  return (
+    <button
+      type="button"
+      className="context-menu-item"
+      role="menuitem"
+      onClick={() => {
+        onSelect()
+      }}
+    >
+      {label}
+    </button>
   )
 }
 

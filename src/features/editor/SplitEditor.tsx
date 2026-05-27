@@ -6,7 +6,7 @@ import type { ReaderSettings } from '../settings/settings-store'
 import { ReaderView } from '../reader/ReaderView'
 import { SourceEditor } from './SourceEditor'
 
-export const SPLIT_RATIO_KEY = 'hmark-split-ratio'
+export const SPLIT_RATIO_KEY = 'inkleaf-split-ratio'
 
 export function clampSplitRatio(value: number): number {
   return Math.min(0.7, Math.max(0.3, value))
@@ -27,16 +27,20 @@ type SplitEditorProps = {
   document: CurrentDocument
   settings: ReaderSettings
   onEditRequest?: (line?: number) => void
+  wordWrap: boolean
   targetLine?: number
   onTargetLineHandled?: () => void
+  onOpenGotoLine?: () => void
 }
 
 export function SplitEditor({
   document,
   settings,
   onEditRequest,
+  wordWrap,
   targetLine,
   onTargetLineHandled,
+  onOpenGotoLine,
 }: SplitEditorProps) {
   const t = useT()
   const [ratio, setRatio] = useState(readSplitRatio)
@@ -89,8 +93,10 @@ export function SplitEditor({
             <SourceEditor
               documentPath={document.path}
               content={document.content}
+              wordWrap={wordWrap}
               targetLine={targetLine}
               onTargetLineHandled={onTargetLineHandled}
+              onOpenGotoLine={onOpenGotoLine}
             />
           </div>
         </section>

@@ -8,7 +8,21 @@ function withI18n(ui: ReactNode) {
   return <I18nProvider>{ui}</I18nProvider>
 }
 
-const settings = { fontSize: 16, lineHeight: 1.7, readingWidth: 980, zoom: 100, autoRenderTxtImages: true, themeMode: 'light' as const, accentColor: 'blue' as const, allowRemoteImages: false }
+const settings = {
+  fontSize: 16,
+  lineHeight: 1.7,
+  readingWidth: 980,
+  zoom: 100,
+  wordWrap: true,
+  showStatusBar: true,
+  autoSaveInterval: 0 as const,
+  autoRenderTxtImages: true,
+  themeMode: 'light' as const,
+  accentColor: 'blue' as const,
+  bodyFont: 'system' as const,
+  monoFont: 'cascadia-code' as const,
+  allowRemoteImages: false,
+}
 
 const markdownSample = `# Hello World
 

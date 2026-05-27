@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { FilePlus2, FileText, FolderOpen, HelpCircle, Settings, X } from 'lucide-react'
 import { useI18n, useT } from '../i18n'
 import type { I18N } from '../i18n'
@@ -6,27 +7,49 @@ import type { SupportedFileType } from '../features/document/document-types'
 
 type EmptyStateProps = {
   recentFiles: RecentFile[]
+  recoveryDraft: { fileName: string; updatedAt: number } | null
   onNewMarkdown: () => void
   onNewTxt: () => void
   onOpen: () => void
+  onOpenFolder: () => void
   onOpenRecent: (path: string) => void
   onRemoveRecent: (path: string) => void
+  onOpenRecentFolder: (path: string) => void
+  onRestoreDraft: () => void
+  onDiscardDraft: () => void
   onOpenSettings: () => void
   onOpenHelp: () => void
 }
 
 export function EmptyState({
   recentFiles,
+  recoveryDraft,
   onNewMarkdown,
   onNewTxt,
   onOpen,
+  onOpenFolder,
   onOpenRecent,
   onRemoveRecent,
+  onOpenRecentFolder,
+  onRestoreDraft,
+  onDiscardDraft,
   onOpenSettings,
   onOpenHelp,
 }: EmptyStateProps) {
   const t = useT()
   const { locale } = useI18n()
+  const [contextFile, setContextFile] = useState<{ file: RecentFile; x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    if (!contextFile) return
+    const close = () => setContextFile(null)
+    window.addEventListener('pointerdown', close)
+    window.addEventListener('keydown', close)
+    return () => {
+      window.removeEventListener('pointerdown', close)
+      window.removeEventListener('keydown', close)
+    }
+  }, [contextFile])
 
   return (
     <main className="empty-state">
@@ -42,6 +65,10 @@ export function EmptyState({
                   type="button"
                   className="recent-file-button"
                   onClick={() => onOpenRecent(file.path)}
+                  onContextMenu={(event) => {
+                    event.preventDefault()
+                    setContextFile({ file, x: event.clientX, y: event.clientY })
+                  }}
                   title={file.path}
                 >
                   <span className="recent-file-main">
@@ -76,6 +103,23 @@ export function EmptyState({
       </section>
 
       <section className="empty-intro">
+        {recoveryDraft ? (
+          <div className="recovery-banner">
+            <div>
+              <strong>{t('empty.recoveryTitle')}</strong>
+              <span>{recoveryDraft.fileName} · {formatRecentTime(recoveryDraft.updatedAt, locale)}</span>
+              <p>{t('empty.recoveryDesc')}</p>
+            </div>
+            <div className="recovery-actions">
+              <button type="button" className="primary-button" onClick={onRestoreDraft}>
+                {t('empty.restoreDraft')}
+              </button>
+              <button type="button" className="secondary-button" onClick={onDiscardDraft}>
+                {t('empty.discardDraft')}
+              </button>
+            </div>
+          </div>
+        ) : null}
         <div className="empty-brand-lockup">
           <span className="empty-brand-mark" aria-hidden="true" />
           <div>
@@ -96,6 +140,10 @@ export function EmptyState({
             <FolderOpen size={18} aria-hidden="true" />
             {t('empty.openFile')}
           </button>
+          <button type="button" className="secondary-button large-action" onClick={onOpenFolder}>
+            <FolderOpen size={18} aria-hidden="true" />
+            {t('empty.openFolder')}
+          </button>
         </div>
         <div className="empty-utility-actions">
           <button type="button" className="secondary-button" onClick={onOpenSettings}>
@@ -111,7 +159,27 @@ export function EmptyState({
           <span>{t('empty.shortcuts.desc')}</span>
         </div>
       </section>
+      {contextFile ? (
+        <div
+          className="context-menu"
+          style={{ left: contextFile.x, top: contextFile.y }}
+          role="menu"
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          <ContextMenuItem label={t('context.open')} onSelect={() => { onOpenRecent(contextFile.file.path); setContextFile(null) }} />
+          <ContextMenuItem label={t('context.removeRecent')} onSelect={() => { onRemoveRecent(contextFile.file.path); setContextFile(null) }} />
+          <ContextMenuItem label={t('context.openContainingFolder')} onSelect={() => { onOpenRecentFolder(contextFile.file.path); setContextFile(null) }} />
+        </div>
+      ) : null}
     </main>
+  )
+}
+
+function ContextMenuItem({ label, onSelect }: { label: string; onSelect: () => void }) {
+  return (
+    <button type="button" className="context-menu-item" role="menuitem" onClick={onSelect}>
+      {label}
+    </button>
   )
 }
 

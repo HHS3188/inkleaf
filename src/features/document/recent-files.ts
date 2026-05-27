@@ -9,7 +9,7 @@ export type RecentFile = {
   modifiedAt?: number | null
 }
 
-const STORAGE_KEY = 'hmark-recent-files'
+const STORAGE_KEY = 'inkleaf-recent-files-v1'
 const MAX_RECENT_FILES = 20
 
 export function getRecentFiles(): RecentFile[] {

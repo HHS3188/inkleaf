@@ -9,12 +9,20 @@ import {
   respondToCloseRequest,
   showOpenDialog,
   showSaveDialog,
+  showItemInFolder,
 } from '../lib/platform-api'
 import { getFirstOpenableArg } from '../features/document/open-document'
+import {
+  clearDraftSnapshot,
+  draftSnapshotToDocument,
+  readDraftSnapshot,
+  writeDraftSnapshot,
+  type DraftSnapshot,
+} from '../features/document/auto-recovery'
 import { getRecentFiles, removeRecentFile, type RecentFile } from '../features/document/recent-files'
 import type { SupportedFileType } from '../features/document/document-types'
 import { useDocumentStore } from '../features/document/document-store'
-import { useEditorStore, type EditorMode } from '../features/editor/editor-store'
+import { useEditorStore, type EditorCommand, type EditorMode } from '../features/editor/editor-store'
 import { useSettingsStore } from '../features/settings/settings-store'
 import type { ThemeMode } from '../features/theme/theme-types'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -24,6 +32,8 @@ import { Toolbar } from './Toolbar'
 import { AppMenuBar } from './AppMenuBar'
 import { AboutDialog } from './AboutDialog'
 import { UnsavedChangesDialog, type UnsavedChoice } from './UnsavedChangesDialog'
+import { GotoLineDialog } from './GotoLineDialog'
+import { StatusBar } from './StatusBar'
 import { ReaderView } from '../features/reader/ReaderView'
 import { SourceEditor } from '../features/editor/SourceEditor'
 import { SplitEditor } from '../features/editor/SplitEditor'
@@ -67,10 +77,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const openDocument = useDocumentStore((state) => state.openDocument)
   const closeDocument = useDocumentStore((state) => state.closeDocument)
   const saveCurrentDocument = useDocumentStore((state) => state.saveCurrentDocument)
+  const restoreDocument = useDocumentStore((state) => state.restoreDocument)
   const setError = useDocumentStore((state) => state.setError)
   const mode = useEditorStore((state) => state.mode)
   const setMode = useEditorStore((state) => state.setMode)
   const requestSearch = useEditorStore((state) => state.requestSearch)
+  const requestEditorCommand = useEditorStore((state) => state.requestEditorCommand)
+  const cursor = useEditorStore((state) => state.cursor)
   const settings = useSettingsStore((state) => state.settings)
   const updateSettings = useSettingsStore((state) => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -78,6 +91,9 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const [outlineCollapsed, setOutlineCollapsed] = useState(readOutlineCollapsed)
   const [helpOpen, setHelpOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [gotoOpen, setGotoOpen] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [recoveryDraft, setRecoveryDraft] = useState<DraftSnapshot | null>(() => readDraftSnapshot())
   const [targetLine, setTargetLine] = useState<number | undefined>(undefined)
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>(() => getRecentFiles())
   const [pendingUnsaved, setPendingUnsaved] = useState<{
@@ -90,6 +106,10 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const refreshRecentFiles = useCallback(() => {
     setRecentFiles(getRecentFiles())
   }, [])
+
+  const changeZoom = useCallback((zoom: number) => {
+    updateSettings({ zoom: Math.min(200, Math.max(70, zoom)) })
+  }, [updateSettings])
 
   useEffect(() => {
     try {
@@ -105,6 +125,68 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       ? `${currentDocument.fileName}${suffix} - ${t('app.brand')}`
       : t('app.brand')
   }, [currentDocument, t])
+
+  useEffect(() => {
+    if (!statusMessage) return
+    const timer = window.setTimeout(() => setStatusMessage(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [statusMessage])
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.deltaY === 0) return
+      event.preventDefault()
+      changeZoom(settings.zoom + (event.deltaY < 0 ? 10 : -10))
+    }
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    return () => window.removeEventListener('wheel', handleWheel)
+  }, [changeZoom, settings.zoom])
+
+  useEffect(() => {
+    if (!currentDocument?.dirty) {
+      if (currentDocument) {
+        clearDraftSnapshot()
+        setRecoveryDraft(null)
+      }
+      return
+    }
+    const write = () => {
+      writeDraftSnapshot(currentDocument)
+      setRecoveryDraft(readDraftSnapshot())
+    }
+    const timer = window.setTimeout(write, 1200)
+    const interval = window.setInterval(write, 15000)
+    return () => {
+      window.clearTimeout(timer)
+      window.clearInterval(interval)
+    }
+  }, [currentDocument])
+
+  useEffect(() => {
+    if (!currentDocument?.dirty || !currentDocument.path || settings.autoSaveInterval === 0) return
+    const timer = window.setTimeout(() => {
+      saveCurrentDocument()
+        .then(() => {
+          clearDraftSnapshot()
+          setRecoveryDraft(null)
+          setStatusMessage(t('status.autoSaved'))
+          refreshRecentFiles()
+        })
+        .catch((errorValue) => {
+          setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
+        })
+    }, settings.autoSaveInterval * 1000)
+    return () => window.clearTimeout(timer)
+  }, [
+    currentDocument?.content,
+    currentDocument?.dirty,
+    currentDocument?.path,
+    refreshRecentFiles,
+    saveCurrentDocument,
+    setError,
+    settings.autoSaveInterval,
+    t,
+  ])
 
   const requestUnsavedChoice = useCallback((fileName: string): Promise<UnsavedChoice> => {
     return new Promise((resolve) => {
@@ -130,19 +212,26 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       }
       if (!targetPath) return false
       await saveCurrentDocument(targetPath)
+      clearDraftSnapshot()
+      setRecoveryDraft(null)
+      setStatusMessage(t('status.saved'))
       refreshRecentFiles()
       return true
     } catch (errorValue) {
       setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
       return false
     }
-  }, [currentDocument, refreshRecentFiles, saveCurrentDocument, setError])
+  }, [currentDocument, refreshRecentFiles, saveCurrentDocument, setError, t])
 
   const ensureNoUnsavedChanges = useCallback(async (): Promise<boolean> => {
     if (!currentDocument?.dirty) return true
     const choice = await requestUnsavedChoice(currentDocument.fileName)
     if (choice === 'cancel') return false
-    if (choice === 'discard') return true
+    if (choice === 'discard') {
+      clearDraftSnapshot()
+      setRecoveryDraft(null)
+      return true
+    }
     return saveDocument(false)
   }, [currentDocument?.dirty, currentDocument?.fileName, requestUnsavedChoice, saveDocument])
 
@@ -219,11 +308,67 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     refreshRecentFiles()
   }, [refreshRecentFiles])
 
+  const handleOpenRecentFolder = useCallback((path: string) => {
+    if (!isElectronRuntime()) return
+    void showItemInFolder(path)
+  }, [])
+
+  const handleOpenFolder = useCallback(async () => {
+    try {
+      await showOpenDialog({ directory: true, multiple: false })
+    } catch (errorValue) {
+      setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
+    }
+  }, [setError])
+
+  const handleRestoreDraft = useCallback(async () => {
+    const draft = recoveryDraft ?? readDraftSnapshot()
+    if (!draft) return
+    if (!(await ensureNoUnsavedChanges())) return
+    restoreDocument(draftSnapshotToDocument(draft))
+    setMode('source')
+    clearDraftSnapshot()
+    setRecoveryDraft(null)
+    setStatusMessage(t('status.draftSaved'))
+  }, [ensureNoUnsavedChanges, recoveryDraft, restoreDocument, setMode, t])
+
+  const handleDiscardDraft = useCallback(() => {
+    clearDraftSnapshot()
+    setRecoveryDraft(null)
+  }, [])
+
   const handleSearch = useCallback(() => {
     if (!currentDocument) return
     if (mode === 'reader') setMode('source')
     requestSearch()
   }, [currentDocument, mode, requestSearch, setMode])
+
+  const runEditorCommand = useCallback((command: EditorCommand) => {
+    if (!currentDocument) return
+    if (mode === 'reader') {
+      setMode('source')
+      window.setTimeout(() => requestEditorCommand(command), 0)
+      return
+    }
+    requestEditorCommand(command)
+  }, [currentDocument, mode, requestEditorCommand, setMode])
+
+  const handleReplace = useCallback(() => {
+    runEditorCommand('replace')
+  }, [runEditorCommand])
+
+  const handleGotoLine = useCallback(() => {
+    if (!currentDocument) return
+    setGotoOpen(true)
+  }, [currentDocument])
+
+  const handleGotoSubmit = useCallback((line: number) => {
+    setTargetLine(line)
+    setGotoOpen(false)
+    if (mode === 'reader') {
+      setMode('source')
+    }
+  }, [mode, setMode])
 
   const handleOutlineLineJump = useCallback(
     (line: number) => {
@@ -239,9 +384,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     updateSettings({ themeMode })
   }, [updateSettings])
 
-  const changeZoom = useCallback((zoom: number) => {
-    updateSettings({ zoom })
-  }, [updateSettings])
+  const cycleZoom = useCallback(() => {
+    const steps = [70, 90, 100, 110, 125, 150, 175, 200]
+    const next = steps.find((value) => value > settings.zoom) ?? 100
+    changeZoom(next)
+  }, [changeZoom, settings.zoom])
+
+  const toggleWordWrap = useCallback(() => {
+    const next = !settings.wordWrap
+    updateSettings({ wordWrap: next })
+    setStatusMessage(next ? t('wordWrap.on') : t('wordWrap.off'))
+  }, [settings.wordWrap, t, updateSettings])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -284,6 +437,16 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         handleSearch()
         return
       }
+      if (key === 'h' && currentDocument) {
+        event.preventDefault()
+        handleReplace()
+        return
+      }
+      if (key === 'g' && currentDocument) {
+        event.preventDefault()
+        handleGotoLine()
+        return
+      }
       if (key === 'l' && event.shiftKey && currentDocument) {
         event.preventDefault()
         setOutlineCollapsed((value) => !value)
@@ -291,7 +454,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       }
       if (event.key === '=' || event.key === '+') {
         event.preventDefault()
-        changeZoom(Math.min(160, settings.zoom + 10))
+        changeZoom(Math.min(200, settings.zoom + 10))
         return
       }
       if (event.key === '-') {
@@ -319,6 +482,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     handleNewMarkdown,
     handleNewTxt,
     handleOpen,
+    handleGotoLine,
+    handleReplace,
     handleSearch,
     saveDocument,
     setMode,
@@ -340,7 +505,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       if (command === 'mode-source' && currentDocument) setMode('source')
       if (command === 'mode-split' && currentDocument) setMode('split')
       if (command === 'toggle-outline' && currentDocument) setOutlineCollapsed((value) => !value)
-      if (command === 'zoom-in') changeZoom(Math.min(160, settings.zoom + 10))
+      if (command === 'zoom-in') changeZoom(Math.min(200, settings.zoom + 10))
       if (command === 'zoom-out') changeZoom(Math.max(70, settings.zoom - 10))
       if (command === 'zoom-reset') changeZoom(100)
       if (command === 'theme-system') setThemeMode('system')
@@ -409,6 +574,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         zoom={settings.zoom}
         themeMode={settings.themeMode}
         outlineCollapsed={outlineCollapsed}
+        wordWrap={settings.wordWrap}
+        showStatusBar={settings.showStatusBar}
         onNewMarkdown={() => void handleNewMarkdown()}
         onNewTxt={() => void handleNewTxt()}
         onOpen={() => void handleOpen()}
@@ -418,11 +585,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onCloseDocument={() => void handleCloseDocument()}
         onQuit={() => void handleQuit()}
         onSearch={handleSearch}
+        onReplace={handleReplace}
+        onGotoLine={handleGotoLine}
+        onEditorCommand={runEditorCommand}
         onModeChange={setMode}
         onToggleOutline={() => setOutlineCollapsed((value) => !value)}
+        onToggleWordWrap={toggleWordWrap}
+        onToggleStatusBar={() => updateSettings({ showStatusBar: !settings.showStatusBar })}
         onZoomChange={changeZoom}
         onThemeChange={setThemeMode}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenFontSettings={() => setSettingsOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
         onOpenAbout={() => setAboutOpen(true)}
       />
@@ -463,6 +636,18 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         </div>
       </div>
 
+      {settings.showStatusBar ? (
+        <StatusBar
+          document={currentDocument}
+          cursor={cursor}
+          zoom={settings.zoom}
+          wordWrap={settings.wordWrap}
+          statusMessage={statusMessage}
+          onCycleZoom={cycleZoom}
+          onToggleWordWrap={toggleWordWrap}
+        />
+      ) : null}
+
       {settingsOpen ? (
         <Suspense fallback={null}>
           <SettingsPanel
@@ -493,6 +678,12 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         </Suspense>
       ) : null}
       {aboutOpen ? <AboutDialog onClose={() => setAboutOpen(false)} /> : null}
+      {gotoOpen ? (
+        <GotoLineDialog
+          onClose={() => setGotoOpen(false)}
+          onSubmit={handleGotoSubmit}
+        />
+      ) : null}
       {pendingUnsaved ? (
         <UnsavedChangesDialog
           fileName={pendingUnsaved.fileName}
@@ -507,11 +698,16 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       return (
         <EmptyState
           recentFiles={recentFiles}
+          recoveryDraft={recoveryDraft}
           onNewMarkdown={() => void handleNewMarkdown()}
           onNewTxt={() => void handleNewTxt()}
           onOpen={() => void handleOpen()}
+          onOpenFolder={() => void handleOpenFolder()}
           onOpenRecent={(path) => void handleOpenPath(path)}
           onRemoveRecent={handleRemoveRecent}
+          onOpenRecentFolder={handleOpenRecentFolder}
+          onRestoreDraft={() => void handleRestoreDraft()}
+          onDiscardDraft={handleDiscardDraft}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenHelp={() => setHelpOpen(true)}
         />
@@ -528,8 +724,10 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         <SourceEditor
           documentPath={currentDocument.path}
           content={currentDocument.content}
+          wordWrap={settings.wordWrap}
           targetLine={targetLine}
           onTargetLineHandled={() => setTargetLine(undefined)}
+          onOpenGotoLine={handleGotoLine}
         />
       )
     }
@@ -540,8 +738,10 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
           document={currentDocument}
           settings={settings}
           onEditRequest={handleEditRequest}
+          wordWrap={settings.wordWrap}
           targetLine={targetLine}
           onTargetLineHandled={() => setTargetLine(undefined)}
+          onOpenGotoLine={handleGotoLine}
         />
       )
     }

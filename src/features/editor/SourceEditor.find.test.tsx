@@ -14,7 +14,7 @@ describe('SourceEditor find UI', () => {
   })
 
   beforeEach(() => {
-    localStorage.setItem('hmark-locale', 'zh-CN')
+    localStorage.setItem('inkleaf-locale', 'zh-CN')
   })
 
   it('uses the InkLeaf find bar instead of the default CodeMirror search panel', async () => {
@@ -23,6 +23,7 @@ describe('SourceEditor find UI', () => {
         <SourceEditor
           documentPath="D:\\sample.md"
           content={'# Title\nmessage one\nmessage two\n'}
+          wordWrap
         />
       </I18nProvider>,
     )

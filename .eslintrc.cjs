@@ -14,7 +14,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'react-hooks'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-  ignorePatterns: ['dist', 'src-tauri/target'],
+  ignorePatterns: ['dist'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'error',
     'react-hooks/rules-of-hooks': 'error',

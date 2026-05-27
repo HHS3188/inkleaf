@@ -35,80 +35,12 @@ const openPayloadQueue = createOpenPayloadQueue((payload) => {
 
 let menuLocale = normalizeMenuLocale(app.getLocale())
 
-const menuCopy = {
-  'zh-CN': {
-    file: '文件',
-    open: '打开...',
-    save: '保存',
-    closeDocument: '关闭文档',
-    quit: '退出',
-    edit: '编辑',
-    undo: '撤销',
-    redo: '重做',
-    cut: '剪切',
-    copy: '复制',
-    paste: '粘贴',
-    selectAll: '全选',
-    find: '查找',
-    view: '查看',
-    reload: '重新加载',
-    forceReload: '强制重新加载',
-    resetZoom: '实际大小',
-    zoomIn: '放大',
-    zoomOut: '缩小',
-    toggleDevTools: '开发者工具',
-    window: '窗口',
-    minimize: '最小化',
-    closeWindow: '关闭窗口',
-    help: '帮助',
-    settings: '设置',
-    about: '关于 墨笺',
-    aboutMessage: '墨笺 InkLeaf 本地 Markdown / TXT / HTML 阅读编辑器',
-  },
-  'en-US': {
-    file: 'File',
-    open: 'Open...',
-    save: 'Save',
-    closeDocument: 'Close Document',
-    quit: 'Quit',
-    edit: 'Edit',
-    undo: 'Undo',
-    redo: 'Redo',
-    cut: 'Cut',
-    copy: 'Copy',
-    paste: 'Paste',
-    selectAll: 'Select All',
-    find: 'Find',
-    view: 'View',
-    reload: 'Reload',
-    forceReload: 'Force Reload',
-    resetZoom: 'Actual Size',
-    zoomIn: 'Zoom In',
-    zoomOut: 'Zoom Out',
-    toggleDevTools: 'Developer Tools',
-    window: 'Window',
-    minimize: 'Minimize',
-    closeWindow: 'Close Window',
-    help: 'Help',
-    settings: 'Settings',
-    about: 'About InkLeaf',
-    aboutMessage: 'InkLeaf local Markdown / TXT / HTML reader and editor',
-  },
-}
-
 function getMainWindow() {
   return mainWindow
 }
 
 function normalizeMenuLocale(locale) {
   return String(locale || '').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US'
-}
-
-function sendMenuCommand(command) {
-  const win = getMainWindow()
-  if (win && !win.isDestroyed()) {
-    win.webContents.send('menu-command', command)
-  }
 }
 
 function buildApplicationMenu(locale = menuLocale) {
@@ -132,7 +64,7 @@ function isAllowedNavigation(rawUrl) {
     return false
   }
 
-  if (target.protocol === 'about:' || target.protocol === 'inkleaf:' || target.protocol === 'hmark:') return true
+  if (target.protocol === 'about:' || target.protocol === 'inkleaf:') return true
 
   if (isDev) {
     const allowedHosts = new Set(['127.0.0.1:1420', 'localhost:1420', '[::1]:1420'])
@@ -331,8 +263,16 @@ ipcMain.on('app:close-response', (event, shouldClose) => {
 // ── IPC: Dialogs ─────────────────────────────────────────────────────
 
 ipcMain.handle('dialog:open-file', async (_event, options) => {
+  const properties = []
+  if (options && options.directory) {
+    properties.push('openDirectory')
+  } else {
+    properties.push('openFile')
+  }
+  if (options && options.multiple) properties.push('multiSelections')
+
   const result = await dialog.showOpenDialog(mainWindow, {
-    properties: options && options.multiple ? ['openFile', 'multiSelections'] : ['openFile'],
+    properties,
     filters: (options && options.filters) || [],
   })
   if (result.canceled) return null
@@ -373,8 +313,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1180,
     height: 780,
-    minWidth: 880,
-    minHeight: 600,
+    minWidth: 720,
+    minHeight: 520,
     backgroundColor: '#202020',
     title: 'InkLeaf',
     icon: appIconPath,

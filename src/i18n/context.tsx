@@ -4,7 +4,7 @@ import { zhCN } from './locales/zh-CN'
 import { enUS } from './locales/en-US'
 import { isElectronRuntime, setAppLocale } from '../lib/platform-api'
 
-const LOCALE_STORAGE_KEY = 'hmark-locale'
+const LOCALE_STORAGE_KEY = 'inkleaf-locale'
 
 const locales: Record<Locale, I18N> = {
   'zh-CN': zhCN,

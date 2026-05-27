@@ -27,49 +27,60 @@ export function HelpPanel({ onClose }: HelpPanelProps) {
           </button>
         </header>
 
-        <section className="help-section">
-          <h3>{t('help.shortcuts')}</h3>
-          <table className="help-shortcuts-table">
-            <tbody>
-              <tr><td><kbd>Ctrl+N</kbd></td><td>{t('key.newMarkdown')}</td></tr>
-              <tr><td><kbd>Ctrl+Shift+N</kbd></td><td>{t('key.newTxt')}</td></tr>
-              <tr><td><kbd>Ctrl+O</kbd></td><td>{t('key.open')}</td></tr>
-              <tr><td><kbd>Ctrl+S</kbd></td><td>{t('key.save')}</td></tr>
-              <tr><td><kbd>Ctrl+Shift+S</kbd></td><td>{t('key.saveAs')}</td></tr>
-              <tr><td><kbd>Ctrl+W</kbd></td><td>{t('key.closeFile')}</td></tr>
-              <tr><td><kbd>Ctrl+F</kbd></td><td>{t('key.search')}</td></tr>
-              <tr><td><kbd>Ctrl+1</kbd></td><td>{t('key.reader')}</td></tr>
-              <tr><td><kbd>Ctrl+2</kbd></td><td>{t('key.source')}</td></tr>
-              <tr><td><kbd>Ctrl+3</kbd></td><td>{t('key.split')}</td></tr>
-              <tr><td><kbd>Ctrl+Shift+L</kbd></td><td>{t('key.outline')}</td></tr>
-              <tr><td><kbd>Esc</kbd></td><td>{t('generic.close')}</td></tr>
-            </tbody>
-          </table>
-        </section>
+        <div className="help-panel-content">
+          <section className="help-section">
+            <h3>{t('help.shortcuts')}</h3>
+            <table className="help-shortcuts-table">
+              <tbody>
+                <tr><td><kbd>Ctrl+N</kbd></td><td>{t('key.newMarkdown')}</td></tr>
+                <tr><td><kbd>Ctrl+Shift+N</kbd></td><td>{t('key.newTxt')}</td></tr>
+                <tr><td><kbd>Ctrl+O</kbd></td><td>{t('key.open')}</td></tr>
+                <tr><td><kbd>Ctrl+S</kbd></td><td>{t('key.save')}</td></tr>
+                <tr><td><kbd>Ctrl+Shift+S</kbd></td><td>{t('key.saveAs')}</td></tr>
+                <tr><td><kbd>Ctrl+W</kbd></td><td>{t('key.closeFile')}</td></tr>
+                <tr><td><kbd>Ctrl+F</kbd></td><td>{t('key.search')}</td></tr>
+                <tr><td><kbd>Ctrl+H</kbd></td><td>{t('key.replace')}</td></tr>
+                <tr><td><kbd>Ctrl+G</kbd></td><td>{t('key.gotoLine')}</td></tr>
+                <tr><td><kbd>Ctrl+Wheel</kbd></td><td>{t('help.tip.zoomWheel')}</td></tr>
+                <tr><td><kbd>Ctrl+1</kbd></td><td>{t('key.reader')}</td></tr>
+                <tr><td><kbd>Ctrl+2</kbd></td><td>{t('key.source')}</td></tr>
+                <tr><td><kbd>Ctrl+3</kbd></td><td>{t('key.split')}</td></tr>
+                <tr><td><kbd>Ctrl+Shift+L</kbd></td><td>{t('key.outline')}</td></tr>
+                <tr><td><kbd>Esc</kbd></td><td>{t('generic.close')}</td></tr>
+              </tbody>
+            </table>
+          </section>
 
-        <section className="help-section">
-          <h3>{t('help.modes')}</h3>
-          <dl className="help-modes-list">
-            <dt>{t('help.readerMode')}</dt>
-            <dd>{t('help.readerMode.desc')}</dd>
-            <dt>{t('help.sourceMode')}</dt>
-            <dd>{t('help.sourceMode.desc')}</dd>
-            <dt>{t('help.splitMode')}</dt>
-            <dd>{t('help.splitMode.desc')}</dd>
-          </dl>
-        </section>
+          <section className="help-section">
+            <h3>{t('help.modes')}</h3>
+            <dl className="help-modes-list">
+              <dt>{t('help.readerMode')}</dt>
+              <dd>{t('help.readerMode.desc')}</dd>
+              <dt>{t('help.sourceMode')}</dt>
+              <dd>{t('help.sourceMode.desc')}</dd>
+              <dt>{t('help.splitMode')}</dt>
+              <dd>{t('help.splitMode.desc')}</dd>
+            </dl>
+          </section>
 
-        <section className="help-section">
-          <h3>{t('help.tips')}</h3>
-          <ul className="help-tips-list">
-            <li>{t('help.tip.outline')}</li>
-            <li>{t('help.tip.save')}</li>
-            <li>{t('help.tip.search')}</li>
-            <li>{t('help.tip.splitDivider')}</li>
-            <li>{t('help.tip.language')}</li>
-            <li>{t('help.tip.theme')}</li>
-          </ul>
-        </section>
+          <section className="help-section">
+            <h3>{t('help.tips')}</h3>
+            <ul className="help-tips-list">
+              <li>{t('help.tip.outline')}</li>
+              <li>{t('help.tip.save')}</li>
+              <li>{t('help.tip.search')}</li>
+              <li>{t('help.tip.replace')}</li>
+              <li>{t('help.tip.gotoLine')}</li>
+              <li>{t('help.tip.wordWrap')}</li>
+              <li>{t('help.tip.autoSave')}</li>
+              <li>{t('help.tip.autoRecovery')}</li>
+              <li>{t('help.tip.contextMenu')}</li>
+              <li>{t('help.tip.splitDivider')}</li>
+              <li>{t('help.tip.language')}</li>
+              <li>{t('help.tip.theme')}</li>
+            </ul>
+          </section>
+        </div>
       </div>
     </div>
   )

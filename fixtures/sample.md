@@ -1,4 +1,4 @@
-# HMark Markdown Fixture
+# InkLeaf Markdown Fixture
 
 This fixture covers GitHub-flavored Markdown.
 
@@ -17,7 +17,7 @@ This fixture covers GitHub-flavored Markdown.
 ## Code
 
 ```ts
-const message = 'hello hmark'
+const message = 'hello inkleaf'
 console.log(message)
 ```
 

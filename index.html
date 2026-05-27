@@ -9,9 +9,11 @@
       ;(function () {
         try {
           const savedSettings = JSON.parse(
-            localStorage.getItem('hmark-reader-settings-v1') || '{}',
+            localStorage.getItem('inkleaf-reader-settings-v2') || '{}',
           )
-          const theme = savedSettings.themeMode || localStorage.getItem('hmark-theme') || 'system'
+          const theme =
+            savedSettings.themeMode ||
+            localStorage.getItem('inkleaf-theme') || 'system'
           const accentMap = {
             blue: '#3b82f6',
             green: '#16a34a',
@@ -20,8 +22,7 @@
           }
           const accent =
             accentMap[savedSettings.accentColor] ||
-            localStorage.getItem('hmark-accent') ||
-            '#3b82f6'
+            localStorage.getItem('inkleaf-accent') || '#3b82f6'
           const dark =
             theme === 'dark' ||
             (theme === 'system' &&

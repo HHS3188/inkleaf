@@ -66,6 +66,7 @@ declare global {
       showItemInFolder: (p: string) => Promise<void>
       showOpenDialog: (o: {
         multiple?: boolean
+        directory?: boolean
         filters?: DialogFilter[]
       }) => Promise<string | string[] | null>
       showSaveDialog: (o: {
@@ -121,6 +122,7 @@ export async function copyImageToAssets(
 
 export async function showOpenDialog(options: {
   multiple?: boolean
+  directory?: boolean
   filters?: DialogFilter[]
 }): Promise<string | string[] | null> {
   return api().showOpenDialog(options)

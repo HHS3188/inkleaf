@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { useT } from '../i18n'
 import type { I18N } from '../i18n'
 import type { ThemeMode } from '../features/theme/theme-types'
-import type { EditorMode } from '../features/editor/editor-store'
+import type { EditorCommand, EditorMode } from '../features/editor/editor-store'
 import type { RecentFile } from '../features/document/recent-files'
 import type { CurrentDocument, SupportedFileType } from '../features/document/document-types'
 
@@ -16,6 +16,8 @@ type AppMenuBarProps = {
   zoom: number
   themeMode: ThemeMode
   outlineCollapsed: boolean
+  wordWrap: boolean
+  showStatusBar: boolean
   onNewMarkdown: () => void
   onNewTxt: () => void
   onOpen: () => void
@@ -25,11 +27,17 @@ type AppMenuBarProps = {
   onCloseDocument: () => void
   onQuit: () => void
   onSearch: () => void
+  onReplace: () => void
+  onGotoLine: () => void
+  onEditorCommand: (command: EditorCommand) => void
   onModeChange: (mode: EditorMode) => void
   onToggleOutline: () => void
+  onToggleWordWrap: () => void
+  onToggleStatusBar: () => void
   onZoomChange: (zoom: number) => void
   onThemeChange: (mode: ThemeMode) => void
   onOpenSettings: () => void
+  onOpenFontSettings: () => void
   onOpenHelp: () => void
   onOpenAbout: () => void
 }
@@ -41,6 +49,8 @@ export function AppMenuBar({
   zoom,
   themeMode,
   outlineCollapsed,
+  wordWrap,
+  showStatusBar,
   onNewMarkdown,
   onNewTxt,
   onOpen,
@@ -50,11 +60,17 @@ export function AppMenuBar({
   onCloseDocument,
   onQuit,
   onSearch,
+  onReplace,
+  onGotoLine,
+  onEditorCommand,
   onModeChange,
   onToggleOutline,
+  onToggleWordWrap,
+  onToggleStatusBar,
   onZoomChange,
   onThemeChange,
   onOpenSettings,
+  onOpenFontSettings,
   onOpenHelp,
   onOpenAbout,
 }: AppMenuBarProps) {
@@ -115,15 +131,20 @@ export function AppMenuBar({
       </MenuButton>
 
       <MenuButton id="edit" label={t('menu.edit')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
-        <MenuItem label={t('menu.undo')} shortcut="Ctrl+Z" onSelect={() => run(() => runEditCommand('undo'))} />
-        <MenuItem label={t('menu.redo')} shortcut="Ctrl+Y" onSelect={() => run(() => runEditCommand('redo'))} />
+        <MenuItem label={t('menu.undo')} shortcut="Ctrl+Z" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('undo'))} />
+        <MenuItem label={t('menu.redo')} shortcut="Ctrl+Y" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('redo'))} />
         <MenuSeparator />
-        <MenuItem label={t('menu.cut')} shortcut="Ctrl+X" onSelect={() => run(() => runEditCommand('cut'))} />
-        <MenuItem label={t('menu.copy')} shortcut="Ctrl+C" onSelect={() => run(() => runEditCommand('copy'))} />
-        <MenuItem label={t('menu.paste')} shortcut="Ctrl+V" onSelect={() => run(() => runEditCommand('paste'))} />
-        <MenuItem label={t('menu.selectAll')} shortcut="Ctrl+A" onSelect={() => run(() => runEditCommand('selectAll'))} />
+        <MenuItem label={t('menu.cut')} shortcut="Ctrl+X" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('cut'))} />
+        <MenuItem label={t('menu.copy')} shortcut="Ctrl+C" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('copy'))} />
+        <MenuItem label={t('menu.paste')} shortcut="Ctrl+V" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('paste'))} />
+        <MenuItem label={t('menu.selectAll')} shortcut="Ctrl+A" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('select-all'))} />
         <MenuSeparator />
         <MenuItem label={t('menu.find')} shortcut="Ctrl+F" disabled={!hasDocument} onSelect={() => run(onSearch)} />
+        <MenuItem label={t('menu.replace')} shortcut="Ctrl+H" disabled={!hasDocument} onSelect={() => run(onReplace)} />
+        <MenuItem label={t('menu.gotoLine')} shortcut="Ctrl+G" disabled={!hasDocument} onSelect={() => run(onGotoLine)} />
+        <MenuItem label={t('menu.insertDateTime')} disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('insert-date-time'))} />
+        <MenuSeparator />
+        <MenuItem label={t('menu.fontSettings')} onSelect={() => run(onOpenFontSettings)} />
       </MenuButton>
 
       <MenuButton id="view" label={t('menu.view')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
@@ -132,8 +153,10 @@ export function AppMenuBar({
         <MenuItem label={t('menu.splitMode')} shortcut="Ctrl+3" checked={mode === 'split'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('split'))} />
         <MenuSeparator />
         <MenuItem label={t('menu.toggleOutline')} shortcut="Ctrl+Shift+L" checked={!outlineCollapsed} disabled={!hasDocument} onSelect={() => run(onToggleOutline)} />
+        <MenuItem label={t('menu.wordWrap')} checked={wordWrap} onSelect={() => run(onToggleWordWrap)} />
+        <MenuItem label={t('menu.statusBar')} checked={showStatusBar} onSelect={() => run(onToggleStatusBar)} />
         <MenuSeparator />
-        <MenuItem label={t('menu.zoomIn')} shortcut="Ctrl+=" onSelect={() => run(() => onZoomChange(Math.min(160, zoom + 10)))} />
+        <MenuItem label={t('menu.zoomIn')} shortcut="Ctrl+=" onSelect={() => run(() => onZoomChange(Math.min(200, zoom + 10)))} />
         <MenuItem label={t('menu.zoomOut')} shortcut="Ctrl+-" onSelect={() => run(() => onZoomChange(Math.max(70, zoom - 10)))} />
         <MenuItem label={t('menu.actualSize')} shortcut="Ctrl+0" onSelect={() => run(() => onZoomChange(100))} />
       </MenuButton>
@@ -235,8 +258,4 @@ function formatRecentType(fileType: SupportedFileType | undefined, t: (key: keyo
   if (fileType === 'txt') return t('empty.recentType.txt')
   if (fileType === 'html') return t('empty.recentType.html')
   return t('empty.recentType.unknown')
-}
-
-function runEditCommand(command: string) {
-  globalThis.document.execCommand(command)
 }

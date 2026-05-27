@@ -3,6 +3,7 @@ import {
   CaseSensitive,
   ChevronDown,
   ChevronUp,
+  Replace,
   Search,
   WholeWord,
   X,
@@ -15,6 +16,9 @@ type FindBarProps = {
   query: string
   matchCase: boolean
   wholeWord: boolean
+  replaceOpen?: boolean
+  replaceValue?: string
+  replaceDisabled?: boolean
   current: number
   total: number
   scopeLabel: string
@@ -22,6 +26,10 @@ type FindBarProps = {
   onQueryChange: (value: string) => void
   onMatchCaseChange: (value: boolean) => void
   onWholeWordChange: (value: boolean) => void
+  onReplaceOpenChange?: (value: boolean) => void
+  onReplaceChange?: (value: string) => void
+  onReplaceNext?: () => void
+  onReplaceAll?: () => void
   onPrevious: () => void
   onNext: () => void
   onClose: () => void
@@ -32,6 +40,9 @@ export function FindBar({
   query,
   matchCase,
   wholeWord,
+  replaceOpen = false,
+  replaceValue = '',
+  replaceDisabled = false,
   current,
   total,
   scopeLabel,
@@ -39,6 +50,10 @@ export function FindBar({
   onQueryChange,
   onMatchCaseChange,
   onWholeWordChange,
+  onReplaceOpenChange,
+  onReplaceChange,
+  onReplaceNext,
+  onReplaceAll,
   onPrevious,
   onNext,
   onClose,
@@ -56,7 +71,7 @@ export function FindBar({
   if (!open) return null
 
   return (
-    <div className="find-bar" role="search" aria-label={t('find.title')}>
+    <div className={clsx('find-bar', replaceOpen && 'find-bar--replace')} role="search" aria-label={t('find.title')}>
       <span className="find-scope">{scopeLabel}</span>
       <div className="find-input-wrap">
         <Search size={14} aria-hidden="true" />
@@ -125,6 +140,16 @@ export function FindBar({
       </button>
       <button
         type="button"
+        className={clsx('find-icon-button', 'find-toggle', replaceOpen && 'active')}
+        onClick={() => onReplaceOpenChange?.(!replaceOpen)}
+        title={t('find.showReplace')}
+        aria-label={t('find.showReplace')}
+        aria-pressed={replaceOpen}
+      >
+        <Replace size={15} aria-hidden="true" />
+      </button>
+      <button
+        type="button"
         className="find-icon-button"
         onClick={onClose}
         title={t('find.close')}
@@ -132,6 +157,47 @@ export function FindBar({
       >
         <X size={15} aria-hidden="true" />
       </button>
+      {replaceOpen ? (
+        <div className="replace-row">
+          <div className="find-input-wrap replace-input-wrap">
+            <Replace size={14} aria-hidden="true" />
+            <input
+              className="find-input"
+              value={replaceValue}
+              placeholder={t('find.replacePlaceholder')}
+              aria-label={t('find.replacePlaceholder')}
+              disabled={replaceDisabled}
+              onChange={(event) => onReplaceChange?.(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  onReplaceNext?.()
+                }
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  onClose()
+                }
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            className="secondary-button find-replace-button"
+            disabled={!hasQuery || total === 0 || replaceDisabled}
+            onClick={onReplaceNext}
+          >
+            {t('find.replaceNext')}
+          </button>
+          <button
+            type="button"
+            className="secondary-button find-replace-button"
+            disabled={!hasQuery || total === 0 || replaceDisabled}
+            onClick={onReplaceAll}
+          >
+            {t('find.replaceAll')}
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -56,11 +56,17 @@ export interface I18N {
   'menu.paste': string
   'menu.selectAll': string
   'menu.find': string
+  'menu.replace': string
+  'menu.gotoLine': string
+  'menu.insertDateTime': string
+  'menu.wordWrap': string
+  'menu.fontSettings': string
   'menu.view': string
   'menu.readerMode': string
   'menu.sourceMode': string
   'menu.splitMode': string
   'menu.toggleOutline': string
+  'menu.statusBar': string
   'menu.zoomIn': string
   'menu.zoomOut': string
   'menu.actualSize': string
@@ -91,6 +97,11 @@ export interface I18N {
   'empty.sampleFile': string
   'empty.shortcuts': string
   'empty.shortcuts.desc': string
+  'empty.recoveryTitle': string
+  'empty.recoveryDesc': string
+  'empty.restoreDraft': string
+  'empty.discardDraft': string
+  'empty.openFolder': string
   'empty.recentType.markdown': string
   'empty.recentType.txt': string
   'empty.recentType.html': string
@@ -115,9 +126,17 @@ export interface I18N {
   'settings.close': string
   'settings.themeMode': string
   'settings.accentColor': string
+  'settings.bodyFont': string
+  'settings.monoFont': string
   'settings.fontSize': string
   'settings.lineHeight': string
   'settings.readingWidth': string
+  'settings.wordWrap': string
+  'settings.autoSave': string
+  'settings.autoSave.off': string
+  'settings.autoSave.30s': string
+  'settings.autoSave.1m': string
+  'settings.autoSave.5m': string
   'settings.autoRenderTxtImages': string
   'settings.allowRemoteImages': string
   'settings.setDefaultOpener': string
@@ -141,6 +160,10 @@ export interface I18N {
   'find.next': string
   'find.matchCase': string
   'find.wholeWord': string
+  'find.replacePlaceholder': string
+  'find.showReplace': string
+  'find.replaceNext': string
+  'find.replaceAll': string
   'find.close': string
   'find.noResults': string
   'find.scopeSource': string
@@ -176,6 +199,13 @@ export interface I18N {
   'help.tip.outline': string
   'help.tip.save': string
   'help.tip.search': string
+  'help.tip.replace': string
+  'help.tip.gotoLine': string
+  'help.tip.wordWrap': string
+  'help.tip.zoomWheel': string
+  'help.tip.autoSave': string
+  'help.tip.autoRecovery': string
+  'help.tip.contextMenu': string
   'help.tip.splitDivider': string
   'help.tip.language': string
   'help.tip.theme': string
@@ -195,10 +225,37 @@ export interface I18N {
   'key.saveAs': string
   'key.closeFile': string
   'key.search': string
+  'key.replace': string
+  'key.gotoLine': string
   'key.reader': string
   'key.source': string
   'key.split': string
   'key.outline': string
 
   'largeFile.warning': string
+
+  'status.line': string
+  'status.column': string
+  'status.words': string
+  'status.characters': string
+  'status.zoom': string
+  'status.encoding': string
+  'status.lineEnding': string
+  'status.wordWrapOn': string
+  'status.wordWrapOff': string
+  'status.autoSaved': string
+  'status.saved': string
+  'status.draftSaved': string
+
+  'goto.title': string
+  'goto.placeholder': string
+  'goto.invalid': string
+  'goto.go': string
+
+  'context.open': string
+  'context.removeRecent': string
+  'context.openContainingFolder': string
+
+  'wordWrap.on': string
+  'wordWrap.off': string
 }

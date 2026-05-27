@@ -20,6 +20,7 @@ type DocumentState = {
   updateContent: (content: string) => void
   saveCurrentDocument: (pathOverride?: string) => Promise<string | null>
   markSaved: () => void
+  restoreDocument: (document: CurrentDocument) => void
   closeDocument: () => void
   setError: (message: string | null) => void
   setScrollTop: (value: number) => void
@@ -151,6 +152,19 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           }
         : null,
     })),
+  restoreDocument: (document) =>
+    set({
+      current: {
+        ...document,
+        size: new TextEncoder().encode(document.content).length,
+        dirty: true,
+        scrollTop: 0,
+        openedAt: Date.now(),
+      },
+      loading: false,
+      error: null,
+      lastSavedPath: document.path,
+    }),
   closeDocument: () => set({ current: null, error: null }),
   setError: (message) => set({ error: message }),
   setScrollTop: (value) =>

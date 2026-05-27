@@ -3,8 +3,6 @@ dist
 dist-electron
 release
 target
-src-tauri/target
-src-tauri/gen/
 .tools/
 *.log
 .DS_Store
