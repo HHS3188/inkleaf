@@ -1,3 +1,4 @@
+import { useT } from '../../i18n'
 import { fileToAssetUrl } from '../../lib/platform-api'
 import type { SingleInstancePayload } from '../../lib/platform-api'
 import type { CurrentDocument } from '../document/document-types'
@@ -20,22 +21,23 @@ export function DiagnosticsPanel({
   document,
   settings,
 }: DiagnosticsPanelProps) {
+  const t = useT()
   if (!openPanel) return null
   const assetUrlProbe = document?.path ? safeConvertFileSrc(document.path) : null
 
   return (
-    <aside className="side-panel diagnostics-panel" aria-label="诊断">
+    <aside className="side-panel diagnostics-panel" aria-label={t('diag.title')}>
       <header>
-        <strong>诊断</strong>
+        <strong>{t('diag.title')}</strong>
         <button type="button" className="secondary-button" onClick={onClose}>
-          关闭
+          {t('diag.close')}
         </button>
       </header>
-      <DiagnosticBlock title="Initial Args" value={initialArgs} />
-      <DiagnosticBlock title="Single Instance Payload" value={lastSingleInstancePayload} />
-      <DiagnosticBlock title="Current Document" value={document} />
+      <DiagnosticBlock title={t('diag.initialArgs')} value={initialArgs} />
+      <DiagnosticBlock title={t('diag.singleInstance')} value={lastSingleInstancePayload} />
+      <DiagnosticBlock title={t('diag.currentDoc')} value={document} />
       <DiagnosticBlock
-        title="Windows Integration"
+        title={t('diag.windowsIntegration')}
         value={{
           fileAssociations: ['.md', '.markdown', '.mdown', '.txt', '.html', '.htm'],
           defaultAppGuide: 'ms-settings:defaultapps',
@@ -43,7 +45,7 @@ export function DiagnosticsPanel({
           assetUrlProbe,
         }}
       />
-      <DiagnosticBlock title="Settings" value={settings} />
+      <DiagnosticBlock title={t('diag.settings')} value={settings} />
     </aside>
   )
 }

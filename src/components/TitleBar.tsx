@@ -6,13 +6,14 @@ type TitleBarProps = {
 
 export function TitleBar({ document }: TitleBarProps) {
   const title = document ? `${document.fileName}${document.dirty ? ' *' : ''}` : 'HMark'
+  const subtitle = document?.path ?? 'HMark — Markdown / TXT / HTML'
 
   return (
     <div className="title-bar">
       <div className="brand-mark">H</div>
       <div>
         <strong>{title}</strong>
-        <span>{document?.path ?? 'Markdown / TXT / HTML reader and source workspace'}</span>
+        <span>{subtitle}</span>
       </div>
     </div>
   )

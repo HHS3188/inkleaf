@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { useT } from '../i18n'
 import type { SingleInstancePayload } from '../lib/platform-api'
 import { showOpenDialog, showSaveDialog } from '../lib/platform-api'
 import { useDocumentStore } from '../features/document/document-store'
@@ -13,19 +14,18 @@ import { ReaderView } from '../features/reader/ReaderView'
 import { SourceEditor } from '../features/editor/SourceEditor'
 import { SplitEditor } from '../features/editor/SplitEditor'
 
-// 面板组件（非即时渲染）保留懒加载
+// Panel components — lazy loaded
 const DiagnosticsPanel = lazy(() =>
-  import('../features/diagnostics/DiagnosticsPanel').then((module) => ({
-    default: module.DiagnosticsPanel,
-  })),
+  import('../features/diagnostics/DiagnosticsPanel').then((m) => ({ default: m.DiagnosticsPanel })),
 )
 const SettingsPanel = lazy(() =>
-  import('../features/settings/SettingsPanel').then((module) => ({
-    default: module.SettingsPanel,
-  })),
+  import('../features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })),
 )
 const OutlinePanel = lazy(() =>
-  import('../features/outline/OutlinePanel').then((module) => ({ default: module.OutlinePanel })),
+  import('../features/outline/OutlinePanel').then((m) => ({ default: m.OutlinePanel })),
+)
+const HelpPanel = lazy(() =>
+  import('./HelpPanel').then((m) => ({ default: m.HelpPanel })),
 )
 
 type AppShellProps = {
@@ -38,6 +38,7 @@ const fileFilters = [
 ]
 
 export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellProps) {
+  const t = useT()
   const document = useDocumentStore((state) => state.current)
   const loading = useDocumentStore((state) => state.loading)
   const error = useDocumentStore((state) => state.error)
@@ -53,6 +54,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
   const [outlineOpen, setOutlineOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [targetLine, setTargetLine] = useState<number | undefined>(undefined)
 
   const handleSave = useCallback(async (): Promise<boolean> => {
@@ -60,10 +62,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     try {
       const targetPath =
         document.path ||
-        (await showSaveDialog({
-          defaultPath: document.fileName,
-          filters: fileFilters,
-        }))
+        (await showSaveDialog({ defaultPath: document.fileName, filters: fileFilters }))
       if (targetPath) {
         await saveCurrentDocument(targetPath)
         return true
@@ -76,18 +75,15 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   }, [document, saveCurrentDocument, setError])
 
   const handleOpenPath = useCallback(async (path: string) => {
-    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave))) return
+    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave, t))) return
     setMode('reader')
     await openDocument(path)
-  }, [document?.dirty, handleSave, openDocument, setMode])
+  }, [document?.dirty, handleSave, openDocument, setMode, t])
 
   const handleOpen = useCallback(async () => {
-    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave))) return
+    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave, t))) return
     try {
-      const selected = await showOpenDialog({
-        multiple: false,
-        filters: fileFilters,
-      })
+      const selected = await showOpenDialog({ multiple: false, filters: fileFilters })
       if (typeof selected === 'string') {
         setMode('reader')
         await openDocument(selected)
@@ -95,19 +91,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     } catch (errorValue) {
       setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
     }
-  }, [document?.dirty, handleSave, openDocument, setError, setMode])
+  }, [document?.dirty, handleSave, openDocument, setError, setMode, t])
 
   const handleCloseDocument = useCallback(async () => {
-    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave))) return
+    if (!(await resolveDirtyBeforeContinuing(document?.dirty ?? false, handleSave, t))) return
     closeDocument()
     setMode('reader')
-  }, [closeDocument, document?.dirty, handleSave, setMode])
+  }, [closeDocument, document?.dirty, handleSave, setMode, t])
 
   const handleSearch = useCallback(() => {
     if (!document) return
-    if (mode === 'reader') {
-      setMode('source')
-    }
+    if (mode === 'reader') setMode('source')
     requestSearch()
   }, [document, mode, requestSearch, setMode])
 
@@ -115,26 +109,15 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!event.ctrlKey || event.altKey || event.metaKey) return
       const key = event.key.toLowerCase()
-      if (key === 'o') {
-        event.preventDefault()
-        void handleOpen()
-      }
-      if (key === 's') {
-        event.preventDefault()
-        void handleSave()
-      }
-      if (key === 'f' && document) {
-        event.preventDefault()
-        handleSearch()
-      }
+      if (key === 'o') { event.preventDefault(); void handleOpen() }
+      if (key === 's') { event.preventDefault(); void handleSave() }
+      if (key === 'f' && document) { event.preventDefault(); handleSearch() }
       if (event.key === '1' || event.key === '2' || event.key === '3') {
         event.preventDefault()
-        const nextMode: EditorMode =
-          event.key === '1' ? 'reader' : event.key === '2' ? 'source' : 'split'
+        const nextMode: EditorMode = event.key === '1' ? 'reader' : event.key === '2' ? 'source' : 'split'
         if (document) setMode(nextMode)
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [document, handleOpen, handleSave, handleSearch, setMode])
@@ -162,44 +145,28 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onModeChange={setMode}
         onZoomChange={(zoom) => updateSettings({ zoom })}
         onSearch={handleSearch}
-        onToggleTheme={() =>
-          updateSettings({ themeMode: settings.themeMode === 'dark' ? 'light' : 'dark' })
-        }
+        onToggleTheme={() => updateSettings({ themeMode: settings.themeMode === 'dark' ? 'light' : 'dark' })}
         onOpenSettings={() => setSettingsOpen(true)}
-        onOpenDiagnostics={() => setDiagnosticsOpen(true)}
         onToggleOutline={() => setOutlineOpen(!outlineOpen)}
+        onToggleHelp={() => setHelpOpen(!helpOpen)}
       />
 
       {error ? <ErrorState message={error} onDismiss={() => setError(null)} /> : null}
 
       <div className="workspace">
         <ErrorBoundary>
-          {loading ? <div className="loading-state">正在打开文件...</div> : renderWorkspace()}
+          {loading ? <div className="loading-state">{t('editor.loading')}</div> : renderWorkspace()}
         </ErrorBoundary>
       </div>
 
       {settingsOpen ? (
         <Suspense fallback={null}>
-          <SettingsPanel
-            openPanel={settingsOpen}
-            onClose={() => setSettingsOpen(false)}
-            onOpenDiagnostics={() => {
-              setSettingsOpen(false)
-              setDiagnosticsOpen(true)
-            }}
-          />
+          <SettingsPanel openPanel={settingsOpen} onClose={() => setSettingsOpen(false)} onOpenDiagnostics={() => { setSettingsOpen(false); setDiagnosticsOpen(true) }} />
         </Suspense>
       ) : null}
       {diagnosticsOpen ? (
         <Suspense fallback={null}>
-          <DiagnosticsPanel
-            openPanel={diagnosticsOpen}
-            onClose={() => setDiagnosticsOpen(false)}
-            initialArgs={initialArgs}
-            lastSingleInstancePayload={lastSingleInstancePayload}
-            document={document}
-            settings={settings}
-          />
+          <DiagnosticsPanel openPanel={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} initialArgs={initialArgs} lastSingleInstancePayload={lastSingleInstancePayload} document={document} settings={settings} />
         </Suspense>
       ) : null}
       {outlineOpen ? (
@@ -207,18 +174,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
           <OutlinePanel onClose={() => setOutlineOpen(false)} />
         </Suspense>
       ) : null}
+      {helpOpen ? (
+        <Suspense fallback={null}>
+          <HelpPanel onClose={() => setHelpOpen(false)} />
+        </Suspense>
+      ) : null}
     </div>
   )
 
   function renderWorkspace() {
     if (!document) {
-      return (
-        <EmptyState
-          onOpen={handleOpen}
-          onOpenRecent={handleOpenPath}
-          onOpenDiagnostics={() => setDiagnosticsOpen(true)}
-        />
-      )
+      return <EmptyState onOpen={handleOpen} onOpenRecent={handleOpenPath} onOpenDiagnostics={() => setDiagnosticsOpen(true)} />
     }
 
     const handleEditRequest = (line?: number) => {
@@ -227,14 +193,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     }
 
     if (mode === 'source') {
-      return (
-        <SourceEditor
-          documentPath={document.path}
-          content={document.content}
-          targetLine={targetLine}
-          onTargetLineHandled={() => setTargetLine(undefined)}
-        />
-      )
+      return <SourceEditor documentPath={document.path} content={document.content} targetLine={targetLine} onTargetLineHandled={() => setTargetLine(undefined)} />
     }
 
     if (mode === 'split') {
@@ -245,17 +204,9 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   }
 }
 
-async function resolveDirtyBeforeContinuing(
-  dirty: boolean,
-  saveCurrent: () => Promise<boolean>,
-): Promise<boolean> {
-  if (!dirty) return true
-  const shouldSave = window.confirm(
-    '当前文档有未保存修改。选择“确定”保存并继续；选择“取消”后可选择放弃或返回。',
-  )
-  if (shouldSave) {
-    return saveCurrent()
-  }
-
-  return window.confirm('放弃未保存修改并继续？选择“取消”返回当前文档。')
+function resolveDirtyBeforeContinuing(dirty: boolean, saveCurrent: () => Promise<boolean>, t: (key: 'generic.dirtySave' | 'generic.discardAndContinue') => string): Promise<boolean> {
+  if (!dirty) return Promise.resolve(true)
+  const shouldSave = window.confirm(t('generic.dirtySave'))
+  if (shouldSave) return saveCurrent()
+  return window.confirm(t('generic.discardAndContinue')) ? Promise.resolve(true) : Promise.resolve(false)
 }

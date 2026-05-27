@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useT } from '../../i18n'
 import { showItemInFolder } from '../../lib/platform-api'
 import { Copy, ExternalLink, X } from 'lucide-react'
 import type { ResolvedImageSource } from './image-path-resolver'
@@ -12,6 +13,7 @@ type ImagePreviewModalProps = {
 }
 
 export function ImagePreviewModal({ image, onClose }: ImagePreviewModalProps) {
+  const t = useT()
   useEffect(() => {
     if (!image) return
 
@@ -42,15 +44,15 @@ export function ImagePreviewModal({ image, onClose }: ImagePreviewModalProps) {
         className="image-preview-modal"
         role="dialog"
         aria-modal="true"
-        aria-label="图片预览"
+        aria-label={t('image.preview')}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header>
           <div>
-            <strong>{image.alt || '图片预览'}</strong>
+            <strong>{image.alt || t('image.preview')}</strong>
             <code>{image.source.original}</code>
           </div>
-          <button type="button" className="icon-button" onClick={onClose} title="关闭">
+          <button type="button" className="icon-button" onClick={onClose} title={t('generic.close')}>
             <X size={18} aria-hidden="true" />
           </button>
         </header>
@@ -60,12 +62,12 @@ export function ImagePreviewModal({ image, onClose }: ImagePreviewModalProps) {
         <footer>
           <button type="button" className="secondary-button" onClick={copyPath}>
             <Copy size={16} aria-hidden="true" />
-            复制路径
+            {t('image.copyPath')}
           </button>
           {image.source.absolutePath ? (
             <button type="button" className="secondary-button" onClick={openFolder}>
               <ExternalLink size={16} aria-hidden="true" />
-              打开所在文件夹
+              {t('image.openFolder')}
             </button>
           ) : null}
         </footer>

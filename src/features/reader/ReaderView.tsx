@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useT } from '../../i18n'
 import { LARGE_TEXT_FILE_BYTES } from '../../lib/constants'
 import type { CurrentDocument } from '../document/document-types'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
@@ -15,6 +16,7 @@ type ReaderViewProps = {
 }
 
 export function ReaderView({ document, settings, onEditRequest }: ReaderViewProps) {
+  const t = useT()
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent) => {
       if (!onEditRequest) return
@@ -37,7 +39,7 @@ export function ReaderView({ document, settings, onEditRequest }: ReaderViewProp
       <div className="reader-view" onDoubleClick={handleDoubleClick}>
         {document.size > LARGE_TEXT_FILE_BYTES ? (
           <div className="large-file-warning">
-            文件超过 5MB，预览可能变慢；Source 模式使用 CodeMirror 处理编辑。
+            {t('largeFile.warning')}
           </div>
         ) : null}
         {renderDocument(document, settings)}

@@ -1,7 +1,8 @@
 import {
   BookOpen,
-  Bug,
   FolderOpen,
+  Globe,
+  HelpCircle,
   Minus,
   PanelLeft,
   PanelRight,
@@ -14,6 +15,7 @@ import {
   ZoomIn,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useI18n, useT } from '../i18n'
 import type { CurrentDocument } from '../features/document/document-types'
 import type { EditorMode } from '../features/editor/editor-store'
 
@@ -29,8 +31,8 @@ type ToolbarProps = {
   onSearch: () => void
   onToggleTheme: () => void
   onOpenSettings: () => void
-  onOpenDiagnostics: () => void
   onToggleOutline: () => void
+  onToggleHelp: () => void
 }
 
 export function Toolbar({
@@ -45,53 +47,46 @@ export function Toolbar({
   onSearch,
   onToggleTheme,
   onOpenSettings,
-  onOpenDiagnostics,
   onToggleOutline,
+  onToggleHelp,
 }: ToolbarProps) {
+  const t = useT()
+  const { locale, setLocale } = useI18n()
+
+  const modes: [EditorMode, typeof PanelLeft, string, string][] = [
+    ['reader', PanelLeft, t('toolbar.reader'), t('key.reader')],
+    ['source', PanelRight, t('toolbar.source'), t('key.source')],
+    ['split', SplitSquareHorizontal, t('toolbar.split'), t('key.split')],
+  ]
+
   return (
     <div className="toolbar" role="toolbar">
       <div className="toolbar-group">
-        <button type="button" className="tool-button" onClick={onOpen} title="打开文件 Ctrl+O">
-          <FolderOpen size={17} aria-hidden="true" />
-          打开
+        <button type="button" className="tool-button" onClick={onOpen} title={t('toolbar.open.tooltip')}>
+          <FolderOpen size={16} aria-hidden="true" />
+          {t('toolbar.open')}
         </button>
-        <button
-          type="button"
-          className="tool-button"
-          onClick={onSave}
-          disabled={!document}
-          title="保存 Ctrl+S"
-        >
-          <Save size={17} aria-hidden="true" />
-          保存
+        <button type="button" className="tool-button" onClick={onSave} disabled={!document} title={t('toolbar.save.tooltip')}>
+          <Save size={16} aria-hidden="true" />
+          {t('toolbar.save')}
         </button>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onCloseDocument}
-          disabled={!document}
-          title="关闭文档"
-        >
-          <X size={17} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={onCloseDocument} disabled={!document} title={t('toolbar.close.tooltip')}>
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
 
-      <div className="toolbar-group mode-switch" aria-label="模式">
-        {[
-          ['reader', PanelLeft, 'Reader', 'Ctrl+1'],
-          ['source', PanelRight, 'Source', 'Ctrl+2'],
-          ['split', SplitSquareHorizontal, 'Split', 'Ctrl+3'],
-        ].map(([value, Icon, label, shortcut]) => (
+      <div className="toolbar-group mode-switch" aria-label="Mode">
+        {modes.map(([value, Icon, label, shortcut]) => (
           <button
             type="button"
             className={clsx('segmented-button', mode === value && 'active')}
-            onClick={() => onModeChange(value as EditorMode)}
+            onClick={() => onModeChange(value)}
             disabled={!document}
             title={`${label} ${shortcut}`}
-            key={value as string}
+            key={value}
           >
-            <Icon size={16} aria-hidden="true" />
-            {label as string}
+            <Icon size={15} aria-hidden="true" />
+            {label}
           </button>
         ))}
       </div>
@@ -100,56 +95,53 @@ export function Toolbar({
         {document ? (
           <>
             <strong>{document.fileName}</strong>
-            {document.dirty ? <span className="dirty-badge">未保存</span> : <span>已保存</span>}
+            {document.dirty ? (
+              <span className="dirty-badge">{t('titlebar.unsaved')}</span>
+            ) : (
+              <span>{t('titlebar.saved')}</span>
+            )}
           </>
         ) : (
-          <span>未打开文件</span>
+          <span>{t('titlebar.noFile')}</span>
         )}
       </div>
 
       <div className="toolbar-group">
-        <button
-          type="button"
-          className="icon-button"
-          onClick={() => onZoomChange(Math.max(70, zoom - 10))}
-          title="缩小"
-        >
-          <Minus size={16} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={() => onZoomChange(Math.max(70, zoom - 10))} title="−">
+          <Minus size={15} aria-hidden="true" />
         </button>
         <button type="button" className="zoom-button" onClick={() => onZoomChange(100)}>
           {zoom}%
         </button>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={() => onZoomChange(Math.min(160, zoom + 10))}
-          title="放大"
-        >
-          <ZoomIn size={16} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={() => onZoomChange(Math.min(160, zoom + 10))} title="+">
+          <ZoomIn size={15} aria-hidden="true" />
         </button>
       </div>
 
       <div className="toolbar-group">
-        <button type="button" className="icon-button" onClick={onSearch} disabled={!document} title="查找 Ctrl+F">
-          <Search size={17} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={onSearch} disabled={!document} title={t('toolbar.search.tooltip')}>
+          <Search size={16} aria-hidden="true" />
         </button>
-        <button type="button" className="icon-button" onClick={onToggleTheme} title="切换主题">
-          <SunMoon size={17} aria-hidden="true" />
-        </button>
-        <button type="button" className="icon-button" onClick={onOpenDiagnostics} title="诊断">
-          <Bug size={17} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={onToggleTheme} title={t('toolbar.theme.tooltip')}>
+          <SunMoon size={16} aria-hidden="true" />
         </button>
         <button
           type="button"
           className="icon-button"
           onClick={onToggleOutline}
           disabled={!document}
-          title="大纲"
+          title={t('toolbar.outline.tooltip')}
         >
-          <BookOpen size={17} aria-hidden="true" />
+          <BookOpen size={16} aria-hidden="true" />
         </button>
-        <button type="button" className="icon-button" onClick={onOpenSettings} title="设置">
-          <Settings size={17} aria-hidden="true" />
+        <button type="button" className="icon-button" onClick={() => setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN')} title={t('toolbar.language.tooltip')}>
+          <Globe size={16} aria-hidden="true" />
+        </button>
+        <button type="button" className="icon-button" onClick={onToggleHelp} title={t('toolbar.help.tooltip')}>
+          <HelpCircle size={16} aria-hidden="true" />
+        </button>
+        <button type="button" className="icon-button" onClick={onOpenSettings} title={t('toolbar.settings.tooltip')}>
+          <Settings size={16} aria-hidden="true" />
         </button>
       </div>
     </div>
