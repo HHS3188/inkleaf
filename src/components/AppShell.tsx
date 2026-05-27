@@ -13,6 +13,7 @@ import { Toolbar } from './Toolbar'
 import { ReaderView } from '../features/reader/ReaderView'
 import { SourceEditor } from '../features/editor/SourceEditor'
 import { SplitEditor } from '../features/editor/SplitEditor'
+import { OutlineSidebar } from './OutlineSidebar'
 
 // Panel components — lazy loaded
 const DiagnosticsPanel = lazy(() =>
@@ -21,9 +22,6 @@ const DiagnosticsPanel = lazy(() =>
 const SettingsPanel = lazy(() =>
   import('../features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })),
 )
-const OutlinePanel = lazy(() =>
-  import('../features/outline/OutlinePanel').then((m) => ({ default: m.OutlinePanel })),
-)
 const HelpPanel = lazy(() =>
   import('./HelpPanel').then((m) => ({ default: m.HelpPanel })),
 )
@@ -31,6 +29,16 @@ const HelpPanel = lazy(() =>
 type AppShellProps = {
   initialArgs: string[]
   lastSingleInstancePayload: SingleInstancePayload | null
+}
+
+const OUTLINE_COLLAPSED_KEY = 'hmark-outline-collapsed'
+
+function readOutlineCollapsed(): boolean {
+  try {
+    return localStorage.getItem(OUTLINE_COLLAPSED_KEY) === 'true'
+  } catch {
+    return false
+  }
 }
 
 const fileFilters = [
@@ -53,9 +61,14 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const updateSettings = useSettingsStore((state) => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
-  const [outlineOpen, setOutlineOpen] = useState(false)
+  const [outlineCollapsed, setOutlineCollapsed] = useState(readOutlineCollapsed)
   const [helpOpen, setHelpOpen] = useState(false)
   const [targetLine, setTargetLine] = useState<number | undefined>(undefined)
+
+  // Persist outline collapsed state
+  useEffect(() => {
+    try { localStorage.setItem(OUTLINE_COLLAPSED_KEY, String(outlineCollapsed)) } catch { /* ignore */ }
+  }, [outlineCollapsed])
 
   const handleSave = useCallback(async (): Promise<boolean> => {
     if (!document) return true
@@ -132,6 +145,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [document?.dirty])
 
+  const showOutline = document !== null
+
   return (
     <div className="app-shell">
       <TitleBar document={document} />
@@ -147,16 +162,21 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onSearch={handleSearch}
         onToggleTheme={() => updateSettings({ themeMode: settings.themeMode === 'dark' ? 'light' : 'dark' })}
         onOpenSettings={() => setSettingsOpen(true)}
-        onToggleOutline={() => setOutlineOpen(!outlineOpen)}
+        onToggleOutline={() => setOutlineCollapsed(!outlineCollapsed)}
         onToggleHelp={() => setHelpOpen(!helpOpen)}
       />
 
       {error ? <ErrorState message={error} onDismiss={() => setError(null)} /> : null}
 
-      <div className="workspace">
-        <ErrorBoundary>
-          {loading ? <div className="loading-state">{t('editor.loading')}</div> : renderWorkspace()}
-        </ErrorBoundary>
+      <div className="workspace-container">
+        {showOutline && (
+          <OutlineSidebar collapsed={outlineCollapsed} onToggle={() => setOutlineCollapsed(!outlineCollapsed)} />
+        )}
+        <div className="workspace">
+          <ErrorBoundary>
+            {loading ? <div className="loading-state">{t('editor.loading')}</div> : renderWorkspace()}
+          </ErrorBoundary>
+        </div>
       </div>
 
       {settingsOpen ? (
@@ -167,11 +187,6 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       {diagnosticsOpen ? (
         <Suspense fallback={null}>
           <DiagnosticsPanel openPanel={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} initialArgs={initialArgs} lastSingleInstancePayload={lastSingleInstancePayload} document={document} settings={settings} />
-        </Suspense>
-      ) : null}
-      {outlineOpen ? (
-        <Suspense fallback={null}>
-          <OutlinePanel onClose={() => setOutlineOpen(false)} />
         </Suspense>
       ) : null}
       {helpOpen ? (
