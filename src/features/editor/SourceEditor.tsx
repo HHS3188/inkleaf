@@ -3,6 +3,7 @@ import { copyImageToAssets } from '../../lib/platform-api'
 import { EditorState } from '@codemirror/state'
 import {
   EditorView,
+  drawSelection,
   highlightActiveLine,
   highlightActiveLineGutter,
   keymap,
@@ -49,6 +50,7 @@ export function SourceEditor({
       extensions: [
         history(),
         lineNumbers(),
+        drawSelection(),
         highlightActiveLine(),
         highlightActiveLineGutter(),
         EditorView.lineWrapping,
@@ -72,10 +74,27 @@ export function SourceEditor({
             padding: '16px 20px',
             lineHeight: '1.65',
             cursor: 'text',
+            caretColor: 'var(--editor-caret)',
+            userSelect: 'text',
           },
-          '.cm-cursor, .cm-dropCursor': {
-            borderLeftColor: 'var(--text)',
+          '.cm-line': {
+            cursor: 'text',
+          },
+          '.cm-cursorLayer': {
+            zIndex: '3',
+            pointerEvents: 'none',
+          },
+          '&.cm-focused .cm-cursor': {
+            borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',
+            marginLeft: '-1px',
+          },
+          '&.cm-focused .cm-dropCursor': {
+            borderLeftColor: 'var(--editor-caret)',
+            borderLeftWidth: '2px',
+          },
+          '&:not(.cm-focused) .cm-cursor': {
+            borderLeftColor: 'transparent',
           },
           '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
             backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
@@ -202,7 +221,17 @@ export function SourceEditor({
     }
   }, [targetLine, onTargetLineHandled])
 
-  return <div className="source-editor" ref={hostRef} />
+  return (
+    <div
+      className="source-editor"
+      ref={hostRef}
+      onMouseDown={(event) => {
+        if (event.target === hostRef.current) {
+          viewRef.current?.focus()
+        }
+      }}
+    />
+  )
 }
 
 async function handleImageDrop(
