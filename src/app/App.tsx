@@ -4,7 +4,13 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import { useDocumentStore } from '../features/document/document-store'
 import { getFirstOpenableArg } from '../features/document/open-document'
 import { applyReaderSettings, useSettingsStore } from '../features/settings/settings-store'
-import { getInitialArgs, onFileOpen, type SingleInstancePayload } from '../lib/platform-api'
+import {
+  getInitialArgs,
+  isElectronRuntime,
+  notifyRendererReady,
+  onFileOpen,
+  type SingleInstancePayload,
+} from '../lib/platform-api'
 
 export function App() {
   const openDocument = useDocumentStore((state) => state.openDocument)
@@ -23,25 +29,23 @@ export function App() {
   }, [settings])
 
   useEffect(() => {
+    if (!isElectronRuntime()) return
     let active = true
 
     getInitialArgs()
       .then((args) => {
         if (!active) return
         setInitialArgs(args)
-        const filePath = getFirstOpenableArg(args)
-        if (filePath) {
-          void openDocument(filePath)
-        }
       })
       .catch(() => setInitialArgs([]))
 
     return () => {
       active = false
     }
-  }, [openDocument])
+  }, [])
 
   useEffect(() => {
+    if (!isElectronRuntime()) return
     return onFileOpen((payload) => {
       setLastSingleInstancePayload(payload)
       const filePath = getFirstOpenableArg(payload.args)
@@ -50,6 +54,11 @@ export function App() {
       }
     })
   }, [openDocument])
+
+  useEffect(() => {
+    if (!isElectronRuntime()) return
+    notifyRendererReady()
+  }, [])
 
   return (
     <ErrorBoundary>

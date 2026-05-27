@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // App operations
   getInitialArgs: () => ipcRenderer.invoke('get-initial-args'),
+  notifyRendererReady: () => ipcRenderer.send('renderer-ready'),
 
   // Single instance events
   onFileOpen: (callback) => {

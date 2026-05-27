@@ -23,6 +23,9 @@ export interface I18N {
   'toolbar.language.tooltip': string
   'toolbar.help': string
   'toolbar.help.tooltip': string
+  'toolbar.zoomOut.tooltip': string
+  'toolbar.zoomReset.tooltip': string
+  'toolbar.zoomIn.tooltip': string
 
   // ── TitleBar ───────────────────────────────────────────────
   'titlebar.noFile': string
@@ -103,6 +106,8 @@ export interface I18N {
   'help.tips': string
   'help.tip.outline': string
   'help.tip.save': string
+  'help.tip.search': string
+  'help.tip.splitDivider': string
   'help.tip.language': string
   'help.tip.theme': string
 

@@ -2,6 +2,8 @@ const { app, BrowserWindow, dialog, ipcMain, net, protocol, shell } = require('e
 const fs = require('fs/promises')
 const path = require('path')
 const crypto = require('crypto')
+const { fileURLToPath } = require('url')
+const { createOpenPayloadQueue } = require('./open-payload-queue.cjs')
 
 const isDev = !app.isPackaged
 
@@ -15,15 +17,51 @@ if (!gotLock) {
     if (win) {
       if (win.isMinimized()) win.restore()
       win.focus()
-      win.webContents.send('open-file-from-args', { args: argv, cwd })
+    }
+    if (hasOpenableArg(argv)) {
+      openPayloadQueue.queueOpenPayload({ args: argv, cwd })
     }
   })
 }
 
 let mainWindow = null
+const openPayloadQueue = createOpenPayloadQueue((payload) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('open-file-from-args', payload)
+  }
+})
 
 function getMainWindow() {
   return mainWindow
+}
+
+function hasOpenableArg(args) {
+  return args.some((arg, idx) => {
+    if (idx < (isDev ? 2 : 1)) return false
+    if (!arg || arg.startsWith('-') || arg.startsWith('--')) return false
+    return arg.length > 1
+  })
+}
+
+function isAllowedNavigation(rawUrl) {
+  let target
+  try {
+    target = new URL(rawUrl)
+  } catch {
+    return false
+  }
+
+  if (target.protocol === 'about:' || target.protocol === 'hmark:') return true
+
+  if (isDev) {
+    const allowedHosts = new Set(['127.0.0.1:1420', 'localhost:1420', '[::1]:1420'])
+    return target.protocol === 'http:' && allowedHosts.has(target.host)
+  }
+
+  if (target.protocol !== 'file:') return false
+  const loadedPath = path.normalize(fileURLToPath(target))
+  const appDistPath = path.normalize(path.join(__dirname, '..', 'dist'))
+  return loadedPath.startsWith(appDistPath)
 }
 
 // ── Custom protocol for local images ─────────────────────────────────
@@ -185,6 +223,11 @@ ipcMain.handle('get-initial-args', () => {
   return args
 })
 
+ipcMain.on('renderer-ready', (event) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return
+  openPayloadQueue.markRendererReady()
+})
+
 // ── IPC: Dialogs ─────────────────────────────────────────────────────
 
 ipcMain.handle('dialog:open-file', async (_event, options) => {
@@ -222,6 +265,11 @@ ipcMain.handle('shell:open-external', async (_event, url) => {
 // ── Window creation ──────────────────────────────────────────────────
 
 function createWindow() {
+  openPayloadQueue.markRendererUnavailable()
+  const appIconPath = isDev
+    ? path.join(__dirname, 'hmark-icon.ico')
+    : path.join(process.resourcesPath, 'icon.ico')
+
   mainWindow = new BrowserWindow({
     width: 1180,
     height: 780,
@@ -229,7 +277,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: '#101319',
     title: 'HMark',
-    icon: path.join(__dirname, 'hmark-icon.png'),
+    icon: appIconPath,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -252,7 +300,16 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'))
   }
 
+  mainWindow.webContents.on('will-navigate', (event, targetUrl) => {
+    if (!isAllowedNavigation(targetUrl)) {
+      event.preventDefault()
+    }
+  })
+
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+
   mainWindow.on('closed', () => {
+    openPayloadQueue.markRendererUnavailable()
     mainWindow = null
   })
 }
@@ -260,23 +317,11 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow()
 
-  // Auto-open file from CLI args
-  const openArg = process.argv.find(
-    (arg, idx) =>
-      idx >= (isDev ? 2 : 1) &&
-      !arg.startsWith('-') &&
-      !arg.startsWith('--') &&
-      arg.length > 1,
-  )
-  if (openArg) {
-    setTimeout(() => {
-      if (mainWindow) {
-        mainWindow.webContents.send('open-file-from-args', {
-          args: process.argv,
-          cwd: process.cwd(),
-        })
-      }
-    }, 500)
+  if (hasOpenableArg(process.argv)) {
+    openPayloadQueue.queueOpenPayload({
+      args: process.argv,
+      cwd: process.cwd(),
+    })
   }
 
   app.on('activate', () => {

@@ -23,6 +23,9 @@ export const zhCN: I18N = {
   'toolbar.language.tooltip': '切换语言',
   'toolbar.help': '帮助',
   'toolbar.help.tooltip': '查看帮助',
+  'toolbar.zoomOut.tooltip': '缩小',
+  'toolbar.zoomReset.tooltip': '重置缩放',
+  'toolbar.zoomIn.tooltip': '放大',
 
   // TitleBar
   'titlebar.noFile': '未打开文件',
@@ -101,8 +104,10 @@ export const zhCN: I18N = {
   'help.splitMode': '分屏模式',
   'help.splitMode.desc': '左侧编辑源码，右侧实时预览。',
   'help.tips': '实用技巧',
-  'help.tip.outline': '点击「大纲」按钮可展开文档目录，点击标题可跳转。',
+  'help.tip.outline': '大纲常驻左侧，可用 Ctrl+B 折叠；在阅读、源码、分屏模式点击标题都会跳转。',
   'help.tip.save': '编辑后按 Ctrl+S 保存，未保存的修改会在关闭前提示。',
+  'help.tip.search': '按 Ctrl+F 可在源码或分屏编辑区搜索。',
+  'help.tip.splitDivider': '分屏模式可拖拽中间分隔线，左侧编辑、右侧实时预览。',
   'help.tip.language': '在设置或工具栏可切换中/英文界面。',
   'help.tip.theme': '点击主题按钮可在明暗模式间切换。',
 

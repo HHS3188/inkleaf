@@ -7,9 +7,16 @@ import { extractOutline } from '../features/outline/extract-outline'
 type OutlineSidebarProps = {
   collapsed: boolean
   onToggle: () => void
+  onLineJump?: (line: number) => void
+  syncLineJumpOnDomHit?: boolean
 }
 
-export function OutlineSidebar({ collapsed, onToggle }: OutlineSidebarProps) {
+export function OutlineSidebar({
+  collapsed,
+  onToggle,
+  onLineJump,
+  syncLineJumpOnDomHit = false,
+}: OutlineSidebarProps) {
   const t = useT()
   const doc = useDocumentStore((state) => state.current)
   const items = useMemo(() => {
@@ -62,14 +69,19 @@ export function OutlineSidebar({ collapsed, onToggle }: OutlineSidebarProps) {
       ) : (
         <nav className="outline-nav" aria-label={t('outline.title')}>
           <ul className="outline-list">
-            {items.map((item) => (
-              <li key={item.slug} className={`outline-item outline-level-${item.level}`}>
+            {items.map((item, index) => (
+              <li key={`${item.slug}-${item.line}-${index}`} className={`outline-item outline-level-${item.level}`}>
                 <button
                   className="outline-link"
                   onClick={() => {
                     const el = document.getElementById(item.slug)
                     if (el) {
                       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      if (syncLineJumpOnDomHit) {
+                        onLineJump?.(item.line)
+                      }
+                    } else {
+                      onLineJump?.(item.line)
                     }
                   }}
                 >

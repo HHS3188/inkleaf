@@ -70,7 +70,7 @@ button:disabled {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto 1fr;
   width: 100%;
   height: 100%;
   min-width: 720px;
@@ -115,13 +115,62 @@ button:disabled {
 .toolbar {
   display: flex;
   flex-wrap: nowrap;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
-  height: 40px;
-  padding: 0 8px;
+  min-height: 44px;
+  padding: 0 10px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.compact-topbar {
+  scrollbar-width: thin;
+}
+
+.topbar-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  max-width: min(260px, 30vw);
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+.topbar-file {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.topbar-file strong,
+.topbar-file span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-file strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.topbar-file span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
+.toolbar-file-actions,
+.toolbar-modes {
+  flex-shrink: 0;
 }
 
 .toolbar-group {
@@ -741,11 +790,13 @@ button:disabled {
   height: 100%;
   min-height: 0;
   border: 1px solid transparent;
+  background: var(--editor-bg);
   transition: border-color 0.15s;
 }
 
 .source-editor:focus-within {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .split-editor {
@@ -756,6 +807,8 @@ button:disabled {
 }
 
 .split-pane {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -779,36 +832,39 @@ button:disabled {
 }
 
 .split-divider {
-  width: 4px;
+  position: relative;
+  width: 6px;
   flex-shrink: 0;
   cursor: col-resize;
+  background: var(--surface-subtle);
+  transition: background 0.15s;
+}
+
+.split-divider::after {
+  position: absolute;
+  inset: 0 2px;
+  content: "";
   background: var(--border);
-  transition: background 0.15s, width 0.15s;
+  transition: background 0.15s;
 }
 
 .split-divider:hover {
-  background: var(--accent);
-  width: 6px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-subtle));
 }
 
 .split-divider.dragging {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-subtle));
+}
+
+.split-divider:hover::after,
+.split-divider.dragging::after {
   background: var(--accent);
-  width: 6px;
 }
 
 .preview-pane {
   flex: 1;
   overflow: auto;
   background: var(--bg);
-}
-
-.split-divider:hover {
-  background: var(--accent);
-}
-
-.preview-pane {
-  flex: 1;
-  overflow: auto;
 }
 
 .resource-image-button {
@@ -1088,7 +1144,22 @@ button:disabled {
   }
 
   .toolbar {
-    grid-template-columns: 1fr;
+    padding: 0 6px;
+  }
+
+  .topbar-identity {
+    min-width: 104px;
+    max-width: 150px;
+  }
+
+  .tool-button,
+  .segmented-button {
+    padding: 0 7px;
+  }
+
+  .toolbar-file-actions .icon-button,
+  .toolbar-separator {
+    display: none;
   }
 
   .empty-state,

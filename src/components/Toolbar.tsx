@@ -52,11 +52,23 @@ export function Toolbar({
 }: ToolbarProps) {
   const t = useT()
   const { locale, setLocale } = useI18n()
+  const status = document
+    ? document.dirty
+      ? t('titlebar.unsaved')
+      : t('titlebar.saved')
+    : t('titlebar.noFile')
 
   return (
-    <div className="toolbar" role="toolbar">
-      {/* File group */}
-      <div className="toolbar-group">
+    <div className="toolbar compact-topbar" role="toolbar">
+      <div className="topbar-identity" title={document?.path ?? 'HMark'}>
+        <div className="brand-mark">H</div>
+        <div className="topbar-file">
+          <strong>{document?.fileName ?? 'HMark'}</strong>
+          <span>{status}</span>
+        </div>
+      </div>
+
+      <div className="toolbar-group toolbar-file-actions">
         <button type="button" className="tool-button" onClick={onOpen} title={t('toolbar.open.tooltip')}>
           <FolderOpen size={15} aria-hidden="true" />
           <span className="tool-button-label">{t('toolbar.open')}</span>
@@ -72,8 +84,7 @@ export function Toolbar({
 
       <span className="toolbar-separator" />
 
-      {/* Mode group */}
-      <div className="toolbar-group" aria-label="Mode">
+      <div className="toolbar-group toolbar-modes" aria-label="Mode">
         {([
           ['reader', PanelLeft, t('toolbar.reader')],
           ['source', PanelRight, t('toolbar.source')],
@@ -93,19 +104,8 @@ export function Toolbar({
         ))}
       </div>
 
-      {/* File info (fills remaining space) */}
-      <div className="toolbar-file">
-        {document ? (
-          <>
-            <strong>{document.fileName}</strong>
-            {document.dirty ? (
-              <span className="dirty-badge">{t('titlebar.unsaved')}</span>
-            ) : null}
-          </>
-        ) : null}
-      </div>
+      <div className="toolbar-spacer" />
 
-      {/* View group */}
       <div className="toolbar-group">
         <button type="button" className="icon-button" onClick={onToggleOutline} disabled={!document} title={t('toolbar.outline.tooltip')}>
           <BookOpen size={15} aria-hidden="true" />
@@ -114,13 +114,13 @@ export function Toolbar({
           <Search size={15} aria-hidden="true" />
         </button>
         <div className="toolbar-zoom">
-          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.max(70, zoom - 10))} title="−">
+          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.max(70, zoom - 10))} title={t('toolbar.zoomOut.tooltip')}>
             <Minus size={14} aria-hidden="true" />
           </button>
-          <button type="button" className="zoom-display" onClick={() => onZoomChange(100)}>
+          <button type="button" className="zoom-display" onClick={() => onZoomChange(100)} title={t('toolbar.zoomReset.tooltip')}>
             {zoom}%
           </button>
-          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.min(160, zoom + 10))} title="+">
+          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.min(160, zoom + 10))} title={t('toolbar.zoomIn.tooltip')}>
             <Plus size={14} aria-hidden="true" />
           </button>
         </div>
@@ -128,7 +128,6 @@ export function Toolbar({
 
       <span className="toolbar-separator" />
 
-      {/* Settings group */}
       <div className="toolbar-group">
         <button type="button" className="icon-button" onClick={onToggleTheme} title={t('toolbar.theme.tooltip')}>
           <SunMoon size={15} aria-hidden="true" />

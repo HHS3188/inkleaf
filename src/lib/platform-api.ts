@@ -55,6 +55,7 @@ declare global {
         kind?: string
       }) => Promise<void>
       getInitialArgs: () => Promise<string[]>
+      notifyRendererReady: () => void
       onFileOpen: (cb: (p: SingleInstancePayload) => void) => () => void
     }
   }
@@ -122,6 +123,10 @@ export async function showItemInFolder(p: string): Promise<void> {
 
 export async function getInitialArgs(): Promise<string[]> {
   return api().getInitialArgs()
+}
+
+export function notifyRendererReady(): void {
+  return api().notifyRendererReady()
 }
 
 export function onFileOpen(

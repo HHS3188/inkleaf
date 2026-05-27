@@ -23,6 +23,9 @@ export const enUS: I18N = {
   'toolbar.language.tooltip': 'Switch language',
   'toolbar.help': 'Help',
   'toolbar.help.tooltip': 'View help',
+  'toolbar.zoomOut.tooltip': 'Zoom out',
+  'toolbar.zoomReset.tooltip': 'Reset zoom',
+  'toolbar.zoomIn.tooltip': 'Zoom in',
 
   // TitleBar
   'titlebar.noFile': 'No file open',
@@ -101,8 +104,10 @@ export const enUS: I18N = {
   'help.splitMode': 'Split',
   'help.splitMode.desc': 'Edit on the left, preview on the right, in real time.',
   'help.tips': 'Tips',
-  'help.tip.outline': 'Click "Outline" to expand the document table of contents and jump to headings.',
+  'help.tip.outline': 'Outline stays on the left, can be folded with Ctrl+B, and jumps in Reader, Source, and Split modes.',
   'help.tip.save': 'Press Ctrl+S to save. Unsaved changes are prompted before closing.',
+  'help.tip.search': 'Press Ctrl+F to search in Source or Split editing surfaces.',
+  'help.tip.splitDivider': 'In Split mode, drag the divider to resize source and live preview panes.',
   'help.tip.language': 'Switch language in settings or via the toolbar toggle.',
   'help.tip.theme': 'Click the theme button to toggle light/dark mode.',
 

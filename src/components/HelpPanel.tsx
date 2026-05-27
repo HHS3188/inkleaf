@@ -59,6 +59,8 @@ export function HelpPanel({ onClose }: HelpPanelProps) {
           <ul className="help-tips-list">
             <li>{t('help.tip.outline')}</li>
             <li>{t('help.tip.save')}</li>
+            <li>{t('help.tip.search')}</li>
+            <li>{t('help.tip.splitDivider')}</li>
             <li>{t('help.tip.language')}</li>
             <li>{t('help.tip.theme')}</li>
           </ul>

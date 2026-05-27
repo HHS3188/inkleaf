@@ -1,7 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { copyImageToAssets } from '../../lib/platform-api'
 import { EditorState } from '@codemirror/state'
-import { EditorView, keymap } from '@codemirror/view'
+import {
+  EditorView,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  keymap,
+  lineNumbers,
+} from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
 import { highlightSelectionMatches, openSearchPanel, searchKeymap } from '@codemirror/search'
@@ -42,6 +48,9 @@ export function SourceEditor({
       doc: contentRef.current,
       extensions: [
         history(),
+        lineNumbers(),
+        highlightActiveLine(),
+        highlightActiveLineGutter(),
         EditorView.lineWrapping,
         markdown(),
         highlightSelectionMatches(),
@@ -93,11 +102,40 @@ export function SourceEditor({
             color: 'var(--text)',
             borderColor: 'var(--border)',
           },
+          '.cm-panel.cm-search': {
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            alignItems: 'center',
+            padding: '8px 10px',
+            backgroundColor: 'var(--surface)',
+            color: 'var(--text)',
+            borderColor: 'var(--border)',
+          },
+          '.cm-panel.cm-search input': {
+            minHeight: '26px',
+            border: '1px solid var(--border)',
+            borderRadius: '5px',
+            padding: '2px 7px',
+            backgroundColor: 'var(--editor-bg)',
+            color: 'var(--text)',
+          },
+          '.cm-panel.cm-search button': {
+            minHeight: '26px',
+            border: '1px solid var(--border)',
+            borderRadius: '5px',
+            padding: '2px 8px',
+            backgroundColor: 'var(--surface-subtle)',
+            color: 'var(--text)',
+          },
+          '.cm-panel.cm-search label': {
+            color: 'var(--muted)',
+            fontSize: '12px',
+          },
           '&.cm-focused': {
             outline: 'none',
           },
         }),
-        EditorView.lineWrapping,
       ],
     })
 
@@ -180,7 +218,7 @@ async function handleImageDrop(
 
   const filePath = findDroppedImagePath(files)
   if (!filePath) {
-    setError('没有可用的本地图片路径；请在 Tauri 桌面运行时拖入图片。')
+    setError('没有可用的本地图片路径；请在 Electron 桌面运行时拖入图片。')
     return
   }
 

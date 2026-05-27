@@ -27,10 +27,15 @@
       "dist/**/*",
       "electron/**/*"
     ],
-    "extraResources": [],
+    "extraResources": [
+      {
+        "from": "electron/hmark-icon.ico",
+        "to": "icon.ico"
+      }
+    ],
     "win": {
       "target": ["nsis", "msi", "portable"],
-      "icon": "electron/hmark-icon.png"
+      "icon": "electron/hmark-icon.ico"
     },
     "nsis": {
       "oneClick": false,

@@ -8,7 +8,6 @@ import { useSettingsStore } from '../features/settings/settings-store'
 import { ErrorBoundary } from './ErrorBoundary'
 import { ErrorState } from './ErrorState'
 import { EmptyState } from './EmptyState'
-import { TitleBar } from './TitleBar'
 import { Toolbar } from './Toolbar'
 import { ReaderView } from '../features/reader/ReaderView'
 import { SourceEditor } from '../features/editor/SourceEditor'
@@ -118,6 +117,16 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     requestSearch()
   }, [document, mode, requestSearch, setMode])
 
+  const handleOutlineLineJump = useCallback(
+    (line: number) => {
+      if (!document) return
+      setTargetLine(line)
+      if (mode === 'source' || mode === 'split') return
+      setMode('source')
+    },
+    [document, mode, setMode],
+  )
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!event.ctrlKey || event.altKey || event.metaKey) return
@@ -149,7 +158,6 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
 
   return (
     <div className="app-shell">
-      <TitleBar document={document} />
       <Toolbar
         document={document}
         mode={mode}
@@ -170,7 +178,12 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
 
       <div className="workspace-container">
         {showOutline && (
-          <OutlineSidebar collapsed={outlineCollapsed} onToggle={() => setOutlineCollapsed(!outlineCollapsed)} />
+          <OutlineSidebar
+            collapsed={outlineCollapsed}
+            onToggle={() => setOutlineCollapsed(!outlineCollapsed)}
+            onLineJump={handleOutlineLineJump}
+            syncLineJumpOnDomHit={mode === 'split'}
+          />
         )}
         <div className="workspace">
           <ErrorBoundary>
@@ -212,7 +225,15 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     }
 
     if (mode === 'split') {
-      return <SplitEditor document={document} settings={settings} onEditRequest={handleEditRequest} />
+      return (
+        <SplitEditor
+          document={document}
+          settings={settings}
+          onEditRequest={handleEditRequest}
+          targetLine={targetLine}
+          onTargetLineHandled={() => setTargetLine(undefined)}
+        />
+      )
     }
 
     return <ReaderView document={document} settings={settings} onEditRequest={handleEditRequest} />
