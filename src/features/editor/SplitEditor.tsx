@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { useT } from '../../i18n'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -12,11 +13,9 @@ function readSplitRatio(): number {
     const v = localStorage.getItem(SPLIT_RATIO_KEY)
     if (v) {
       const n = parseFloat(v)
-      if (n >= 0.2 && n <= 0.8) return n
+      if (n >= 0.3 && n <= 0.7) return n
     }
-  } catch {
-    // ignore
-  }
+  } catch { /* ignore */ }
   return 0.5
 }
 
@@ -27,13 +26,14 @@ type SplitEditorProps = {
 }
 
 export function SplitEditor({ document, settings, onEditRequest }: SplitEditorProps) {
+  const t = useT()
   const [ratio, setRatio] = useState(readSplitRatio)
+  const [dragging, setDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const draggingRef = useRef(false)
 
   const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
-    draggingRef.current = true
+    setDragging(true)
     const body = globalThis.document.body
     body.style.cursor = 'col-resize'
     body.style.userSelect = 'none'
@@ -43,12 +43,12 @@ export function SplitEditor({ document, settings, onEditRequest }: SplitEditorPr
       if (!container) return
       const rect = container.getBoundingClientRect()
       const x = me.clientX - rect.left
-      const newRatio = Math.min(0.8, Math.max(0.2, x / rect.width))
+      const newRatio = Math.min(0.7, Math.max(0.3, x / rect.width))
       setRatio(newRatio)
     }
 
     const handleMouseUp = () => {
-      draggingRef.current = false
+      setDragging(false)
       body.style.cursor = ''
       body.style.userSelect = ''
       window.removeEventListener('mousemove', handleMouseMove)
@@ -64,16 +64,24 @@ export function SplitEditor({ document, settings, onEditRequest }: SplitEditorPr
     <ErrorBoundary compact>
       <div className="split-editor" ref={containerRef}>
         <section className="split-pane source-pane" style={{ flex: `0 0 ${ratio * 100}%` }} aria-label="Source">
-          <SourceEditor documentPath={document.path} content={document.content} />
+          <div className="split-pane-label">
+            <span>{t('toolbar.source')}</span>
+          </div>
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <SourceEditor documentPath={document.path} content={document.content} />
+          </div>
         </section>
         <div
-          className="split-divider"
+          className={`split-divider${dragging ? ' dragging' : ''}`}
           onMouseDown={handleDividerMouseDown}
           role="separator"
           aria-orientation="vertical"
           tabIndex={0}
         />
         <section className="split-pane preview-pane" aria-label="Preview">
+          <div className="split-pane-label">
+            <span>{t('toolbar.reader')}</span>
+          </div>
           <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} />
         </section>
       </div>

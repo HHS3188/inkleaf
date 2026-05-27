@@ -60,25 +60,44 @@ export function SourceEditor({
           },
           '.cm-content': {
             fontFamily: 'var(--mono-font)',
-            padding: '18px 22px',
+            padding: '16px 20px',
+            lineHeight: '1.65',
+            cursor: 'text',
+          },
+          '.cm-cursor, .cm-dropCursor': {
+            borderLeftColor: 'var(--text)',
+            borderLeftWidth: '2px',
+          },
+          '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+            backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
           },
           '.cm-gutters': {
             backgroundColor: 'var(--editor-gutter)',
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
+            fontSize: '12px',
           },
-          '.cm-activeLineGutter, .cm-activeLine': {
+          '.cm-activeLineGutter': {
+            backgroundColor: 'var(--editor-active-line)',
+            color: 'var(--text)',
+          },
+          '.cm-activeLine': {
             backgroundColor: 'var(--editor-active-line)',
           },
           '.cm-scroller': {
             fontFamily: 'var(--mono-font)',
+            cursor: 'text',
           },
           '.cm-panels': {
             backgroundColor: 'var(--surface)',
             color: 'var(--text)',
             borderColor: 'var(--border)',
           },
+          '&.cm-focused': {
+            outline: 'none',
+          },
         }),
+        EditorView.lineWrapping,
       ],
     })
 
