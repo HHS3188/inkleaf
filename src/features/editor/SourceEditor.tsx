@@ -238,7 +238,7 @@ export function SourceEditor({
             borderLeftColor: 'transparent',
           },
           '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-            backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
+            backgroundColor: 'var(--selection)',
           },
           '.cm-gutters': {
             backgroundColor: 'var(--editor-gutter)',

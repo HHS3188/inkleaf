@@ -444,7 +444,7 @@ function createWindow() {
     height: 780,
     minWidth: 880,
     minHeight: 600,
-    backgroundColor: '#101319',
+    backgroundColor: '#202020',
     title: 'HMark',
     icon: appIconPath,
     webPreferences: {
