@@ -10,3 +10,4 @@ src-tauri/gen/
 .DS_Store
 .vscode
 mitm_mcp_traffic.db
+pnpm-workspace.yaml
