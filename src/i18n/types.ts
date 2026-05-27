@@ -1,11 +1,22 @@
 export type Locale = 'zh-CN' | 'en-US'
 
 export interface I18N {
-  // ── Toolbar ────────────────────────────────────────────────
+  'app.name': string
+  'app.brand': string
+  'app.description': string
+  'app.aboutTitle': string
+  'app.aboutBody': string
+
+  'toolbar.newMarkdown': string
+  'toolbar.newMarkdown.tooltip': string
+  'toolbar.newTxt': string
+  'toolbar.newTxt.tooltip': string
   'toolbar.open': string
   'toolbar.open.tooltip': string
   'toolbar.save': string
   'toolbar.save.tooltip': string
+  'toolbar.saveAs': string
+  'toolbar.saveAs.tooltip': string
   'toolbar.close': string
   'toolbar.close.tooltip': string
   'toolbar.reader': string
@@ -27,26 +38,79 @@ export interface I18N {
   'toolbar.zoomReset.tooltip': string
   'toolbar.zoomIn.tooltip': string
 
-  // ── TitleBar ───────────────────────────────────────────────
+  'menu.file': string
+  'menu.newMarkdown': string
+  'menu.newTxt': string
+  'menu.open': string
+  'menu.openRecent': string
+  'menu.noRecent': string
+  'menu.save': string
+  'menu.saveAs': string
+  'menu.closeFile': string
+  'menu.exit': string
+  'menu.edit': string
+  'menu.undo': string
+  'menu.redo': string
+  'menu.cut': string
+  'menu.copy': string
+  'menu.paste': string
+  'menu.selectAll': string
+  'menu.find': string
+  'menu.view': string
+  'menu.readerMode': string
+  'menu.sourceMode': string
+  'menu.splitMode': string
+  'menu.toggleOutline': string
+  'menu.zoomIn': string
+  'menu.zoomOut': string
+  'menu.actualSize': string
+  'menu.theme': string
+  'menu.themeSystem': string
+  'menu.themeLight': string
+  'menu.themeDark': string
+  'menu.help': string
+  'menu.guide': string
+  'menu.shortcuts': string
+  'menu.about': string
+
   'titlebar.noFile': string
   'titlebar.saved': string
   'titlebar.unsaved': string
+  'titlebar.untitled': string
 
-  // ── Empty State / Welcome ──────────────────────────────────
   'empty.welcome': string
   'empty.subtitle': string
   'empty.openFile': string
+  'empty.newMarkdown': string
+  'empty.newTxt': string
+  'empty.settings': string
+  'empty.help': string
   'empty.recentFiles': string
   'empty.noRecent': string
+  'empty.noRecent.desc': string
   'empty.sampleFile': string
   'empty.shortcuts': string
   'empty.shortcuts.desc': string
+  'empty.recentType.markdown': string
+  'empty.recentType.txt': string
+  'empty.recentType.html': string
+  'empty.recentType.unknown': string
+  'empty.removeRecent': string
 
-  // ── Outline ────────────────────────────────────────────────
+  'unsaved.title': string
+  'unsaved.message': string
+  'unsaved.save': string
+  'unsaved.dontSave': string
+  'unsaved.cancel': string
+
+  'document.newMarkdownName': string
+  'document.newMarkdownContent': string
+  'document.newTxtName': string
+  'document.newTxtContent': string
+
   'outline.title': string
   'outline.empty': string
 
-  // ── Settings ───────────────────────────────────────────────
   'settings.title': string
   'settings.close': string
   'settings.themeMode': string
@@ -63,17 +127,14 @@ export interface I18N {
   'settings.clearRecent': string
   'settings.locale': string
 
-  // ── Error States ───────────────────────────────────────────
   'error.loadFailed': string
   'error.loadFailed.detail': string
   'error.dismiss': string
 
-  // ── Editor (Source) ────────────────────────────────────────
   'editor.dragDropNoDoc': string
   'editor.dragDropNoPath': string
   'editor.loading': string
 
-  // ── Find ───────────────────────────────────────────────────
   'find.title': string
   'find.placeholder': string
   'find.previous': string
@@ -85,18 +146,15 @@ export interface I18N {
   'find.scopeSource': string
   'find.scopePreview': string
 
-  // ── Image Preview ──────────────────────────────────────────
   'image.preview': string
   'image.copyPath': string
   'image.openFolder': string
 
-  // ── Missing Image ──────────────────────────────────────────
   'image.blocked': string
   'image.notFound': string
   'image.retry': string
   'image.localNotExists': string
 
-  // ── Diagnostic ─────────────────────────────────────────────
   'diag.title': string
   'diag.close': string
   'diag.initialArgs': string
@@ -105,7 +163,6 @@ export interface I18N {
   'diag.windowsIntegration': string
   'diag.settings': string
 
-  // ── Help Panel ─────────────────────────────────────────────
   'help.title': string
   'help.shortcuts': string
   'help.modes': string
@@ -123,21 +180,25 @@ export interface I18N {
   'help.tip.language': string
   'help.tip.theme': string
 
-  // ── Generic ────────────────────────────────────────────────
   'generic.close': string
   'generic.cancel': string
   'generic.confirm': string
+  'generic.save': string
+  'generic.remove': string
   'generic.dirtySave': string
   'generic.discardAndContinue': string
 
-  // ── Keyboard shortcut labels ───────────────────────────────
+  'key.newMarkdown': string
+  'key.newTxt': string
   'key.open': string
   'key.save': string
+  'key.saveAs': string
+  'key.closeFile': string
   'key.search': string
   'key.reader': string
   'key.source': string
   'key.split': string
+  'key.outline': string
 
-  // ── Large file warning ─────────────────────────────────────
   'largeFile.warning': string
 }

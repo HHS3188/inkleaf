@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="InkLeaf icon">
+  <defs>
+    <linearGradient id="bg" x1="96" y1="70" x2="430" y2="454" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#343944"/>
+      <stop offset="1" stop-color="#15171d"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="178" y1="120" x2="344" y2="390" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dce6f4"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="292" y1="232" x2="388" y2="362" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#70c7ff"/>
+      <stop offset="1" stop-color="#2f79ff"/>
+    </linearGradient>
+    <filter id="shadow" x="80" y="80" width="360" height="360" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity=".32"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="44" y="44" width="424" height="424" rx="92" fill="none" stroke="#4a5364" stroke-width="10" opacity=".7"/>
+  <g filter="url(#shadow)">
+    <path d="M164 112h136l72 72v216H164z" fill="url(#paper)"/>
+    <path d="M300 112v72h72z" fill="#b8c7dc"/>
+    <rect x="196" y="206" width="112" height="12" rx="6" fill="#8190a5" opacity=".9"/>
+    <rect x="196" y="246" width="76" height="12" rx="6" fill="#9aa8b9" opacity=".78"/>
+    <rect x="196" y="286" width="88" height="12" rx="6" fill="#9aa8b9" opacity=".7"/>
+    <rect x="198" y="328" width="8" height="44" rx="4" fill="#20242c"/>
+    <path d="M314 278c50-22 88 8 74 54-13 43-68 61-106 31 35-7 58-30 66-65-21 34-48 51-85 55 3-34 20-60 51-75z" fill="url(#leaf)"/>
+    <path d="M286 380c31-8 61-28 89-68" fill="none" stroke="#dff4ff" stroke-width="9" stroke-linecap="round" opacity=".86"/>
+  </g>
+</svg>

@@ -26,6 +26,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getInitialArgs: () => ipcRenderer.invoke('get-initial-args'),
   notifyRendererReady: () => ipcRenderer.send('renderer-ready'),
   setAppLocale: (locale) => ipcRenderer.send('app:set-locale', locale),
+  requestAppClose: () => ipcRenderer.send('app:request-close'),
+  respondToCloseRequest: (shouldClose) =>
+    ipcRenderer.send('app:close-response', Boolean(shouldClose)),
 
   // Single instance events
   onFileOpen: (callback) => {
@@ -37,5 +40,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (_event, command) => callback(command)
     ipcRenderer.on('menu-command', handler)
     return () => ipcRenderer.removeListener('menu-command', handler)
+  },
+  onBeforeClose: (callback) => {
+    const handler = () => callback()
+    ipcRenderer.on('app:before-close', handler)
+    return () => ipcRenderer.removeListener('app:before-close', handler)
   },
 })

@@ -25,7 +25,28 @@ export type SingleInstancePayload = {
   cwd: string
 }
 
-export type MenuCommand = 'open' | 'save' | 'close-document' | 'find' | 'settings'
+export type MenuCommand =
+  | 'new-markdown'
+  | 'new-txt'
+  | 'open'
+  | 'save'
+  | 'save-as'
+  | 'close-document'
+  | 'quit'
+  | 'find'
+  | 'mode-reader'
+  | 'mode-source'
+  | 'mode-split'
+  | 'toggle-outline'
+  | 'zoom-in'
+  | 'zoom-out'
+  | 'zoom-reset'
+  | 'theme-system'
+  | 'theme-light'
+  | 'theme-dark'
+  | 'settings'
+  | 'help'
+  | 'about'
 
 export interface DialogFilter {
   name: string
@@ -59,8 +80,11 @@ declare global {
       getInitialArgs: () => Promise<string[]>
       notifyRendererReady: () => void
       setAppLocale: (locale: string) => void
+      requestAppClose: () => void
+      respondToCloseRequest: (shouldClose: boolean) => void
       onFileOpen: (cb: (p: SingleInstancePayload) => void) => () => void
       onMenuCommand: (cb: (command: MenuCommand) => void) => () => void
+      onBeforeClose: (cb: () => void) => () => void
     }
   }
 }
@@ -137,6 +161,14 @@ export function setAppLocale(locale: string): void {
   return api().setAppLocale(locale)
 }
 
+export function requestAppClose(): void {
+  return api().requestAppClose()
+}
+
+export function respondToCloseRequest(shouldClose: boolean): void {
+  return api().respondToCloseRequest(shouldClose)
+}
+
 export function onFileOpen(
   cb: (payload: SingleInstancePayload) => void,
 ): () => void {
@@ -147,6 +179,10 @@ export function onMenuCommand(cb: (command: MenuCommand) => void): () => void {
   return api().onMenuCommand(cb)
 }
 
+export function onBeforeClose(cb: () => void): () => void {
+  return api().onBeforeClose(cb)
+}
+
 export function fileToAssetUrl(p: string): string {
-  return 'hmark:///' + p.replace(/\\/g, '/')
+  return 'inkleaf:///' + p.replace(/\\/g, '/')
 }

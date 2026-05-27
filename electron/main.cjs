@@ -6,6 +6,7 @@ const { fileURLToPath } = require('url')
 const { createOpenPayloadQueue } = require('./open-payload-queue.cjs')
 
 const isDev = !app.isPackaged
+app.setName('InkLeaf')
 
 // ── Single instance lock ────────────────────────────────────────────
 const gotLock = app.requestSingleInstanceLock()
@@ -25,6 +26,7 @@ if (!gotLock) {
 }
 
 let mainWindow = null
+let assetProtocolRegistered = false
 const openPayloadQueue = createOpenPayloadQueue((payload) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('open-file-from-args', payload)
@@ -60,8 +62,8 @@ const menuCopy = {
     closeWindow: '关闭窗口',
     help: '帮助',
     settings: '设置',
-    about: '关于 HMark',
-    aboutMessage: 'HMark 本地 Markdown / TXT / HTML 阅读编辑器',
+    about: '关于 墨笺',
+    aboutMessage: '墨笺 InkLeaf 本地 Markdown / TXT / HTML 阅读编辑器',
   },
   'en-US': {
     file: 'File',
@@ -89,8 +91,8 @@ const menuCopy = {
     closeWindow: 'Close Window',
     help: 'Help',
     settings: 'Settings',
-    about: 'About HMark',
-    aboutMessage: 'HMark local Markdown / TXT / HTML reader and editor',
+    about: 'About InkLeaf',
+    aboutMessage: 'InkLeaf local Markdown / TXT / HTML reader and editor',
   },
 }
 
@@ -111,92 +113,7 @@ function sendMenuCommand(command) {
 
 function buildApplicationMenu(locale = menuLocale) {
   menuLocale = normalizeMenuLocale(locale)
-  const label = menuCopy[menuLocale]
-  const template = [
-    {
-      label: label.file,
-      submenu: [
-        {
-          label: label.open,
-          accelerator: 'CmdOrCtrl+O',
-          click: () => sendMenuCommand('open'),
-        },
-        {
-          label: label.save,
-          accelerator: 'CmdOrCtrl+S',
-          click: () => sendMenuCommand('save'),
-        },
-        {
-          label: label.closeDocument,
-          accelerator: 'CmdOrCtrl+W',
-          click: () => sendMenuCommand('close-document'),
-        },
-        { type: 'separator' },
-        { role: 'quit', label: label.quit },
-      ],
-    },
-    {
-      label: label.edit,
-      submenu: [
-        { role: 'undo', label: label.undo },
-        { role: 'redo', label: label.redo },
-        { type: 'separator' },
-        { role: 'cut', label: label.cut },
-        { role: 'copy', label: label.copy },
-        { role: 'paste', label: label.paste },
-        { role: 'selectAll', label: label.selectAll },
-        { type: 'separator' },
-        {
-          label: label.find,
-          accelerator: 'CmdOrCtrl+F',
-          click: () => sendMenuCommand('find'),
-        },
-      ],
-    },
-    {
-      label: label.view,
-      submenu: [
-        { role: 'reload', label: label.reload },
-        { role: 'forceReload', label: label.forceReload },
-        { role: 'toggleDevTools', label: label.toggleDevTools },
-        { type: 'separator' },
-        { role: 'resetZoom', label: label.resetZoom },
-        { role: 'zoomIn', label: label.zoomIn },
-        { role: 'zoomOut', label: label.zoomOut },
-      ],
-    },
-    {
-      label: label.window,
-      submenu: [
-        { role: 'minimize', label: label.minimize },
-        { role: 'close', label: label.closeWindow },
-      ],
-    },
-    {
-      label: label.help,
-      submenu: [
-        {
-          label: label.settings,
-          click: () => sendMenuCommand('settings'),
-        },
-        {
-          label: label.about,
-          click: () => {
-            const win = getMainWindow()
-            const options = {
-              type: 'info',
-              title: label.about,
-              message: label.aboutMessage,
-            }
-            if (win) dialog.showMessageBox(win, options)
-            else dialog.showMessageBox(options)
-          },
-        },
-      ],
-    },
-  ]
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+  Menu.setApplicationMenu(null)
 }
 
 function hasOpenableArg(args) {
@@ -215,7 +132,7 @@ function isAllowedNavigation(rawUrl) {
     return false
   }
 
-  if (target.protocol === 'about:' || target.protocol === 'hmark:') return true
+  if (target.protocol === 'about:' || target.protocol === 'inkleaf:' || target.protocol === 'hmark:') return true
 
   if (isDev) {
     const allowedHosts = new Set(['127.0.0.1:1420', 'localhost:1420', '[::1]:1420'])
@@ -231,12 +148,12 @@ function isAllowedNavigation(rawUrl) {
 // ── Custom protocol for local images ─────────────────────────────────
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient('hmark', process.execPath, [
+    app.setAsDefaultProtocolClient('inkleaf', process.execPath, [
       path.resolve(process.argv[1]),
     ])
   }
 } else {
-  app.setAsDefaultProtocolClient('hmark')
+  app.setAsDefaultProtocolClient('inkleaf')
 }
 
 // ── IPC: File operations ─────────────────────────────────────────────
@@ -397,6 +314,20 @@ ipcMain.on('app:set-locale', (event, locale) => {
   buildApplicationMenu(locale)
 })
 
+let closeAfterRendererApproval = false
+
+ipcMain.on('app:request-close', (event) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return
+  mainWindow.close()
+})
+
+ipcMain.on('app:close-response', (event, shouldClose) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return
+  if (!shouldClose) return
+  closeAfterRendererApproval = true
+  mainWindow.close()
+})
+
 // ── IPC: Dialogs ─────────────────────────────────────────────────────
 
 ipcMain.handle('dialog:open-file', async (_event, options) => {
@@ -436,7 +367,7 @@ ipcMain.handle('shell:open-external', async (_event, url) => {
 function createWindow() {
   openPayloadQueue.markRendererUnavailable()
   const appIconPath = isDev
-    ? path.join(__dirname, 'hmark-icon.ico')
+    ? path.join(__dirname, 'inkleaf-icon.ico')
     : path.join(process.resourcesPath, 'icon.ico')
 
   mainWindow = new BrowserWindow({
@@ -445,7 +376,7 @@ function createWindow() {
     minWidth: 880,
     minHeight: 600,
     backgroundColor: '#202020',
-    title: 'HMark',
+    title: 'InkLeaf',
     icon: appIconPath,
     webPreferences: {
       contextIsolation: true,
@@ -455,11 +386,14 @@ function createWindow() {
     },
   })
 
-  // Custom protocol for local image serving (hmark:///path)
-  protocol.handle('hmark', (request) => {
-    const filePath = request.url.replace('hmark:///', '')
-    return net.fetch('file:///' + filePath)
-  })
+  if (!assetProtocolRegistered) {
+    assetProtocolRegistered = true
+    // Custom protocol for local image serving (inkleaf:///path)
+    protocol.handle('inkleaf', (request) => {
+      const filePath = request.url.replace('inkleaf:///', '')
+      return net.fetch('file:///' + filePath)
+    })
+  }
 
   if (isDev) {
     mainWindow.loadURL('http://127.0.0.1:1420')
@@ -477,8 +411,16 @@ function createWindow() {
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
+  mainWindow.on('close', (event) => {
+    if (closeAfterRendererApproval) return
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return
+    event.preventDefault()
+    mainWindow.webContents.send('app:before-close')
+  })
+
   mainWindow.on('closed', () => {
     openPayloadQueue.markRendererUnavailable()
+    closeAfterRendererApproval = false
     mainWindow = null
   })
 }

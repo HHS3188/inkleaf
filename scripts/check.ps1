@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot
 
-Write-Host "=== HMark Check ===" -ForegroundColor Cyan
+Write-Host "=== InkLeaf Check ===" -ForegroundColor Cyan
 
 Write-Host "`n--- typecheck ---" -ForegroundColor Cyan
 pnpm typecheck

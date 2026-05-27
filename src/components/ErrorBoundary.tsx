@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('HMark render error', error, info.componentStack)
+    console.error('InkLeaf render error', error, info.componentStack)
   }
 
   render(): ReactNode {

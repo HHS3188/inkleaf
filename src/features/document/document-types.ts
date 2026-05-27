@@ -1,7 +1,7 @@
 export type SupportedFileType = 'markdown' | 'txt' | 'html' | 'unknown'
 
 export type CurrentDocument = {
-  path: string
+  path: string | null
   fileName: string
   fileType: SupportedFileType
   content: string

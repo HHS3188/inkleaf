@@ -17,7 +17,7 @@ describe('SourceEditor find UI', () => {
     localStorage.setItem('hmark-locale', 'zh-CN')
   })
 
-  it('uses the HMark find bar instead of the default CodeMirror search panel', async () => {
+  it('uses the InkLeaf find bar instead of the default CodeMirror search panel', async () => {
     render(
       <I18nProvider>
         <SourceEditor

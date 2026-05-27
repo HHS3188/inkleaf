@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot
 
-Write-Host "=== HMark Electron Build ===" -ForegroundColor Cyan
+Write-Host "=== InkLeaf Electron Build ===" -ForegroundColor Cyan
 
 pnpm build
 if ($LASTEXITCODE -ne 0) { throw "Build failed" }

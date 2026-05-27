@@ -1,6 +1,8 @@
 {
-  "name": "hmark",
+  "name": "inkleaf",
   "version": "0.1.0",
+  "description": "InkLeaf / 墨笺 — A clean local reader and editor for Markdown, TXT, and HTML.",
+  "author": "InkLeaf",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -18,8 +20,8 @@
     "vite:build": "vite build"
   },
   "build": {
-    "appId": "dev.hmark.reader",
-    "productName": "HMark",
+    "appId": "dev.inkleaf.editor",
+    "productName": "InkLeaf",
     "directories": {
       "output": "release"
     },
@@ -29,13 +31,13 @@
     ],
     "extraResources": [
       {
-        "from": "electron/hmark-icon.ico",
+        "from": "electron/inkleaf-icon.ico",
         "to": "icon.ico"
       }
     ],
     "win": {
       "target": ["nsis", "msi", "portable"],
-      "icon": "electron/hmark-icon.ico"
+      "icon": "electron/inkleaf-icon.ico"
     },
     "nsis": {
       "oneClick": false,

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AppShell } from '../components/AppShell'
 import { ErrorBoundary } from '../components/ErrorBoundary'
-import { useDocumentStore } from '../features/document/document-store'
-import { getFirstOpenableArg } from '../features/document/open-document'
 import { applyReaderSettings, useSettingsStore } from '../features/settings/settings-store'
 import {
   getInitialArgs,
@@ -13,7 +11,6 @@ import {
 } from '../lib/platform-api'
 
 export function App() {
-  const openDocument = useDocumentStore((state) => state.openDocument)
   const settings = useSettingsStore((state) => state.settings)
   const hydrateSettings = useSettingsStore((state) => state.hydrate)
   const [initialArgs, setInitialArgs] = useState<string[]>([])
@@ -48,12 +45,8 @@ export function App() {
     if (!isElectronRuntime()) return
     return onFileOpen((payload) => {
       setLastSingleInstancePayload(payload)
-      const filePath = getFirstOpenableArg(payload.args)
-      if (filePath) {
-        void openDocument(filePath)
-      }
     })
-  }, [openDocument])
+  }, [])
 
   useEffect(() => {
     if (!isElectronRuntime()) return

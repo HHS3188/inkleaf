@@ -284,7 +284,10 @@ export function SourceEditor({
     const handleDrop = (event: DragEvent) => {
       if (!event.dataTransfer?.files.length) return
       event.preventDefault()
-      void handleImageDrop(event.dataTransfer.files, documentPath, view, setError)
+      void handleImageDrop(event.dataTransfer.files, documentPath, view, setError, {
+        noDocumentPath: t('editor.dragDropNoDoc'),
+        noImagePath: t('editor.dragDropNoPath'),
+      })
     }
 
     host.addEventListener('dragover', handleDragOver)
@@ -296,7 +299,7 @@ export function SourceEditor({
       view.destroy()
       viewRef.current = null
     }
-  }, [closeFindBar, documentPath, openFindBar, setError, updateContent])
+  }, [closeFindBar, documentPath, openFindBar, setError, t, updateContent])
 
   useEffect(() => {
     const view = viewRef.current
@@ -376,15 +379,16 @@ async function handleImageDrop(
   documentPath: string | null,
   view: EditorView,
   setError: (message: string | null) => void,
+  messages: { noDocumentPath: string; noImagePath: string },
 ) {
   if (!documentPath) {
-    setError('拖入图片前请先保存 Markdown 文档。')
+    setError(messages.noDocumentPath)
     return
   }
 
   const filePath = findDroppedImagePath(files)
   if (!filePath) {
-    setError('没有可用的本地图片路径；请在 Electron 桌面运行时拖入图片。')
+    setError(messages.noImagePath)
     return
   }
 

@@ -26,7 +26,7 @@ export function OutlineSidebar({
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'l') {
         e.preventDefault()
         onToggle()
       }

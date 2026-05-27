@@ -2,13 +2,20 @@ import { create } from 'zustand'
 import { detectFileType } from '../../lib/file-type'
 import { readTextFile, writeTextFile } from '../../lib/platform-api'
 import { addRecentFile } from './recent-files'
-import type { CurrentDocument, ReadTextFileResult } from './document-types'
+import type { CurrentDocument, ReadTextFileResult, SupportedFileType } from './document-types'
+
+type NewDocumentInput = {
+  fileType: Extract<SupportedFileType, 'markdown' | 'txt'>
+  fileName: string
+  content: string
+}
 
 type DocumentState = {
   current: CurrentDocument | null
   loading: boolean
   error: string | null
   lastSavedPath: string | null
+  newDocument: (input: NewDocumentInput) => void
   openDocument: (path: string) => Promise<void>
   updateContent: (content: string) => void
   saveCurrentDocument: (pathOverride?: string) => Promise<string | null>
@@ -41,14 +48,37 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   loading: false,
   error: null,
   lastSavedPath: null,
+  newDocument: ({ fileType, fileName, content }) => {
+    const openedAt = Date.now()
+    set({
+      current: {
+        path: null,
+        fileName,
+        fileType,
+        content,
+        savedContent: '',
+        size: new TextEncoder().encode(content).length,
+        encoding: 'utf-8',
+        modifiedMs: null,
+        dirty: true,
+        scrollTop: 0,
+        openedAt,
+        savedAt: null,
+      },
+      loading: false,
+      error: null,
+      lastSavedPath: null,
+    })
+  },
   openDocument: async (path) => {
     set({ loading: true, error: null })
     try {
       const result = await readTextFile(path)
       const document = createDocumentFromReadResult(result)
       addRecentFile({
-        path: document.path,
+        path,
         fileName: document.fileName,
+        fileType: document.fileType,
         openedAt: document.openedAt,
         modifiedAt: document.modifiedMs,
       })
@@ -68,7 +98,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           ...state.current,
           content,
           size: new TextEncoder().encode(content).length,
-          dirty: content !== state.current.savedContent,
+          dirty: state.current.path === null || content !== state.current.savedContent,
         },
       }
     }),
@@ -95,8 +125,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           savedAt,
         }
         addRecentFile({
-          path: nextDocument.path,
+          path: targetPath,
           fileName: nextDocument.fileName,
+          fileType: nextDocument.fileType,
           openedAt: nextDocument.openedAt,
           modifiedAt: savedAt,
         })
@@ -115,7 +146,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         ? {
             ...state.current,
             savedContent: state.current.content,
-            dirty: false,
+            dirty: state.current.path === null,
             savedAt: Date.now(),
           }
         : null,

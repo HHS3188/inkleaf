@@ -31,12 +31,17 @@ export function HelpPanel({ onClose }: HelpPanelProps) {
           <h3>{t('help.shortcuts')}</h3>
           <table className="help-shortcuts-table">
             <tbody>
+              <tr><td><kbd>Ctrl+N</kbd></td><td>{t('key.newMarkdown')}</td></tr>
+              <tr><td><kbd>Ctrl+Shift+N</kbd></td><td>{t('key.newTxt')}</td></tr>
               <tr><td><kbd>Ctrl+O</kbd></td><td>{t('key.open')}</td></tr>
               <tr><td><kbd>Ctrl+S</kbd></td><td>{t('key.save')}</td></tr>
+              <tr><td><kbd>Ctrl+Shift+S</kbd></td><td>{t('key.saveAs')}</td></tr>
+              <tr><td><kbd>Ctrl+W</kbd></td><td>{t('key.closeFile')}</td></tr>
               <tr><td><kbd>Ctrl+F</kbd></td><td>{t('key.search')}</td></tr>
               <tr><td><kbd>Ctrl+1</kbd></td><td>{t('key.reader')}</td></tr>
               <tr><td><kbd>Ctrl+2</kbd></td><td>{t('key.source')}</td></tr>
               <tr><td><kbd>Ctrl+3</kbd></td><td>{t('key.split')}</td></tr>
+              <tr><td><kbd>Ctrl+Shift+L</kbd></td><td>{t('key.outline')}</td></tr>
               <tr><td><kbd>Esc</kbd></td><td>{t('generic.close')}</td></tr>
             </tbody>
           </table>

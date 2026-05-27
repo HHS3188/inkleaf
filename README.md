@@ -1,20 +1,22 @@
-# HMark
+# 墨笺 / InkLeaf
 
-HMark is a local-first Windows desktop reader and source workspace for Markdown, TXT, and HTML files. The current stack is Electron, React, TypeScript, Vite, pnpm, CodeMirror 6, react-markdown, and CSS variables.
+InkLeaf is a clean local reader and editor for Markdown, TXT, and HTML. It is built as an Electron desktop app with React, TypeScript, Vite, pnpm, CodeMirror 6, react-markdown, and CSS variables.
 
-## Current Scope
+## Current Features
 
+- New Markdown and TXT documents.
+- Open, save, Save As, close current file, and recent files.
+- Custom unsaved-changes prompt before replacing, closing, or exiting.
 - Reader mode for `.md`, `.markdown`, `.mdown`, `.txt`, `.html`, and `.htm`.
-- Source mode powered by CodeMirror 6, with line numbers, active-line highlight, search, and Ctrl+S saving.
+- Source mode powered by CodeMirror 6.
 - Split mode with source editing on the left and live preview on the right.
 - Persistent draggable Split divider ratio.
-- Left Outline sidebar, foldable with Ctrl+B, with heading jumps in Reader, Source, and Split.
+- Left Outline sidebar, foldable with Ctrl+Shift+L.
 - UTF-8 text read/write, with GBK fallback on read.
-- Local image rendering through the `hmark://` protocol, not direct `file://`.
+- Local image rendering through the `inkleaf://` protocol, not direct `file://`.
 - TXT image link cards, missing image cards, image preview modal, and copy/open-folder actions.
 - Markdown image drag-drop into Source mode, copied to `<document-stem>.assets/`.
-- Recent files, reader settings, theme, language, zoom, help, and diagnostics panels.
-- Electron command-line open handling through a renderer-ready IPC queue.
+- Theme, language, zoom, help, diagnostics, and a Windows 11-style dark desktop UI.
 
 ## Quick Start
 
@@ -39,17 +41,28 @@ pnpm dev
 
 `scripts\check.ps1` runs typecheck, lint, tests, and `pnpm vite:build`. `pnpm build` runs the Vite build and Electron packaging through `electron-builder`.
 
-## Smoke Test Checklist
+## File Workflow
 
-- Open `fixtures/sample.md`.
-- Switch Reader, Source, and Split modes.
-- In Source, verify line numbers, cursor, active line, Ctrl+F search, and Ctrl+S save.
-- In Split, edit the left source pane and confirm the right preview updates before saving.
-- Drag the Split divider, restart `pnpm dev`, and confirm the final ratio persists.
-- Click Outline headings in Reader, Source, and Split; each mode should visibly jump.
-- Toggle Outline with Ctrl+B.
-- Toggle light/dark theme and English/Chinese language.
-- Confirm external links cannot navigate the main Electron window away from the app.
+- `Ctrl+N`: create an untitled Markdown document.
+- `Ctrl+Shift+N`: create an untitled TXT document.
+- `Ctrl+O`: open a local Markdown, TXT, or HTML file.
+- `Ctrl+S`: save the current file. Untitled files open Save As first.
+- `Ctrl+Shift+S`: Save As with a default extension based on the document type.
+- `Ctrl+W`: close the current file and return to the start page.
+- Recent files are listed on the start page and in the File menu.
+
+If the current document has unsaved changes, InkLeaf asks whether to save, discard, or cancel before replacing the document or closing the app.
+
+## Reader Shortcuts
+
+- `Ctrl+F`: open the custom find bar.
+- `Ctrl+1`: Reader mode.
+- `Ctrl+2`: Source mode.
+- `Ctrl+3`: Split mode.
+- `Ctrl+Shift+L`: show or hide Outline.
+- `Ctrl+=`: zoom in.
+- `Ctrl+-`: zoom out.
+- `Ctrl+0`: actual size.
 
 ## Build Outputs
 
@@ -62,3 +75,7 @@ Use these files for local smoke testing:
 - `fixtures/sample.md`
 - `fixtures/sample.txt`
 - `fixtures/unsafe.html`
+
+## Repository
+
+GitHub repository URL: https://github.com/HHS3188/inkleaf

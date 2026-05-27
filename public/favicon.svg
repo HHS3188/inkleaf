@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#3b82f6"/>
-  <path d="M17 16h7v13h16V16h7v32h-7V35H24v13h-7z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="InkLeaf">
+  <rect width="64" height="64" rx="14" fill="#1f232b"/>
+  <rect x="18" y="12" width="26" height="40" rx="2" fill="#f4f7fb"/>
+  <path d="M34 12v10h10z" fill="#b8c7dc"/>
+  <rect x="24" y="27" width="11" height="2" rx="1" fill="#78879a"/>
+  <rect x="24" y="34" width="2" height="11" rx="1" fill="#20242c"/>
+  <path d="M39 34c9-4 16 2 13 10-3 8-13 11-20 5 7-1 12-6 13-12-4 7-9 10-16 11 1-6 4-11 10-14z" fill="#4ba3ff"/>
 </svg>

@@ -2,7 +2,7 @@ import { defaultSchema } from 'rehype-sanitize'
 
 export const markdownSanitizeSchema: typeof defaultSchema = {
   ...defaultSchema,
-  clobberPrefix: 'hmark-',
+  clobberPrefix: 'inkleaf-',
   tagNames: defaultSchema.tagNames?.filter((tagName) => tagName !== 'svg' && tagName !== 'iframe'),
   attributes: {
     ...defaultSchema.attributes,

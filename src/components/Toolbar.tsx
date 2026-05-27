@@ -1,8 +1,10 @@
 import {
   BookOpen,
+  FilePlus2,
   FolderOpen,
   Globe,
   HelpCircle,
+  Leaf,
   Minus,
   PanelLeft,
   PanelRight,
@@ -23,8 +25,11 @@ type ToolbarProps = {
   document: CurrentDocument | null
   mode: EditorMode
   zoom: number
+  onNewMarkdown: () => void
+  onNewTxt: () => void
   onOpen: () => void
   onSave: () => void
+  onSaveAs: () => void
   onCloseDocument: () => void
   onModeChange: (mode: EditorMode) => void
   onZoomChange: (zoom: number) => void
@@ -39,8 +44,11 @@ export function Toolbar({
   document,
   mode,
   zoom,
+  onNewMarkdown,
+  onNewTxt,
   onOpen,
   onSave,
+  onSaveAs,
   onCloseDocument,
   onModeChange,
   onZoomChange,
@@ -60,15 +68,25 @@ export function Toolbar({
 
   return (
     <div className="toolbar compact-topbar" role="toolbar">
-      <div className="topbar-identity" title={document?.path ?? 'HMark'}>
-        <div className="brand-mark">H</div>
+      <div className="topbar-identity" title={document?.path ?? t('app.brand')}>
+        <div className="brand-mark brand-mark--icon">
+          <Leaf size={16} aria-hidden="true" />
+        </div>
         <div className="topbar-file">
-          <strong>{document?.fileName ?? 'HMark'}</strong>
+          <strong>{document?.fileName ?? t('app.name')}</strong>
           <span>{status}</span>
         </div>
       </div>
 
       <div className="toolbar-group toolbar-file-actions">
+        <button type="button" className="tool-button" onClick={onNewMarkdown} title={t('toolbar.newMarkdown.tooltip')}>
+          <FilePlus2 size={15} aria-hidden="true" />
+          <span className="tool-button-label">{t('toolbar.newMarkdown')}</span>
+        </button>
+        <button type="button" className="tool-button compact-only-label" onClick={onNewTxt} title={t('toolbar.newTxt.tooltip')}>
+          <FilePlus2 size={15} aria-hidden="true" />
+          <span className="tool-button-label">TXT</span>
+        </button>
         <button type="button" className="tool-button" onClick={onOpen} title={t('toolbar.open.tooltip')}>
           <FolderOpen size={15} aria-hidden="true" />
           <span className="tool-button-label">{t('toolbar.open')}</span>
@@ -76,6 +94,9 @@ export function Toolbar({
         <button type="button" className="tool-button" onClick={onSave} disabled={!document} title={t('toolbar.save.tooltip')}>
           <Save size={15} aria-hidden="true" />
           <span className="tool-button-label">{t('toolbar.save')}</span>
+        </button>
+        <button type="button" className="tool-button save-as-button" onClick={onSaveAs} disabled={!document} title={t('toolbar.saveAs.tooltip')}>
+          <span className="tool-button-label">{t('toolbar.saveAs')}</span>
         </button>
         <button type="button" className="icon-button" onClick={onCloseDocument} disabled={!document} title={t('toolbar.close.tooltip')}>
           <X size={15} aria-hidden="true" />

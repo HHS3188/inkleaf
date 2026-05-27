@@ -12,6 +12,7 @@ describe('recent files', () => {
     addRecentFile({ path: 'd:/a.md', fileName: 'a.md', openedAt: 3 })
 
     expect(getRecentFiles().map((file) => file.path)).toEqual(['d:/a.md', 'D:/b.md'])
+    expect(getRecentFiles()[0].fileType).toBe('markdown')
   })
 
   it('clears recent files', () => {
