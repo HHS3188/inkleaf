@@ -8,8 +8,6 @@ type StatusBarProps = {
   zoom: number
   wordWrap: boolean
   statusMessage: string | null
-  onCycleZoom: () => void
-  onToggleWordWrap: () => void
 }
 
 export function StatusBar({
@@ -18,8 +16,6 @@ export function StatusBar({
   zoom,
   wordWrap,
   statusMessage,
-  onCycleZoom,
-  onToggleWordWrap,
 }: StatusBarProps) {
   const t = useT()
   const content = document?.content ?? ''
@@ -40,14 +36,14 @@ export function StatusBar({
         {statusMessage ? <span className="status-message">{statusMessage}</span> : null}
       </div>
       <div className="status-right">
-        <button type="button" onClick={onCycleZoom} title={t('status.zoom')}>
+        <span title={t('status.zoom')}>
           {t('status.zoom')} {zoom}%
-        </button>
+        </span>
         <span title={t('status.lineEnding')}>{lineEnding}</span>
         <span title={t('status.encoding')}>{encoding}</span>
-        <button type="button" onClick={onToggleWordWrap}>
+        <span>
           {wordWrap ? t('status.wordWrapOn') : t('status.wordWrapOff')}
-        </button>
+        </span>
       </div>
     </footer>
   )

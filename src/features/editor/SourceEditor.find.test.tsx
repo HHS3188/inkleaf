@@ -54,4 +54,36 @@ describe('SourceEditor find UI', () => {
       expect(screen.queryByPlaceholderText('查找内容')).not.toBeInTheDocument()
     })
   })
+
+  it('does not remount CodeMirror when callback props change after an edit render', async () => {
+    const firstGoto = () => undefined
+    const { rerender } = render(
+      <I18nProvider>
+        <SourceEditor
+          documentPath="D:\\sample.md"
+          content={'alpha'}
+          wordWrap
+          onOpenGotoLine={firstGoto}
+        />
+      </I18nProvider>,
+    )
+
+    await waitFor(() => {
+      expect(document.querySelector('.cm-editor')).toBeInTheDocument()
+    })
+    const editor = document.querySelector('.cm-editor')
+
+    rerender(
+      <I18nProvider>
+        <SourceEditor
+          documentPath="D:\\sample.md"
+          content={'alpha'}
+          wordWrap
+          onOpenGotoLine={() => undefined}
+        />
+      </I18nProvider>,
+    )
+
+    expect(document.querySelector('.cm-editor')).toBe(editor)
+  })
 })

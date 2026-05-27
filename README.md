@@ -5,18 +5,19 @@ InkLeaf is a quiet Windows-first local reader and source editor for Markdown, TX
 ## Features
 
 - New Markdown and TXT documents.
-- Open, Save, Save As, close current file, and recent files.
-- Dirty guard with Save, Don't Save, and Cancel before replacing or closing content.
+- Open, Save, Save As, close current tab, and recent files.
+- Real editor tabs with active/dirty state, tab close, and `+` new Markdown.
+- Dirty guard with Save, Don't Save, and Cancel before closing dirty tabs or quitting with dirty tabs.
 - Reader, Source, and Split modes with live preview.
 - Source editing with custom Find, Replace, Go to Line, right-click menu, and image drag-drop.
-- Word Wrap setting, View menu toggle, and status-bar toggle.
+- Word Wrap setting, View menu toggle, and status-bar display.
 - Ctrl+mouse-wheel zoom from 70% to 200% across Reader, Source, and Split.
 - Reader left-biased layout, safer long-line wrapping, and Windows 11-style light/dark themes.
-- Status bar with line, column, words, characters, file type, zoom, line ending, encoding, and wrap state.
+- Pure display status bar with line, column, words, characters, file type, zoom, line ending, encoding, and wrap state.
 - Font settings for body and monospace text.
 - Auto Save intervals: Off, 30 seconds, 1 minute, or 5 minutes.
 - Local auto-recovery draft for unsaved dirty content.
-- Local images rendered through the `inkleaf://` protocol.
+- Local images rendered through the `inkleaf://` protocol with path segment encoding.
 
 ## Quick Start
 
@@ -35,8 +36,9 @@ pnpm dev
 - `Ctrl+O`: open a local Markdown, TXT, or HTML file.
 - `Ctrl+S`: save the current file. Untitled files open Save As first.
 - `Ctrl+Shift+S`: Save As with a default extension based on the document type.
-- `Ctrl+W`: close the current file and return to the start page.
-- Recent files are listed on the start page and in the File menu.
+- `Ctrl+W`: close the current tab. If it is the last tab, InkLeaf returns to the start page.
+- Recent files are listed on the start page and in the File menu; opening a recent file creates or switches to a tab instead of replacing dirty work.
+- Closing a dirty tab prompts before discarding changes. Switching tabs does not prompt.
 
 ## Editing Shortcuts
 
@@ -56,7 +58,7 @@ pnpm dev
 
 Auto Save is off by default. When enabled, it only saves documents that already have a file path. Untitled documents are never silently written and still require Save As.
 
-Auto-recovery stores the current dirty document as a local app-data draft through Electron renderer storage. It does not write into the repository and does not overwrite user files. On startup, the start page offers Restore Draft or Discard Draft.
+Auto-recovery stores the active dirty document as a local app-data draft through Electron renderer storage. It does not write into the repository and does not overwrite user files. On startup, the start page offers Restore Draft or Discard Draft.
 
 ## Commands
 

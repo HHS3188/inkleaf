@@ -8,6 +8,7 @@ import {
 } from './auto-recovery'
 
 const dirtyDocument: CurrentDocument = {
+  id: 'tab-draft',
   path: null,
   fileName: 'Untitled.md',
   fileType: 'markdown',

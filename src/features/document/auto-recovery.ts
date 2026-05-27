@@ -51,6 +51,7 @@ export function clearDraftSnapshot(): void {
 
 export function draftSnapshotToDocument(snapshot: DraftSnapshot): CurrentDocument {
   return {
+    id: `recovered-${Date.now()}`,
     path: snapshot.path,
     fileName: snapshot.fileName,
     fileType: snapshot.fileType,

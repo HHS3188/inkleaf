@@ -1,6 +1,7 @@
 export type SupportedFileType = 'markdown' | 'txt' | 'html' | 'unknown'
 
-export type CurrentDocument = {
+export type EditorTab = {
+  id: string
   path: string | null
   fileName: string
   fileType: SupportedFileType
@@ -14,6 +15,8 @@ export type CurrentDocument = {
   openedAt: number
   savedAt: number | null
 }
+
+export type CurrentDocument = EditorTab
 
 export type ReadTextFileResult = {
   path: string

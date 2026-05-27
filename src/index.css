@@ -4,10 +4,13 @@
   --bg: #f3f3f3;
   --surface: #fafafa;
   --surface-subtle: #f5f5f5;
-  --surface-elevated: #ffffff;
+  --surface-elevated: #f7f7f7;
+  --toolbar-bg: #f3f3f3;
+  --sidebar-bg: #f5f5f5;
+  --statusbar-bg: #f3f3f3;
   --text: #1f1f1f;
   --muted: #666666;
-  --border: #dddddd;
+  --border: #dedede;
   --border-subtle: #e8e8e8;
   --danger: #dc2626;
   --shadow: 0 8px 28px rgb(15 23 42 / 8%);
@@ -20,7 +23,7 @@
   --body-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono-font: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   --editor-font-size: 14px;
-  --editor-bg: #ffffff;
+  --editor-bg: #f7f7f7;
   --editor-gutter: #f5f5f5;
   --editor-active-line: rgb(59 130 246 / 8%);
   --editor-caret: #2563eb;
@@ -36,6 +39,9 @@
   --surface: #1f1f1f;
   --surface-subtle: #252525;
   --surface-elevated: #2b2b2b;
+  --toolbar-bg: #1f1f1f;
+  --sidebar-bg: #1f1f1f;
+  --statusbar-bg: #1f1f1f;
   --text: #f2f2f2;
   --muted: #b8b8b8;
   --border: #3a3a3a;
@@ -91,21 +97,11 @@ button:disabled {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto 1fr auto;
   width: 100%;
   height: 100%;
   min-width: 720px;
   background: var(--bg);
-}
-
-.title-bar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 44px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
 }
 
 .brand-mark {
@@ -130,20 +126,6 @@ button:disabled {
   color: #f2f2f2;
 }
 
-.title-bar strong,
-.title-bar span {
-  display: block;
-}
-
-.title-bar span {
-  max-width: 66vw;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .toolbar {
   display: flex;
   flex-wrap: nowrap;
@@ -152,7 +134,7 @@ button:disabled {
   min-height: 44px;
   padding: 0 10px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--toolbar-bg);
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -163,13 +145,13 @@ button:disabled {
   min-height: 30px;
   padding: 0 8px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--toolbar-bg);
   user-select: none;
 }
 
 :root[data-theme='dark'] .app-menu-bar {
   border-bottom-color: var(--border-subtle);
-  background: #1f1f1f;
+  background: var(--toolbar-bg);
 }
 
 .app-menu {
@@ -212,6 +194,10 @@ button:disabled {
   background: var(--surface);
   box-shadow: var(--shadow);
   animation: menuFade var(--motion-fast);
+}
+
+.app-menu-dropdown[data-state='closing'] {
+  animation: menuFadeOut 110ms ease forwards;
 }
 
 :root[data-theme='dark'] .app-menu-dropdown {
@@ -286,6 +272,113 @@ button:disabled {
 
 :root[data-theme='dark'] .app-menu-separator {
   background: var(--border-subtle);
+}
+
+.tab-strip {
+  display: flex;
+  align-items: stretch;
+  min-height: 36px;
+  border-bottom: 1px solid var(--border);
+  background: var(--toolbar-bg);
+  overflow: hidden;
+  user-select: none;
+}
+
+:root[data-theme='dark'] .tab-strip {
+  border-bottom-color: var(--border-subtle);
+}
+
+.tab-scroll {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.editor-tab {
+  display: flex;
+  align-items: center;
+  min-width: 132px;
+  max-width: 240px;
+  margin: 4px 0 0 4px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 7px 7px 0 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.editor-tab.active {
+  border-color: var(--border);
+  background: var(--surface-elevated);
+  color: var(--text);
+}
+
+:root[data-theme='dark'] .editor-tab.active {
+  border-color: var(--border-subtle);
+}
+
+.editor-tab-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  min-height: 30px;
+  border: 0;
+  padding: 0 7px 0 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.editor-tab-dirty {
+  width: 8px;
+  flex-shrink: 0;
+  color: var(--accent);
+  font-family: var(--mono-font);
+  line-height: 1;
+}
+
+.editor-tab-title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-tab-close,
+.tab-new-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.editor-tab-close {
+  margin-right: 3px;
+}
+
+.editor-tab-close:hover,
+.tab-new-button:hover {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+
+.tab-new-button {
+  align-self: center;
+  margin: 0 8px;
+  flex-shrink: 0;
 }
 
 :root[data-theme='dark'] .toolbar {
@@ -548,7 +641,7 @@ button:disabled {
 
 .workspace-container {
   display: flex;
-  grid-row: 4;
+  grid-row: 5;
   min-height: 0;
   overflow: hidden;
 }
@@ -569,7 +662,7 @@ button:disabled {
   min-height: 26px;
   padding: 0 10px;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--statusbar-bg);
   color: var(--muted);
   font-size: 11px;
   user-select: none;
@@ -577,7 +670,7 @@ button:disabled {
 
 :root[data-theme='dark'] .status-bar {
   border-top-color: var(--border-subtle);
-  background: #1f1f1f;
+  background: var(--statusbar-bg);
 }
 
 .status-left,
@@ -593,8 +686,7 @@ button:disabled {
 }
 
 .status-left span,
-.status-right span,
-.status-bar button {
+.status-right span {
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -603,22 +695,6 @@ button:disabled {
   overflow: hidden;
   color: var(--accent);
   text-overflow: ellipsis;
-}
-
-.status-bar button {
-  min-height: 20px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 0 6px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.status-bar button:hover {
-  border-color: var(--border);
-  background: var(--surface-subtle);
-  color: var(--text);
 }
 
 /* ---- Outline Sidebar ---- */
@@ -630,12 +706,12 @@ button:disabled {
   min-width: 0;
   overflow: hidden;
   border-right: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--sidebar-bg);
 }
 
 :root[data-theme='dark'] .outline-sidebar {
   border-right-color: var(--border-subtle);
-  background: #1f1f1f;
+  background: var(--sidebar-bg);
 }
 
 .outline-sidebar--open {
@@ -1320,24 +1396,28 @@ button:disabled {
 .find-bar {
   position: absolute;
   top: 10px;
-  right: 12px;
+  left: 50%;
+  right: auto;
   z-index: 8;
   display: flex;
   align-items: center;
   gap: 5px;
-  max-width: min(680px, calc(100% - 24px));
+  width: max-content;
+  max-width: min(720px, calc(100% - 32px));
   min-height: 36px;
   padding: 4px 6px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface) 96%, transparent);
   box-shadow: var(--shadow);
-  animation: panelIn var(--motion-fast);
+  transform: translateX(-50%);
+  animation: findBarIn var(--motion-fast);
 }
 
 .find-bar--replace {
   display: grid;
   grid-template-columns: auto minmax(180px, 320px) auto auto auto auto auto auto;
+  width: min(720px, calc(100% - 32px));
 }
 
 :root[data-theme='dark'] .find-bar {
@@ -2028,6 +2108,17 @@ button:disabled {
   }
 }
 
+@keyframes findBarIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 @keyframes sidePanelIn {
   from {
     opacity: 0;
@@ -2042,11 +2133,22 @@ button:disabled {
 @keyframes menuFade {
   from {
     opacity: 0;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes menuFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 }
 
@@ -2114,10 +2216,20 @@ button:disabled {
   }
 
   .find-bar {
-    right: 8px;
-    left: 8px;
+    left: 50%;
     flex-wrap: wrap;
+    width: calc(100% - 16px);
     max-width: none;
+  }
+
+  .find-bar--replace {
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    width: calc(100% - 16px);
+  }
+
+  .find-scope,
+  .find-count {
+    display: none;
   }
 
   .find-input-wrap {

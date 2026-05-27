@@ -55,12 +55,17 @@ export function SourceEditor({
   const wrapCompartmentRef = useRef(new Compartment())
   const wordWrapRef = useRef(wordWrap)
   const contentRef = useRef(content)
+  const isLocalEditRef = useRef(false)
+  const lastLocalContentRef = useRef(content)
+  const documentPathRef = useRef(documentPath)
+  const onOpenGotoLineRef = useRef(onOpenGotoLine)
   const findOpenRef = useRef(false)
   const findStateRef = useRef({ query: '', matchCase: false, wholeWord: false })
   const handledCommandIdRef = useRef(0)
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
   const searchRequest = useEditorStore((state) => state.searchRequest)
+  const handledSearchRequestRef = useRef(searchRequest)
   const focusRequest = useEditorStore((state) => state.focusRequest)
   const commandRequest = useEditorStore((state) => state.commandRequest)
   const setCursorPosition = useEditorStore((state) => state.setCursorPosition)
@@ -77,6 +82,14 @@ export function SourceEditor({
   useEffect(() => {
     contentRef.current = content
   }, [content])
+
+  useEffect(() => {
+    documentPathRef.current = documentPath
+  }, [documentPath])
+
+  useEffect(() => {
+    onOpenGotoLineRef.current = onOpenGotoLine
+  }, [onOpenGotoLine])
 
   useEffect(() => {
     wordWrapRef.current = wordWrap
@@ -326,7 +339,7 @@ export function SourceEditor({
       return
     }
     if (command === 'goto-line') {
-      onOpenGotoLine?.()
+      onOpenGotoLineRef.current?.()
       return
     }
     if (command === 'insert-date-time') {
@@ -335,7 +348,7 @@ export function SourceEditor({
         timeStyle: 'short',
       }).format(new Date()))
     }
-  }, [copySelection, insertTextAtSelection, onOpenGotoLine, openFindBar, pasteText])
+  }, [copySelection, insertTextAtSelection, openFindBar, pasteText])
 
   useEffect(() => {
     const host = hostRef.current
@@ -371,7 +384,7 @@ export function SourceEditor({
           {
             key: 'Mod-g',
             run: () => {
-              onOpenGotoLine?.()
+              onOpenGotoLineRef.current?.()
               return true
             },
           },
@@ -388,7 +401,11 @@ export function SourceEditor({
         ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
-            updateContent(update.state.doc.toString())
+            const nextContent = update.state.doc.toString()
+            isLocalEditRef.current = true
+            lastLocalContentRef.current = nextContent
+            contentRef.current = nextContent
+            updateContent(nextContent)
           }
           if (update.docChanged || update.selectionSet) {
             updateCursorPosition(update.view)
@@ -476,7 +493,7 @@ export function SourceEditor({
     const handleDrop = (event: DragEvent) => {
       if (!event.dataTransfer?.files.length) return
       event.preventDefault()
-      void handleImageDrop(event.dataTransfer.files, documentPath, view, setError, {
+      void handleImageDrop(event.dataTransfer.files, documentPathRef.current, view, setError, {
         noDocumentPath: t('editor.dragDropNoDoc'),
         noImagePath: t('editor.dragDropNoPath'),
       })
@@ -491,22 +508,39 @@ export function SourceEditor({
       view.destroy()
       viewRef.current = null
     }
-  }, [closeFindBar, documentPath, onOpenGotoLine, openFindBar, setError, t, updateContent, updateCursorPosition])
+  }, [closeFindBar, openFindBar, setError, t, updateContent, updateCursorPosition])
 
   useEffect(() => {
     const view = viewRef.current
     if (!view) return
     const current = view.state.doc.toString()
+    if (current === content) {
+      if (lastLocalContentRef.current === content) {
+        isLocalEditRef.current = false
+      }
+      return
+    }
+    if (isLocalEditRef.current && lastLocalContentRef.current === content) {
+      isLocalEditRef.current = false
+      return
+    }
+    isLocalEditRef.current = false
     if (current !== content) {
       view.dispatch({
         changes: { from: 0, to: current.length, insert: content },
       })
+      contentRef.current = content
     }
     if (findOpen) syncFindState()
   }, [content, findOpen, syncFindState])
 
   useEffect(() => {
-    if (searchRequest > 0 && viewRef.current) {
+    if (
+      searchRequest > 0 &&
+      searchRequest !== handledSearchRequestRef.current &&
+      viewRef.current
+    ) {
+      handledSearchRequestRef.current = searchRequest
       openFindBar(false)
     }
   }, [openFindBar, searchRequest])

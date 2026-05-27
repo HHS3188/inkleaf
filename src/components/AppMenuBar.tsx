@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import clsx from 'clsx'
 import { useT } from '../i18n'
 import type { I18N } from '../i18n'
@@ -76,34 +76,67 @@ export function AppMenuBar({
 }: AppMenuBarProps) {
   const t = useT()
   const [openMenu, setOpenMenu] = useState<MenuId | null>(null)
+  const [closingMenu, setClosingMenu] = useState<MenuId | null>(null)
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const closeTimerRef = useRef<number | null>(null)
+  const openMenuRef = useRef<MenuId | null>(null)
   const hasDocument = Boolean(document)
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }, [])
+
+  const requestMenu = useCallback((menu: MenuId | null) => {
+    clearCloseTimer()
+    if (menu === null) {
+      const menuToClose = openMenuRef.current
+      if (menuToClose) {
+        setClosingMenu(menuToClose)
+        setOpenMenu(null)
+        closeTimerRef.current = window.setTimeout(() => {
+          setClosingMenu(null)
+          closeTimerRef.current = null
+        }, 120)
+      }
+      return
+    }
+    setClosingMenu(null)
+    setOpenMenu(menu)
+  }, [clearCloseTimer])
+
+  useEffect(() => {
+    openMenuRef.current = openMenu
+  }, [openMenu])
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setOpenMenu(null)
+        requestMenu(null)
       }
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpenMenu(null)
+      if (event.key === 'Escape') requestMenu(null)
     }
     window.addEventListener('pointerdown', handlePointerDown)
     window.addEventListener('keydown', handleKeyDown)
     return () => {
+      clearCloseTimer()
       window.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [clearCloseTimer, requestMenu])
 
   const run = (action: () => void) => {
-    setOpenMenu(null)
+    requestMenu(null)
     action()
   }
 
   return (
     <nav className="app-menu-bar" aria-label="Application menu" ref={rootRef}>
-      <MenuButton id="file" label={t('menu.file')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      <MenuButton id="file" label={t('menu.file')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
         <MenuItem label={t('menu.newMarkdown')} shortcut="Ctrl+N" onSelect={() => run(onNewMarkdown)} />
         <MenuItem label={t('menu.newTxt')} shortcut="Ctrl+Shift+N" onSelect={() => run(onNewTxt)} />
         <MenuSeparator />
@@ -130,7 +163,7 @@ export function AppMenuBar({
         <MenuItem label={t('menu.exit')} onSelect={() => run(onQuit)} />
       </MenuButton>
 
-      <MenuButton id="edit" label={t('menu.edit')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      <MenuButton id="edit" label={t('menu.edit')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
         <MenuItem label={t('menu.undo')} shortcut="Ctrl+Z" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('undo'))} />
         <MenuItem label={t('menu.redo')} shortcut="Ctrl+Y" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('redo'))} />
         <MenuSeparator />
@@ -147,7 +180,7 @@ export function AppMenuBar({
         <MenuItem label={t('menu.fontSettings')} onSelect={() => run(onOpenFontSettings)} />
       </MenuButton>
 
-      <MenuButton id="view" label={t('menu.view')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      <MenuButton id="view" label={t('menu.view')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
         <MenuItem label={t('menu.readerMode')} shortcut="Ctrl+1" checked={mode === 'reader'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('reader'))} />
         <MenuItem label={t('menu.sourceMode')} shortcut="Ctrl+2" checked={mode === 'source'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('source'))} />
         <MenuItem label={t('menu.splitMode')} shortcut="Ctrl+3" checked={mode === 'split'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('split'))} />
@@ -161,13 +194,13 @@ export function AppMenuBar({
         <MenuItem label={t('menu.actualSize')} shortcut="Ctrl+0" onSelect={() => run(() => onZoomChange(100))} />
       </MenuButton>
 
-      <MenuButton id="theme" label={t('menu.theme')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      <MenuButton id="theme" label={t('menu.theme')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
         <MenuItem label={t('menu.themeSystem')} checked={themeMode === 'system'} onSelect={() => run(() => onThemeChange('system'))} />
         <MenuItem label={t('menu.themeLight')} checked={themeMode === 'light'} onSelect={() => run(() => onThemeChange('light'))} />
         <MenuItem label={t('menu.themeDark')} checked={themeMode === 'dark'} onSelect={() => run(() => onThemeChange('dark'))} />
       </MenuButton>
 
-      <MenuButton id="help" label={t('menu.help')} openMenu={openMenu} setOpenMenu={setOpenMenu}>
+      <MenuButton id="help" label={t('menu.help')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
         <MenuItem label={t('menu.guide')} onSelect={() => run(onOpenHelp)} />
         <MenuItem label={t('menu.shortcuts')} onSelect={() => run(onOpenHelp)} />
         <MenuSeparator />
@@ -182,16 +215,19 @@ function MenuButton({
   id,
   label,
   openMenu,
+  closingMenu,
   setOpenMenu,
   children,
 }: {
   id: MenuId
   label: string
   openMenu: MenuId | null
+  closingMenu: MenuId | null
   setOpenMenu: (menu: MenuId | null) => void
   children: ReactNode
 }) {
   const isOpen = openMenu === id
+  const isClosing = closingMenu === id
   return (
     <div className="app-menu">
       <button
@@ -206,7 +242,11 @@ function MenuButton({
       >
         {label}
       </button>
-      {isOpen ? <div className="app-menu-dropdown" role="menu">{children}</div> : null}
+      {isOpen || isClosing ? (
+        <div className="app-menu-dropdown" data-state={isClosing ? 'closing' : 'open'} role="menu">
+          {children}
+        </div>
+      ) : null}
     </div>
   )
 }

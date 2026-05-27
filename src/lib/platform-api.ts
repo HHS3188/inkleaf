@@ -186,5 +186,10 @@ export function onBeforeClose(cb: () => void): () => void {
 }
 
 export function fileToAssetUrl(p: string): string {
-  return 'inkleaf:///' + p.replace(/\\/g, '/')
+  const normalized = p.replace(/\\/g, '/')
+  const encoded = normalized
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
+  return 'inkleaf:///' + encoded
 }

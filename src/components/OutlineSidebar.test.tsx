@@ -11,6 +11,7 @@ function withI18n(ui: ReactNode) {
 }
 
 const documentState: CurrentDocument = {
+  id: 'outline-tab',
   path: 'D:/docs/sample.md',
   fileName: 'sample.md',
   fileType: 'markdown',
@@ -28,6 +29,8 @@ const documentState: CurrentDocument = {
 describe('OutlineSidebar', () => {
   beforeEach(() => {
     useDocumentStore.setState({
+      tabs: [documentState],
+      activeTabId: documentState.id,
       current: documentState,
       loading: false,
       error: null,

@@ -2,7 +2,7 @@ const { app, BrowserWindow, Menu, dialog, ipcMain, net, protocol, shell } = requ
 const fs = require('fs/promises')
 const path = require('path')
 const crypto = require('crypto')
-const { fileURLToPath } = require('url')
+const { fileURLToPath, pathToFileURL } = require('url')
 const { createOpenPayloadQueue } = require('./open-payload-queue.cjs')
 
 const isDev = !app.isPackaged
@@ -34,6 +34,7 @@ const openPayloadQueue = createOpenPayloadQueue((payload) => {
 })
 
 let menuLocale = normalizeMenuLocale(app.getLocale())
+const MAX_TEXT_FILE_BYTES = 100 * 1024 * 1024
 
 function getMainWindow() {
   return mainWindow
@@ -140,6 +141,9 @@ ipcMain.handle('read-text-file', async (_event, filePath) => {
   const resolved = path.resolve(filePath)
   const stats = await fs.stat(resolved)
   if (!stats.isFile()) throw new Error('Not a regular file: ' + resolved)
+  if (stats.size > MAX_TEXT_FILE_BYTES) {
+    throw new Error('InkLeaf supports text files up to 100 MB.')
+  }
 
   const bytes = new Uint8Array(await fs.readFile(resolved))
   const { content, encoding } = decodeText(bytes)
@@ -330,8 +334,9 @@ function createWindow() {
     assetProtocolRegistered = true
     // Custom protocol for local image serving (inkleaf:///path)
     protocol.handle('inkleaf', (request) => {
-      const filePath = request.url.replace('inkleaf:///', '')
-      return net.fetch('file:///' + filePath)
+      const parsed = new URL(request.url)
+      const filePath = path.resolve(decodeURIComponent(parsed.pathname.replace(/^\/+/, '')))
+      return net.fetch(pathToFileURL(filePath).toString())
     })
   }
 
