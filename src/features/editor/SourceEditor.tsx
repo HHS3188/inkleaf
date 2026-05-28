@@ -4,8 +4,6 @@ import { Compartment, EditorState } from '@codemirror/state'
 import {
   EditorView,
   drawSelection,
-  highlightActiveLine,
-  highlightActiveLineGutter,
   keymap,
   lineNumbers,
 } from '@codemirror/view'
@@ -365,8 +363,6 @@ export function SourceEditor({
         history(),
         lineNumbers(),
         drawSelection(),
-        highlightActiveLine(),
-        highlightActiveLineGutter(),
         wrapCompartmentRef.current.of(wordWrapRef.current ? EditorView.lineWrapping : []),
         markdown(),
         search(),
@@ -452,9 +448,6 @@ export function SourceEditor({
           '.cm-gutterElement': {
             fontSize: 'var(--editor-font-size)',
             lineHeight: 'var(--editor-line-height-px)',
-            minHeight: 'var(--editor-line-height-px)',
-            height: 'var(--editor-line-height-px)',
-            boxSizing: 'border-box',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'transparent',
@@ -470,22 +463,16 @@ export function SourceEditor({
           },
           '.cm-line': {
             cursor: 'text',
-            minHeight: 'var(--editor-line-height-px)',
-            height: 'var(--editor-line-height-px)',
-            boxSizing: 'border-box',
+            lineHeight: 'var(--editor-line-height-px)',
           },
           '&.cm-focused .cm-cursor': {
             borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',
             marginLeft: '-1px',
-            height: 'var(--editor-line-height-px) !important',
-            minHeight: 'var(--editor-line-height-px)',
           },
           '&.cm-focused .cm-dropCursor': {
             borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',
-            height: 'var(--editor-line-height-px) !important',
-            minHeight: 'var(--editor-line-height-px)',
           },
           '.cm-searchMatch': {
             backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',
