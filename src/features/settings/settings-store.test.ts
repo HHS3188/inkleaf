@@ -26,4 +26,21 @@ describe('settings store', () => {
     expect(useSettingsStore.getState().settings.bodyFont).toBe('microsoft-yahei')
     expect(useSettingsStore.getState().settings.monoFont).toBe('jetbrains-mono')
   })
+
+  it('applies typography and reading width variables for reader and source surfaces', () => {
+    useSettingsStore.getState().updateSettings({
+      fontSize: 20,
+      lineHeight: 1.8,
+      readingWidth: 860,
+      zoom: 110,
+    })
+
+    const style = document.documentElement.style
+    expect(style.getPropertyValue('--app-font-size')).toBe('20px')
+    expect(style.getPropertyValue('--app-line-height')).toBe('1.8')
+    expect(style.getPropertyValue('--reader-font-size')).toBe('20px')
+    expect(style.getPropertyValue('--reader-line-height')).toBe('1.8')
+    expect(style.getPropertyValue('--reader-width')).toBe('860px')
+    expect(style.getPropertyValue('--editor-font-size')).toBe('22px')
+  })
 })

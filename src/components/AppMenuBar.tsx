@@ -37,7 +37,6 @@ type AppMenuBarProps = {
   onZoomChange: (zoom: number) => void
   onThemeChange: (mode: ThemeMode) => void
   onOpenSettings: () => void
-  onOpenFontSettings: () => void
   onOpenHelp: () => void
   onOpenAbout: () => void
 }
@@ -70,7 +69,6 @@ export function AppMenuBar({
   onZoomChange,
   onThemeChange,
   onOpenSettings,
-  onOpenFontSettings,
   onOpenHelp,
   onOpenAbout,
 }: AppMenuBarProps) {
@@ -89,23 +87,26 @@ export function AppMenuBar({
     }
   }, [])
 
-  const requestMenu = useCallback((menu: MenuId | null) => {
-    clearCloseTimer()
-    if (menu === null) {
-      const menuToClose = openMenuRef.current
-      if (menuToClose) {
-        setClosingMenu(menuToClose)
-        setOpenMenu(null)
-        closeTimerRef.current = window.setTimeout(() => {
-          setClosingMenu(null)
-          closeTimerRef.current = null
-        }, 120)
+  const requestMenu = useCallback(
+    (menu: MenuId | null) => {
+      clearCloseTimer()
+      if (menu === null) {
+        const menuToClose = openMenuRef.current
+        if (menuToClose) {
+          setClosingMenu(menuToClose)
+          setOpenMenu(null)
+          closeTimerRef.current = window.setTimeout(() => {
+            setClosingMenu(null)
+            closeTimerRef.current = null
+          }, 120)
+        }
+        return
       }
-      return
-    }
-    setClosingMenu(null)
-    setOpenMenu(menu)
-  }, [clearCloseTimer])
+      setClosingMenu(null)
+      setOpenMenu(menu)
+    },
+    [clearCloseTimer],
+  )
 
   useEffect(() => {
     openMenuRef.current = openMenu
@@ -136,71 +137,225 @@ export function AppMenuBar({
 
   return (
     <nav className="app-menu-bar" aria-label="Application menu" ref={rootRef}>
-      <MenuButton id="file" label={t('menu.file')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
-        <MenuItem label={t('menu.newMarkdown')} shortcut="Ctrl+N" onSelect={() => run(onNewMarkdown)} />
+      <MenuButton
+        id="file"
+        label={t('menu.file')}
+        openMenu={openMenu}
+        closingMenu={closingMenu}
+        setOpenMenu={requestMenu}
+      >
+        <MenuItem
+          label={t('menu.newMarkdown')}
+          shortcut="Ctrl+N"
+          onSelect={() => run(onNewMarkdown)}
+        />
         <MenuItem label={t('menu.newTxt')} shortcut="Ctrl+Shift+N" onSelect={() => run(onNewTxt)} />
         <MenuSeparator />
         <MenuItem label={t('menu.open')} shortcut="Ctrl+O" onSelect={() => run(onOpen)} />
         <MenuCaption label={t('menu.openRecent')} />
         {recentFiles.length > 0 ? (
-          recentFiles.slice(0, 8).map((file) => (
-            <MenuItem
-              key={file.path}
-              label={file.fileName}
-              detail={formatRecentType(file.fileType, t)}
-              title={file.path}
-              onSelect={() => run(() => onOpenRecent(file.path))}
-            />
-          ))
+          recentFiles
+            .slice(0, 8)
+            .map((file) => (
+              <MenuItem
+                key={file.path}
+                label={file.fileName}
+                detail={formatRecentType(file.fileType, t)}
+                title={file.path}
+                onSelect={() => run(() => onOpenRecent(file.path))}
+              />
+            ))
         ) : (
           <MenuItem label={t('menu.noRecent')} disabled />
         )}
         <MenuSeparator />
-        <MenuItem label={t('menu.save')} shortcut="Ctrl+S" disabled={!hasDocument} onSelect={() => run(onSave)} />
-        <MenuItem label={t('menu.saveAs')} shortcut="Ctrl+Shift+S" disabled={!hasDocument} onSelect={() => run(onSaveAs)} />
-        <MenuItem label={t('menu.closeFile')} shortcut="Ctrl+W" disabled={!hasDocument} onSelect={() => run(onCloseDocument)} />
+        <MenuItem
+          label={t('menu.save')}
+          shortcut="Ctrl+S"
+          disabled={!hasDocument}
+          onSelect={() => run(onSave)}
+        />
+        <MenuItem
+          label={t('menu.saveAs')}
+          shortcut="Ctrl+Shift+S"
+          disabled={!hasDocument}
+          onSelect={() => run(onSaveAs)}
+        />
+        <MenuItem
+          label={t('menu.closeFile')}
+          shortcut="Ctrl+W"
+          disabled={!hasDocument}
+          onSelect={() => run(onCloseDocument)}
+        />
         <MenuSeparator />
         <MenuItem label={t('menu.exit')} onSelect={() => run(onQuit)} />
       </MenuButton>
 
-      <MenuButton id="edit" label={t('menu.edit')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
-        <MenuItem label={t('menu.undo')} shortcut="Ctrl+Z" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('undo'))} />
-        <MenuItem label={t('menu.redo')} shortcut="Ctrl+Y" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('redo'))} />
+      <MenuButton
+        id="edit"
+        label={t('menu.edit')}
+        openMenu={openMenu}
+        closingMenu={closingMenu}
+        setOpenMenu={requestMenu}
+      >
+        <MenuItem
+          label={t('menu.undo')}
+          shortcut="Ctrl+Z"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('undo'))}
+        />
+        <MenuItem
+          label={t('menu.redo')}
+          shortcut="Ctrl+Y"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('redo'))}
+        />
         <MenuSeparator />
-        <MenuItem label={t('menu.cut')} shortcut="Ctrl+X" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('cut'))} />
-        <MenuItem label={t('menu.copy')} shortcut="Ctrl+C" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('copy'))} />
-        <MenuItem label={t('menu.paste')} shortcut="Ctrl+V" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('paste'))} />
-        <MenuItem label={t('menu.selectAll')} shortcut="Ctrl+A" disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('select-all'))} />
+        <MenuItem
+          label={t('menu.cut')}
+          shortcut="Ctrl+X"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('cut'))}
+        />
+        <MenuItem
+          label={t('menu.copy')}
+          shortcut="Ctrl+C"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('copy'))}
+        />
+        <MenuItem
+          label={t('menu.paste')}
+          shortcut="Ctrl+V"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('paste'))}
+        />
+        <MenuItem
+          label={t('menu.selectAll')}
+          shortcut="Ctrl+A"
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('select-all'))}
+        />
         <MenuSeparator />
-        <MenuItem label={t('menu.find')} shortcut="Ctrl+F" disabled={!hasDocument} onSelect={() => run(onSearch)} />
-        <MenuItem label={t('menu.replace')} shortcut="Ctrl+H" disabled={!hasDocument} onSelect={() => run(onReplace)} />
-        <MenuItem label={t('menu.gotoLine')} shortcut="Ctrl+G" disabled={!hasDocument} onSelect={() => run(onGotoLine)} />
-        <MenuItem label={t('menu.insertDateTime')} disabled={!hasDocument} onSelect={() => run(() => onEditorCommand('insert-date-time'))} />
-        <MenuSeparator />
-        <MenuItem label={t('menu.fontSettings')} onSelect={() => run(onOpenFontSettings)} />
+        <MenuItem
+          label={t('menu.find')}
+          shortcut="Ctrl+F"
+          disabled={!hasDocument}
+          onSelect={() => run(onSearch)}
+        />
+        <MenuItem
+          label={t('menu.replace')}
+          shortcut="Ctrl+H"
+          disabled={!hasDocument}
+          onSelect={() => run(onReplace)}
+        />
+        <MenuItem
+          label={t('menu.gotoLine')}
+          shortcut="Ctrl+G"
+          disabled={!hasDocument}
+          onSelect={() => run(onGotoLine)}
+        />
+        <MenuItem
+          label={t('menu.insertDateTime')}
+          disabled={!hasDocument}
+          onSelect={() => run(() => onEditorCommand('insert-date-time'))}
+        />
       </MenuButton>
 
-      <MenuButton id="view" label={t('menu.view')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
-        <MenuItem label={t('menu.readerMode')} shortcut="Ctrl+1" checked={mode === 'reader'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('reader'))} />
-        <MenuItem label={t('menu.sourceMode')} shortcut="Ctrl+2" checked={mode === 'source'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('source'))} />
-        <MenuItem label={t('menu.splitMode')} shortcut="Ctrl+3" checked={mode === 'split'} disabled={!hasDocument} onSelect={() => run(() => onModeChange('split'))} />
+      <MenuButton
+        id="view"
+        label={t('menu.view')}
+        openMenu={openMenu}
+        closingMenu={closingMenu}
+        setOpenMenu={requestMenu}
+      >
+        <MenuItem
+          label={t('menu.readerMode')}
+          shortcut="Ctrl+1"
+          checked={mode === 'reader'}
+          disabled={!hasDocument}
+          onSelect={() => run(() => onModeChange('reader'))}
+        />
+        <MenuItem
+          label={t('menu.sourceMode')}
+          shortcut="Ctrl+2"
+          checked={mode === 'source'}
+          disabled={!hasDocument}
+          onSelect={() => run(() => onModeChange('source'))}
+        />
+        <MenuItem
+          label={t('menu.splitMode')}
+          shortcut="Ctrl+3"
+          checked={mode === 'split'}
+          disabled={!hasDocument}
+          onSelect={() => run(() => onModeChange('split'))}
+        />
         <MenuSeparator />
-        <MenuItem label={t('menu.toggleOutline')} shortcut="Ctrl+Shift+L" checked={!outlineCollapsed} disabled={!hasDocument} onSelect={() => run(onToggleOutline)} />
-        <MenuItem label={t('menu.wordWrap')} checked={wordWrap} onSelect={() => run(onToggleWordWrap)} />
-        <MenuItem label={t('menu.statusBar')} checked={showStatusBar} onSelect={() => run(onToggleStatusBar)} />
+        <MenuItem
+          label={t('menu.toggleOutline')}
+          shortcut="Ctrl+Shift+L"
+          checked={!outlineCollapsed}
+          disabled={!hasDocument}
+          onSelect={() => run(onToggleOutline)}
+        />
+        <MenuItem
+          label={t('menu.wordWrap')}
+          checked={wordWrap}
+          onSelect={() => run(onToggleWordWrap)}
+        />
+        <MenuItem
+          label={t('menu.statusBar')}
+          checked={showStatusBar}
+          onSelect={() => run(onToggleStatusBar)}
+        />
         <MenuSeparator />
-        <MenuItem label={t('menu.zoomIn')} shortcut="Ctrl+=" onSelect={() => run(() => onZoomChange(Math.min(200, zoom + 10)))} />
-        <MenuItem label={t('menu.zoomOut')} shortcut="Ctrl+-" onSelect={() => run(() => onZoomChange(Math.max(70, zoom - 10)))} />
-        <MenuItem label={t('menu.actualSize')} shortcut="Ctrl+0" onSelect={() => run(() => onZoomChange(100))} />
+        <MenuItem
+          label={t('menu.zoomIn')}
+          shortcut="Ctrl+="
+          onSelect={() => run(() => onZoomChange(Math.min(200, zoom + 10)))}
+        />
+        <MenuItem
+          label={t('menu.zoomOut')}
+          shortcut="Ctrl+-"
+          onSelect={() => run(() => onZoomChange(Math.max(70, zoom - 10)))}
+        />
+        <MenuItem
+          label={t('menu.actualSize')}
+          shortcut="Ctrl+0"
+          onSelect={() => run(() => onZoomChange(100))}
+        />
       </MenuButton>
 
-      <MenuButton id="theme" label={t('menu.theme')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
-        <MenuItem label={t('menu.themeSystem')} checked={themeMode === 'system'} onSelect={() => run(() => onThemeChange('system'))} />
-        <MenuItem label={t('menu.themeLight')} checked={themeMode === 'light'} onSelect={() => run(() => onThemeChange('light'))} />
-        <MenuItem label={t('menu.themeDark')} checked={themeMode === 'dark'} onSelect={() => run(() => onThemeChange('dark'))} />
+      <MenuButton
+        id="theme"
+        label={t('menu.theme')}
+        openMenu={openMenu}
+        closingMenu={closingMenu}
+        setOpenMenu={requestMenu}
+      >
+        <MenuItem
+          label={t('menu.themeSystem')}
+          checked={themeMode === 'system'}
+          onSelect={() => run(() => onThemeChange('system'))}
+        />
+        <MenuItem
+          label={t('menu.themeLight')}
+          checked={themeMode === 'light'}
+          onSelect={() => run(() => onThemeChange('light'))}
+        />
+        <MenuItem
+          label={t('menu.themeDark')}
+          checked={themeMode === 'dark'}
+          onSelect={() => run(() => onThemeChange('dark'))}
+        />
       </MenuButton>
 
-      <MenuButton id="help" label={t('menu.help')} openMenu={openMenu} closingMenu={closingMenu} setOpenMenu={requestMenu}>
+      <MenuButton
+        id="help"
+        label={t('menu.help')}
+        openMenu={openMenu}
+        closingMenu={closingMenu}
+        setOpenMenu={requestMenu}
+      >
         <MenuItem label={t('menu.guide')} onSelect={() => run(onOpenHelp)} />
         <MenuItem label={t('menu.shortcuts')} onSelect={() => run(onOpenHelp)} />
         <MenuSeparator />
@@ -277,7 +432,9 @@ function MenuItem({
       title={title}
       onClick={onSelect}
     >
-      <span className="app-menu-check" aria-hidden="true">{checked ? '✓' : ''}</span>
+      <span className="app-menu-check" aria-hidden="true">
+        {checked ? '✓' : ''}
+      </span>
       <span className="app-menu-label">{label}</span>
       {detail ? <span className="app-menu-detail">{detail}</span> : null}
       {shortcut ? <span className="app-menu-shortcut">{shortcut}</span> : null}

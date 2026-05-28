@@ -10,13 +10,7 @@ type StatusBarProps = {
   statusMessage: string | null
 }
 
-export function StatusBar({
-  document,
-  cursor,
-  zoom,
-  wordWrap,
-  statusMessage,
-}: StatusBarProps) {
+export function StatusBar({ document, cursor, zoom, wordWrap, statusMessage }: StatusBarProps) {
   const t = useT()
   const content = document?.content ?? ''
   const words = countWords(content)
@@ -28,20 +22,32 @@ export function StatusBar({
   return (
     <footer className="status-bar" aria-label="Status">
       <div className="status-left">
-        <span>{t('status.line')} {document ? cursor.line : '-'}</span>
-        <span>{t('status.column')} {document ? cursor.column : '-'}</span>
-        <span>{t('status.words')} {words}</span>
-        <span>{t('status.characters')} {characters}</span>
-        <span>{fileType}</span>
+        <span className="status-item status-cursor">
+          {t('status.line')} {document ? cursor.line : '-'}
+        </span>
+        <span className="status-item status-cursor">
+          {t('status.column')} {document ? cursor.column : '-'}
+        </span>
+        <span className="status-item status-words">
+          {t('status.words')} {words}
+        </span>
+        <span className="status-item status-characters">
+          {t('status.characters')} {characters}
+        </span>
+        <span className="status-item status-file-type">{fileType}</span>
         {statusMessage ? <span className="status-message">{statusMessage}</span> : null}
       </div>
       <div className="status-right">
-        <span title={t('status.zoom')}>
+        <span className="status-item status-zoom" title={t('status.zoom')}>
           {t('status.zoom')} {zoom}%
         </span>
-        <span title={t('status.lineEnding')}>{lineEnding}</span>
-        <span title={t('status.encoding')}>{encoding}</span>
-        <span>
+        <span className="status-item status-line-ending" title={t('status.lineEnding')}>
+          {lineEnding}
+        </span>
+        <span className="status-item status-encoding" title={t('status.encoding')}>
+          {encoding}
+        </span>
+        <span className="status-item status-wrap">
           {wordWrap ? t('status.wordWrapOn') : t('status.wordWrapOff')}
         </span>
       </div>

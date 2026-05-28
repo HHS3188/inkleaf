@@ -19,10 +19,18 @@ import {
   writeDraftSnapshot,
   type DraftSnapshot,
 } from '../features/document/auto-recovery'
-import { getRecentFiles, removeRecentFile, type RecentFile } from '../features/document/recent-files'
+import {
+  getRecentFiles,
+  removeRecentFile,
+  type RecentFile,
+} from '../features/document/recent-files'
 import type { SupportedFileType } from '../features/document/document-types'
 import { useDocumentStore } from '../features/document/document-store'
-import { useEditorStore, type EditorCommand, type EditorMode } from '../features/editor/editor-store'
+import {
+  useEditorStore,
+  type EditorCommand,
+  type EditorMode,
+} from '../features/editor/editor-store'
 import { useSettingsStore } from '../features/settings/settings-store'
 import type { ThemeMode } from '../features/theme/theme-types'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -39,16 +47,12 @@ import { ReaderView } from '../features/reader/ReaderView'
 import { SourceEditor } from '../features/editor/SourceEditor'
 import { SplitEditor } from '../features/editor/SplitEditor'
 import { OutlineSidebar } from './OutlineSidebar'
+import { SettingsPanel } from '../features/settings/SettingsPanel'
 
 const DiagnosticsPanel = lazy(() =>
   import('../features/diagnostics/DiagnosticsPanel').then((m) => ({ default: m.DiagnosticsPanel })),
 )
-const SettingsPanel = lazy(() =>
-  import('../features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })),
-)
-const HelpPanel = lazy(() =>
-  import('./HelpPanel').then((m) => ({ default: m.HelpPanel })),
-)
+const HelpPanel = lazy(() => import('./HelpPanel').then((m) => ({ default: m.HelpPanel })))
 
 type AppShellProps = {
   initialArgs: string[]
@@ -98,7 +102,9 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const [aboutOpen, setAboutOpen] = useState(false)
   const [gotoOpen, setGotoOpen] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
-  const [recoveryDraft, setRecoveryDraft] = useState<DraftSnapshot | null>(() => readDraftSnapshot())
+  const [recoveryDraft, setRecoveryDraft] = useState<DraftSnapshot | null>(() =>
+    readDraftSnapshot(),
+  )
   const [targetLine, setTargetLine] = useState<number | undefined>(undefined)
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>(() => getRecentFiles())
   const [pendingUnsaved, setPendingUnsaved] = useState<{
@@ -112,9 +118,12 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     setRecentFiles(getRecentFiles())
   }, [])
 
-  const changeZoom = useCallback((zoom: number) => {
-    updateSettings({ zoom: Math.min(200, Math.max(70, zoom)) })
-  }, [updateSettings])
+  const changeZoom = useCallback(
+    (zoom: number) => {
+      updateSettings({ zoom: Math.min(200, Math.max(70, zoom)) })
+    },
+    [updateSettings],
+  )
 
   useEffect(() => {
     try {
@@ -199,49 +208,58 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     })
   }, [])
 
-  const handleUnsavedChoice = useCallback((choice: UnsavedChoice) => {
-    const pending = pendingUnsaved
-    setPendingUnsaved(null)
-    pending?.resolve(choice)
-  }, [pendingUnsaved])
+  const handleUnsavedChoice = useCallback(
+    (choice: UnsavedChoice) => {
+      const pending = pendingUnsaved
+      setPendingUnsaved(null)
+      pending?.resolve(choice)
+    },
+    [pendingUnsaved],
+  )
 
-  const saveDocument = useCallback(async (forceSaveAs = false): Promise<boolean> => {
-    const document = useDocumentStore.getState().current
-    if (!document) return true
-    try {
-      let targetPath = forceSaveAs ? null : document.path
-      if (!targetPath) {
-        targetPath = await showSaveDialog({
-          defaultPath: document.fileName,
-          filters: getSaveFilters(document.fileType),
-        })
+  const saveDocument = useCallback(
+    async (forceSaveAs = false): Promise<boolean> => {
+      const document = useDocumentStore.getState().current
+      if (!document) return true
+      try {
+        let targetPath = forceSaveAs ? null : document.path
+        if (!targetPath) {
+          targetPath = await showSaveDialog({
+            defaultPath: document.fileName,
+            filters: getSaveFilters(document.fileType),
+          })
+        }
+        if (!targetPath) return false
+        await saveCurrentDocument(targetPath)
+        clearDraftSnapshot()
+        setRecoveryDraft(null)
+        setStatusMessage(t('status.saved'))
+        refreshRecentFiles()
+        return true
+      } catch (errorValue) {
+        setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
+        return false
       }
-      if (!targetPath) return false
-      await saveCurrentDocument(targetPath)
-      clearDraftSnapshot()
-      setRecoveryDraft(null)
-      setStatusMessage(t('status.saved'))
-      refreshRecentFiles()
-      return true
-    } catch (errorValue) {
-      setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
-      return false
-    }
-  }, [refreshRecentFiles, saveCurrentDocument, setError, t])
+    },
+    [refreshRecentFiles, saveCurrentDocument, setError, t],
+  )
 
-  const confirmTabClose = useCallback(async (tabId: string): Promise<boolean> => {
-    const tab = useDocumentStore.getState().tabs.find((item) => item.id === tabId)
-    if (!tab?.dirty) return true
-    switchTab(tabId)
-    const choice = await requestUnsavedChoice(tab.fileName)
-    if (choice === 'cancel') return false
-    if (choice === 'discard') {
-      clearDraftSnapshot()
-      setRecoveryDraft(null)
-      return true
-    }
-    return saveDocument(false)
-  }, [requestUnsavedChoice, saveDocument, switchTab])
+  const confirmTabClose = useCallback(
+    async (tabId: string): Promise<boolean> => {
+      const tab = useDocumentStore.getState().tabs.find((item) => item.id === tabId)
+      if (!tab?.dirty) return true
+      switchTab(tabId)
+      const choice = await requestUnsavedChoice(tab.fileName)
+      if (choice === 'cancel') return false
+      if (choice === 'discard') {
+        clearDraftSnapshot()
+        setRecoveryDraft(null)
+        return true
+      }
+      return saveDocument(false)
+    },
+    [requestUnsavedChoice, saveDocument, switchTab],
+  )
 
   const ensureAllTabsReadyToClose = useCallback(async (): Promise<boolean> => {
     for (;;) {
@@ -280,12 +298,15 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     setMode('source')
   }, [newDocument, setMode, t])
 
-  const handleOpenPath = useCallback(async (path: string) => {
-    setTargetLine(undefined)
-    setMode('reader')
-    await openDocument(path)
-    refreshRecentFiles()
-  }, [openDocument, refreshRecentFiles, setMode])
+  const handleOpenPath = useCallback(
+    async (path: string) => {
+      setTargetLine(undefined)
+      setMode('reader')
+      await openDocument(path)
+      refreshRecentFiles()
+    },
+    [openDocument, refreshRecentFiles, setMode],
+  )
 
   const handleOpen = useCallback(async () => {
     try {
@@ -320,19 +341,25 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     refreshRecentFiles()
   }, [closeDocument, confirmTabClose, refreshRecentFiles, setMode])
 
-  const handleSwitchTab = useCallback((tabId: string) => {
-    switchTab(tabId)
-    setTargetLine(undefined)
-  }, [switchTab])
+  const handleSwitchTab = useCallback(
+    (tabId: string) => {
+      switchTab(tabId)
+      setTargetLine(undefined)
+    },
+    [switchTab],
+  )
 
-  const handleCloseTab = useCallback(async (tabId: string) => {
-    if (!(await confirmTabClose(tabId))) return
-    closeTab(tabId)
-    setTargetLine(undefined)
-    if (useDocumentStore.getState().tabs.length === 0) {
-      setMode('reader')
-    }
-  }, [closeTab, confirmTabClose, setMode])
+  const handleCloseTab = useCallback(
+    async (tabId: string) => {
+      if (!(await confirmTabClose(tabId))) return
+      closeTab(tabId)
+      setTargetLine(undefined)
+      if (useDocumentStore.getState().tabs.length === 0) {
+        setMode('reader')
+      }
+    },
+    [closeTab, confirmTabClose, setMode],
+  )
 
   const handleQuit = useCallback(async () => {
     if (!(await ensureAllTabsReadyToClose())) return
@@ -341,10 +368,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     }
   }, [ensureAllTabsReadyToClose])
 
-  const handleRemoveRecent = useCallback((path: string) => {
-    removeRecentFile(path)
-    refreshRecentFiles()
-  }, [refreshRecentFiles])
+  const handleRemoveRecent = useCallback(
+    (path: string) => {
+      removeRecentFile(path)
+      refreshRecentFiles()
+    },
+    [refreshRecentFiles],
+  )
 
   const handleOpenRecentFolder = useCallback((path: string) => {
     if (!isElectronRuntime()) return
@@ -380,15 +410,18 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     requestSearch()
   }, [mode, requestSearch, setMode])
 
-  const runEditorCommand = useCallback((command: EditorCommand) => {
-    if (!useDocumentStore.getState().current) return
-    if (mode === 'reader') {
-      setMode('source')
-      window.setTimeout(() => requestEditorCommand(command), 0)
-      return
-    }
-    requestEditorCommand(command)
-  }, [mode, requestEditorCommand, setMode])
+  const runEditorCommand = useCallback(
+    (command: EditorCommand) => {
+      if (!useDocumentStore.getState().current) return
+      if (mode === 'reader') {
+        setMode('source')
+        window.setTimeout(() => requestEditorCommand(command), 0)
+        return
+      }
+      requestEditorCommand(command)
+    },
+    [mode, requestEditorCommand, setMode],
+  )
 
   const handleReplace = useCallback(() => {
     runEditorCommand('replace')
@@ -399,13 +432,16 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     setGotoOpen(true)
   }, [])
 
-  const handleGotoSubmit = useCallback((line: number) => {
-    setTargetLine(line)
-    setGotoOpen(false)
-    if (mode === 'reader') {
-      setMode('source')
-    }
-  }, [mode, setMode])
+  const handleGotoSubmit = useCallback(
+    (line: number) => {
+      setTargetLine(line)
+      setGotoOpen(false)
+      if (mode === 'reader') {
+        setMode('source')
+      }
+    },
+    [mode, setMode],
+  )
 
   const handleOutlineLineJump = useCallback(
     (line: number) => {
@@ -417,9 +453,12 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     [currentDocument, mode, setMode],
   )
 
-  const setThemeMode = useCallback((themeMode: ThemeMode) => {
-    updateSettings({ themeMode })
-  }, [updateSettings])
+  const setThemeMode = useCallback(
+    (themeMode: ThemeMode) => {
+      updateSettings({ themeMode })
+    },
+    [updateSettings],
+  )
 
   const toggleWordWrap = useCallback(() => {
     const next = !settings.wordWrap
@@ -500,7 +539,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       }
       if (event.key === '1' || event.key === '2' || event.key === '3') {
         event.preventDefault()
-        const nextMode: EditorMode = event.key === '1' ? 'reader' : event.key === '2' ? 'source' : 'split'
+        const nextMode: EditorMode =
+          event.key === '1' ? 'reader' : event.key === '2' ? 'source' : 'split'
         if (currentDocument) setMode(nextMode)
       }
     }
@@ -588,7 +628,11 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   }, [handleOpenPath, initialArgs])
 
   useEffect(() => {
-    if (!lastSingleInstancePayload || handledSingleInstancePayload.current === lastSingleInstancePayload) return
+    if (
+      !lastSingleInstancePayload ||
+      handledSingleInstancePayload.current === lastSingleInstancePayload
+    )
+      return
     handledSingleInstancePayload.current = lastSingleInstancePayload
     const filePath = getFirstOpenableArg(lastSingleInstancePayload.args)
     if (filePath) void handleOpenPath(filePath)
@@ -626,7 +670,6 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onZoomChange={changeZoom}
         onThemeChange={setThemeMode}
         onOpenSettings={() => setSettingsOpen(true)}
-        onOpenFontSettings={() => setSettingsOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
         onOpenAbout={() => setAboutOpen(true)}
       />
@@ -650,7 +693,9 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onModeChange={setMode}
         onZoomChange={changeZoom}
         onSearch={handleSearch}
-        onToggleTheme={() => updateSettings({ themeMode: settings.themeMode === 'dark' ? 'light' : 'dark' })}
+        onToggleTheme={() =>
+          updateSettings({ themeMode: settings.themeMode === 'dark' ? 'light' : 'dark' })
+        }
         onOpenSettings={() => setSettingsOpen(true)}
         onToggleOutline={() => setOutlineCollapsed(!outlineCollapsed)}
         onToggleHelp={() => setHelpOpen(!helpOpen)}
@@ -669,7 +714,11 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         )}
         <div className="workspace">
           <ErrorBoundary>
-            {loading ? <div className="loading-state">{t('editor.loading')}</div> : renderWorkspace()}
+            {loading ? (
+              <div className="loading-state">{t('editor.loading')}</div>
+            ) : (
+              renderWorkspace()
+            )}
           </ErrorBoundary>
         </div>
       </div>
@@ -685,16 +734,14 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       ) : null}
 
       {settingsOpen ? (
-        <Suspense fallback={null}>
-          <SettingsPanel
-            openPanel={settingsOpen}
-            onClose={() => setSettingsOpen(false)}
-            onOpenDiagnostics={() => {
-              setSettingsOpen(false)
-              setDiagnosticsOpen(true)
-            }}
-          />
-        </Suspense>
+        <SettingsPanel
+          openPanel={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onOpenDiagnostics={() => {
+            setSettingsOpen(false)
+            setDiagnosticsOpen(true)
+          }}
+        />
       ) : null}
       {diagnosticsOpen ? (
         <Suspense fallback={null}>
@@ -715,16 +762,10 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       ) : null}
       {aboutOpen ? <AboutDialog onClose={() => setAboutOpen(false)} /> : null}
       {gotoOpen ? (
-        <GotoLineDialog
-          onClose={() => setGotoOpen(false)}
-          onSubmit={handleGotoSubmit}
-        />
+        <GotoLineDialog onClose={() => setGotoOpen(false)} onSubmit={handleGotoSubmit} />
       ) : null}
       {pendingUnsaved ? (
-        <UnsavedChangesDialog
-          fileName={pendingUnsaved.fileName}
-          onChoose={handleUnsavedChoice}
-        />
+        <UnsavedChangesDialog fileName={pendingUnsaved.fileName} onChoose={handleUnsavedChoice} />
       ) : null}
     </div>
   )
@@ -782,7 +823,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       )
     }
 
-    return <ReaderView document={currentDocument} settings={settings} onEditRequest={handleEditRequest} />
+    return (
+      <ReaderView
+        document={currentDocument}
+        settings={settings}
+        onEditRequest={handleEditRequest}
+      />
+    )
   }
 }
 

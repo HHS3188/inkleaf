@@ -91,11 +91,16 @@ export function applyReaderSettings(settings: ReaderSettings) {
   const root = document.documentElement
   root.style.setProperty('--body-font', resolveBodyFont(settings.bodyFont))
   root.style.setProperty('--mono-font', resolveMonoFont(settings.monoFont))
+  root.style.setProperty('--app-font-size', `${settings.fontSize}px`)
+  root.style.setProperty('--app-line-height', String(settings.lineHeight))
   root.style.setProperty('--reader-font-size', `${settings.fontSize}px`)
   root.style.setProperty('--reader-line-height', String(settings.lineHeight))
   root.style.setProperty('--reader-width', `${settings.readingWidth}px`)
   root.style.setProperty('--reader-zoom', String(settings.zoom / 100))
-  root.style.setProperty('--editor-font-size', `${Math.round(14 * (settings.zoom / 100))}px`)
+  root.style.setProperty(
+    '--editor-font-size',
+    `${Math.round(settings.fontSize * (settings.zoom / 100))}px`,
+  )
 }
 
 function readSettings(): ReaderSettings {
@@ -117,9 +122,7 @@ function readSettings(): ReaderSettings {
       readingWidth: clampNumber(candidate.readingWidth, 560, 1280, defaultSettings.readingWidth),
       zoom: clampNumber(candidate.zoom, 70, 200, defaultSettings.zoom),
       wordWrap:
-        typeof candidate.wordWrap === 'boolean'
-          ? candidate.wordWrap
-          : defaultSettings.wordWrap,
+        typeof candidate.wordWrap === 'boolean' ? candidate.wordWrap : defaultSettings.wordWrap,
       showStatusBar:
         typeof candidate.showStatusBar === 'boolean'
           ? candidate.showStatusBar

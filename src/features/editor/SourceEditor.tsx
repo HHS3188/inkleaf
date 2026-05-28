@@ -9,14 +9,7 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view'
-import {
-  defaultKeymap,
-  history,
-  historyKeymap,
-  redo,
-  selectAll,
-  undo,
-} from '@codemirror/commands'
+import { defaultKeymap, history, historyKeymap, redo, selectAll, undo } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
 import { SearchQuery, highlightSelectionMatches, search, setSearchQuery } from '@codemirror/search'
 import { useT } from '../../i18n'
@@ -96,9 +89,7 @@ export function SourceEditor({
     const view = viewRef.current
     if (!view) return
     view.dispatch({
-      effects: wrapCompartmentRef.current.reconfigure(
-        wordWrap ? EditorView.lineWrapping : [],
-      ),
+      effects: wrapCompartmentRef.current.reconfigure(wordWrap ? EditorView.lineWrapping : []),
     })
   }, [wordWrap])
 
@@ -161,22 +152,25 @@ export function SourceEditor({
     })
   }, [])
 
-  const openFindBar = useCallback((withReplace = false) => {
-    const view = viewRef.current
-    if (view) {
-      const selection = view.state.selection.main
-      const selectedText = selection.empty
-        ? ''
-        : view.state.sliceDoc(selection.from, selection.to)
-      if (selectedText && !selectedText.includes('\n')) {
-        setFindQuery(selectedText)
+  const openFindBar = useCallback(
+    (withReplace = false) => {
+      const view = viewRef.current
+      if (view) {
+        const selection = view.state.selection.main
+        const selectedText = selection.empty
+          ? ''
+          : view.state.sliceDoc(selection.from, selection.to)
+        if (selectedText && !selectedText.includes('\n')) {
+          setFindQuery(selectedText)
+        }
       }
-    }
-    setReplaceOpen(withReplace)
-    setFindOpen(true)
-    setFindFocusKey((value) => value + 1)
-    requestAnimationFrame(() => syncFindState())
-  }, [setFindQuery, syncFindState])
+      setReplaceOpen(withReplace)
+      setFindOpen(true)
+      setFindFocusKey((value) => value + 1)
+      requestAnimationFrame(() => syncFindState())
+    },
+    [setFindQuery, syncFindState],
+  )
 
   const closeFindBar = useCallback(() => {
     const view = viewRef.current
@@ -189,23 +183,26 @@ export function SourceEditor({
     requestAnimationFrame(() => viewRef.current?.focus())
   }, [])
 
-  const moveFindMatch = useCallback((direction: FindDirection) => {
-    const view = viewRef.current
-    if (!view) return
+  const moveFindMatch = useCallback(
+    (direction: FindDirection) => {
+      const view = viewRef.current
+      if (!view) return
 
-    const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
-    const matches = findTextMatches(view.state.doc.toString(), query, {
-      matchCase: caseSensitive,
-      wholeWord: word,
-    })
-    const selection = view.state.selection.main
-    const targetIndex = getNextMatchIndex(
-      matches,
-      { from: selection.from, to: selection.to },
-      direction,
-    )
-    syncFindState(targetIndex)
-  }, [syncFindState])
+      const { query, matchCase: caseSensitive, wholeWord: word } = findStateRef.current
+      const matches = findTextMatches(view.state.doc.toString(), query, {
+        matchCase: caseSensitive,
+        wholeWord: word,
+      })
+      const selection = view.state.selection.main
+      const targetIndex = getNextMatchIndex(
+        matches,
+        { from: selection.from, to: selection.to },
+        direction,
+      )
+      syncFindState(targetIndex)
+    },
+    [syncFindState],
+  )
 
   const replaceNextMatch = useCallback(() => {
     const view = viewRef.current
@@ -252,14 +249,17 @@ export function SourceEditor({
     requestAnimationFrame(() => syncFindState())
   }, [replaceValue, syncFindState])
 
-  const updateCursorPosition = useCallback((view: EditorView) => {
-    const head = view.state.selection.main.head
-    const line = view.state.doc.lineAt(head)
-    setCursorPosition({
-      line: line.number,
-      column: head - line.from + 1,
-    })
-  }, [setCursorPosition])
+  const updateCursorPosition = useCallback(
+    (view: EditorView) => {
+      const head = view.state.selection.main.head
+      const line = view.state.doc.lineAt(head)
+      setCursorPosition({
+        line: line.number,
+        column: head - line.from + 1,
+      })
+    },
+    [setCursorPosition],
+  )
 
   const copySelection = useCallback(async (cutSelection = false) => {
     const view = viewRef.current
@@ -303,52 +303,57 @@ export function SourceEditor({
     view.focus()
   }, [])
 
-  const runSourceCommand = useCallback((command: string) => {
-    const view = viewRef.current
-    if (!view) return
-    if (command === 'undo') {
-      undo(view)
-      return
-    }
-    if (command === 'redo') {
-      redo(view)
-      return
-    }
-    if (command === 'cut') {
-      void copySelection(true)
-      return
-    }
-    if (command === 'copy') {
-      void copySelection(false)
-      return
-    }
-    if (command === 'paste') {
-      void pasteText()
-      return
-    }
-    if (command === 'select-all') {
-      selectAll(view)
-      return
-    }
-    if (command === 'find') {
-      openFindBar(false)
-      return
-    }
-    if (command === 'replace') {
-      openFindBar(true)
-      return
-    }
-    if (command === 'goto-line') {
-      onOpenGotoLineRef.current?.()
-      return
-    }
-    if (command === 'insert-date-time') {
-      insertTextAtSelection(new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }).format(new Date()))
-    }
-  }, [copySelection, insertTextAtSelection, openFindBar, pasteText])
+  const runSourceCommand = useCallback(
+    (command: string) => {
+      const view = viewRef.current
+      if (!view) return
+      if (command === 'undo') {
+        undo(view)
+        return
+      }
+      if (command === 'redo') {
+        redo(view)
+        return
+      }
+      if (command === 'cut') {
+        void copySelection(true)
+        return
+      }
+      if (command === 'copy') {
+        void copySelection(false)
+        return
+      }
+      if (command === 'paste') {
+        void pasteText()
+        return
+      }
+      if (command === 'select-all') {
+        selectAll(view)
+        return
+      }
+      if (command === 'find') {
+        openFindBar(false)
+        return
+      }
+      if (command === 'replace') {
+        openFindBar(true)
+        return
+      }
+      if (command === 'goto-line') {
+        onOpenGotoLineRef.current?.()
+        return
+      }
+      if (command === 'insert-date-time') {
+        insertTextAtSelection(
+          new Intl.DateTimeFormat(undefined, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date()),
+        )
+      }
+    },
+    [copySelection, insertTextAtSelection, openFindBar, pasteText],
+  )
 
   useEffect(() => {
     const host = hostRef.current
@@ -421,7 +426,7 @@ export function SourceEditor({
           '.cm-content': {
             fontFamily: 'var(--mono-font)',
             padding: '16px 20px',
-            lineHeight: '1.65',
+            lineHeight: 'var(--app-line-height)',
             cursor: 'text',
             caretColor: 'var(--editor-caret)',
             userSelect: 'text',
@@ -463,6 +468,7 @@ export function SourceEditor({
           },
           '.cm-scroller': {
             fontFamily: 'var(--mono-font)',
+            lineHeight: 'var(--app-line-height)',
             cursor: 'text',
           },
           '.cm-searchMatch': {
@@ -535,11 +541,7 @@ export function SourceEditor({
   }, [content, findOpen, syncFindState])
 
   useEffect(() => {
-    if (
-      searchRequest > 0 &&
-      searchRequest !== handledSearchRequestRef.current &&
-      viewRef.current
-    ) {
+    if (searchRequest > 0 && searchRequest !== handledSearchRequestRef.current && viewRef.current) {
       handledSearchRequestRef.current = searchRequest
       openFindBar(false)
     }
@@ -630,16 +632,64 @@ export function SourceEditor({
           role="menu"
           onPointerDown={(event) => event.stopPropagation()}
         >
-          <ContextMenuItem label={t('menu.undo')} onSelect={() => { runSourceCommand('undo'); setContextMenu(null) }} />
-          <ContextMenuItem label={t('menu.redo')} onSelect={() => { runSourceCommand('redo'); setContextMenu(null) }} />
+          <ContextMenuItem
+            label={t('menu.undo')}
+            onSelect={() => {
+              runSourceCommand('undo')
+              setContextMenu(null)
+            }}
+          />
+          <ContextMenuItem
+            label={t('menu.redo')}
+            onSelect={() => {
+              runSourceCommand('redo')
+              setContextMenu(null)
+            }}
+          />
           <div className="context-menu-separator" />
-          <ContextMenuItem label={t('menu.cut')} onSelect={() => { runSourceCommand('cut'); setContextMenu(null) }} />
-          <ContextMenuItem label={t('menu.copy')} onSelect={() => { runSourceCommand('copy'); setContextMenu(null) }} />
-          <ContextMenuItem label={t('menu.paste')} onSelect={() => { runSourceCommand('paste'); setContextMenu(null) }} />
-          <ContextMenuItem label={t('menu.selectAll')} onSelect={() => { runSourceCommand('select-all'); setContextMenu(null) }} />
+          <ContextMenuItem
+            label={t('menu.cut')}
+            onSelect={() => {
+              runSourceCommand('cut')
+              setContextMenu(null)
+            }}
+          />
+          <ContextMenuItem
+            label={t('menu.copy')}
+            onSelect={() => {
+              runSourceCommand('copy')
+              setContextMenu(null)
+            }}
+          />
+          <ContextMenuItem
+            label={t('menu.paste')}
+            onSelect={() => {
+              runSourceCommand('paste')
+              setContextMenu(null)
+            }}
+          />
+          <ContextMenuItem
+            label={t('menu.selectAll')}
+            onSelect={() => {
+              runSourceCommand('select-all')
+              setContextMenu(null)
+            }}
+          />
           <div className="context-menu-separator" />
-          <ContextMenuItem label={t('menu.find')} onSelect={() => { runSourceCommand('find'); setContextMenu(null) }} />
-          <ContextMenuItem label={t('menu.gotoLine')} onSelect={() => { runSourceCommand('goto-line'); setContextMenu(null) }} />
+          <ContextMenuItem
+            label={t('menu.find')}
+            onSelect={() => {
+              runSourceCommand('find')
+              setContextMenu(null)
+            }}
+          />
+          <ContextMenuItem
+            label={t('menu.gotoLine')}
+            onSelect={() => {
+              runSourceCommand('goto-line')
+              setContextMenu(null)
+            }}
+          />
         </div>
       ) : null}
     </div>

@@ -41,7 +41,11 @@ function getMainWindow() {
 }
 
 function normalizeMenuLocale(locale) {
-  return String(locale || '').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US'
+  return String(locale || '')
+    .toLowerCase()
+    .startsWith('zh')
+    ? 'zh-CN'
+    : 'en-US'
 }
 
 function buildApplicationMenu(locale = menuLocale) {
@@ -81,9 +85,7 @@ function isAllowedNavigation(rawUrl) {
 // ── Custom protocol for local images ─────────────────────────────────
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient('inkleaf', process.execPath, [
-      path.resolve(process.argv[1]),
-    ])
+    app.setAsDefaultProtocolClient('inkleaf', process.execPath, [path.resolve(process.argv[1])])
   }
 } else {
   app.setAsDefaultProtocolClient('inkleaf')
@@ -176,59 +178,56 @@ ipcMain.handle('path-exists', async (_event, filePath) => {
   }
 })
 
-ipcMain.handle(
-  'copy-image-to-assets',
-  async (_event, documentPath, imagePath) => {
-    const doc = path.resolve(documentPath)
-    const img = path.resolve(imagePath)
+ipcMain.handle('copy-image-to-assets', async (_event, documentPath, imagePath) => {
+  const doc = path.resolve(documentPath)
+  const img = path.resolve(imagePath)
 
-    const docDir = path.dirname(doc)
-    const docStem = path.basename(doc, path.extname(doc))
-    const assetsDir = path.join(docDir, docStem + '.assets')
+  const docDir = path.dirname(doc)
+  const docStem = path.basename(doc, path.extname(doc))
+  const assetsDir = path.join(docDir, docStem + '.assets')
 
-    await fs.mkdir(assetsDir, { recursive: true })
+  await fs.mkdir(assetsDir, { recursive: true })
 
-    const imgExt = path.extname(img).toLowerCase().replace('.', '')
-    const supported = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg']
-    if (!supported.includes(imgExt)) {
-      throw new Error('Unsupported image extension: ' + imgExt)
+  const imgExt = path.extname(img).toLowerCase().replace('.', '')
+  const supported = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg']
+  if (!supported.includes(imgExt)) {
+    throw new Error('Unsupported image extension: ' + imgExt)
+  }
+
+  const now = new Date()
+  const ts =
+    String(now.getFullYear()) +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    String(now.getDate()).padStart(2, '0') +
+    '-' +
+    String(now.getHours()).padStart(2, '0') +
+    String(now.getMinutes()).padStart(2, '0') +
+    String(now.getSeconds()).padStart(2, '0')
+
+  let fileName = 'image-' + ts + '.' + imgExt
+  let counter = 0
+  while (counter < 1000) {
+    try {
+      await fs.access(path.join(assetsDir, fileName))
+      counter++
+      fileName = 'image-' + ts + '-' + (counter + 1) + '.' + imgExt
+    } catch {
+      break
     }
+  }
+  if (counter >= 1000) {
+    throw new Error('Could not generate unique asset file name after 1000 attempts')
+  }
 
-    const now = new Date()
-    const ts =
-      String(now.getFullYear()) +
-      String(now.getMonth() + 1).padStart(2, '0') +
-      String(now.getDate()).padStart(2, '0') +
-      '-' +
-      String(now.getHours()).padStart(2, '0') +
-      String(now.getMinutes()).padStart(2, '0') +
-      String(now.getSeconds()).padStart(2, '0')
+  const targetPath = path.join(assetsDir, fileName)
+  await fs.copyFile(img, targetPath)
 
-    let fileName = 'image-' + ts + '.' + imgExt
-    let counter = 0
-    while (counter < 1000) {
-      try {
-        await fs.access(path.join(assetsDir, fileName))
-        counter++
-        fileName = 'image-' + ts + '-' + (counter + 1) + '.' + imgExt
-      } catch {
-        break
-      }
-    }
-    if (counter >= 1000) {
-      throw new Error('Could not generate unique asset file name after 1000 attempts')
-    }
-
-    const targetPath = path.join(assetsDir, fileName)
-    await fs.copyFile(img, targetPath)
-
-    return {
-      absolute_path: targetPath,
-      relative_path: './' + docStem + '.assets/' + fileName,
-      file_name: fileName,
-    }
-  },
-)
+  return {
+    absolute_path: targetPath,
+    relative_path: './' + docStem + '.assets/' + fileName,
+    file_name: fileName,
+  }
+})
 
 ipcMain.handle('open-in-file-manager', async (_event, filePath) => {
   shell.showItemInFolder(path.resolve(filePath))
@@ -317,8 +316,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1180,
     height: 780,
-    minWidth: 720,
-    minHeight: 520,
+    minWidth: 640,
+    minHeight: 460,
     backgroundColor: '#202020',
     title: 'InkLeaf',
     icon: appIconPath,

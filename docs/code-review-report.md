@@ -12,6 +12,13 @@ Reviewed the current InkLeaf Electron mainline:
 
 ## Fixed P0/P1/P2 Issues
 
+- P1: Settings now opens from the top toolbar/menu as a centered modal with backdrop close, Escape close, bounded height, and scrollable content instead of occupying the page side panel.
+- P1: Removed ineffective body/monospace font selectors from the visible Settings UI while keeping old persisted fields compatible.
+- P1: Font size, line height, and reading width now apply through shared CSS variables; Source CodeMirror uses the same font-size/line-height settings and Reader/Split/TXT keep the configured reader width behavior.
+- P1: Find/Replace is now an opaque fixed overlay with clearer controls, replace row layout, disabled states, and small-window width constraints.
+- P1: Status bar is fixed to the app bottom row, non-interactive, higher contrast, and trims secondary metadata on narrow windows.
+- P1: Light theme moved further toward a white-gray desktop palette across body, toolbar, editor, reader, preview, settings, menus, dialogs, and status bar.
+- P2: Electron minimum window size is now 640x460 with responsive toolbar, settings modal, help modal, find bar, tabs, and status bar constraints.
 - P0: Source editor no longer rebuilds CodeMirror when AppShell callback props change after content updates; local edit guards prevent same-content external sync from replacing the editor document.
 - P1: Document state now supports real tabs with active tab id, dirty state per tab, tab switching, tab closing, and `+` new Markdown.
 - P1: Dirty tab close prompts before discard/save; quitting checks dirty tabs instead of only the active document.
@@ -32,7 +39,7 @@ Reviewed the current InkLeaf Electron mainline:
 - P2: Status bar now shows line, column, word count, character count, file type, zoom, line ending, encoding, and wrap state.
 - P2: Reader layout is left biased with safer wrapping for long TXT/Markdown/HTML content.
 - P2: Help dialog content is scrollable and bounded by viewport height.
-- P2: Small-window minimum changed to 720x520 with responsive toolbar/status behavior.
+- P2: Small-window minimum changed to 640x460 with responsive toolbar/status behavior.
 - P3: Removed obsolete desktop runtime files and misleading validation docs.
 - P3: Updated fixtures and docs to InkLeaf naming.
 
@@ -44,9 +51,11 @@ Reviewed the current InkLeaf Electron mainline:
 - Multi-dirty-tab quit prompts are sequential; a future batch summary could be more ergonomic.
 - Open Folder is only a low-risk entry point for future workspace work and does not implement a file tree.
 - Reader context menu is not fully custom yet; Source and recent files have the implemented context menus.
+- Native Windows desktop acceptance is still required for exact 640x460 usability, OS dialogs, and real IME behavior; automated renderer QA covers DOM/layout contracts.
 
 ## Next Stage
 
+- Manually accept the new settings/find/status layout on the user's latest screenshots, especially 640x460 and 680x500.
 - Add a real workspace/folder model only after tabs and single-file save/recovery receive more usage.
 - Expand recovery from single draft to multiple tab/session snapshots if users need session restore.
 - Add optional snapshot history UI based on `docs/snapshot-history-plan.md`.
