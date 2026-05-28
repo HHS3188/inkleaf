@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useT } from '../../i18n'
 import { showMessageDialog, openExternal } from '../../lib/platform-api'
 import { Trash2, X } from 'lucide-react'
@@ -20,6 +20,9 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
   const t = useT()
   const settings = useSettingsStore((state) => state.settings)
   const updateSettings = useSettingsStore((state) => state.updateSettings)
+  const modalRef = useRef<HTMLDivElement | null>(null)
+  const dragState = useRef<{ startX: number; startY: number; modalX: number; modalY: number } | null>(null)
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     if (!openPanel) return
@@ -29,6 +32,44 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose, openPanel])
+
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const modal = modalRef.current
+    if (!modal) return
+    const rect = modal.getBoundingClientRect()
+    dragState.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      modalX: rect.left,
+      modalY: rect.top,
+    }
+    modal.setPointerCapture(event.pointerId)
+  }, [])
+
+  const handlePointerMove = useCallback((event: React.PointerEvent) => {
+    if (!dragState.current) return
+    const modal = modalRef.current
+    if (!modal) return
+    const dx = event.clientX - dragState.current.startX
+    const dy = event.clientY - dragState.current.startY
+    let newX = dragState.current.modalX + dx
+    let newY = dragState.current.modalY + dy
+    const rect = modal.getBoundingClientRect()
+    const maxX = window.innerWidth - rect.width - 8
+    const maxY = window.innerHeight - rect.height - 8
+    newX = Math.max(8, Math.min(maxX, newX))
+    newY = Math.max(8, Math.min(maxY, newY))
+    setPosition({ x: newX, y: newY })
+  }, [])
+
+  const handlePointerUp = useCallback((event: React.PointerEvent) => {
+    if (!dragState.current) return
+    dragState.current = null
+    const modal = modalRef.current
+    if (modal) {
+      modal.releasePointerCapture(event.pointerId)
+    }
+  }, [])
 
   if (!openPanel) return null
 
@@ -45,16 +86,28 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
     }
   }
 
+  const modalStyle = position
+    ? { position: 'fixed' as const, left: `${position.x}px`, top: `${position.y}px`, margin: 0 }
+    : undefined
+
   return (
     <div className="settings-modal-backdrop" role="presentation" onClick={onClose}>
       <section
+        ref={modalRef}
         className="settings-modal"
         role="dialog"
         aria-modal="true"
         aria-label={t('settings.title')}
+        style={modalStyle}
         onClick={(event) => event.stopPropagation()}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
       >
-        <header className="settings-modal-header">
+        <header
+          className="settings-modal-header"
+          style={{ cursor: 'move', userSelect: 'none' }}
+          onPointerDown={handlePointerDown}
+        >
           <strong>{t('settings.title')}</strong>
           <button
             type="button"

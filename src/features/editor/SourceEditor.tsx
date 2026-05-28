@@ -457,7 +457,7 @@ export function SourceEditor({
             backgroundColor: 'var(--editor-gutter)',
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
-            fontSize: '12px',
+            fontSize: 'var(--editor-font-size)',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'var(--editor-active-line)',

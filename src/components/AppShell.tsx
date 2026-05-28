@@ -723,7 +723,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         </div>
       </div>
 
-      {settings.showStatusBar ? (
+      {settings.showStatusBar && currentDocument ? (
         <StatusBar
           document={currentDocument}
           cursor={cursor}
