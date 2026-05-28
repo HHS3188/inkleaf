@@ -56,13 +56,15 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 
 从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载：
 
-- **InkLeaf Setup x.x.x.exe** — Windows 安装包（推荐 Windows 10/11）
-- **InkLeaf x.x.x.exe** — Portable 免安装版本
+- **InkLeaf Setup 0.1.0.exe** — NSIS 安装包（推荐 Windows 10/11）
+- **InkLeaf 0.1.0.exe** — Portable 免安装版本
+- **InkLeaf 0.1.0.msi** — MSI 安装包
 
 Download from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf Setup x.x.x.exe** — Windows installer (recommended for Windows 10/11)
-- **InkLeaf x.x.x.exe** — Portable, no installation required
+- **InkLeaf Setup 0.1.0.exe** — NSIS installer (recommended for Windows 10/11)
+- **InkLeaf 0.1.0.exe** — Portable, no installation required
+- **InkLeaf 0.1.0.msi** — MSI installer
 
 ## 开发 / Development
 
@@ -85,15 +87,25 @@ pnpm build          # Vite + Electron Builder 打包
 
 ## 项目状态 / Status
 
-当前为早期版本（v0.1.0）。核心功能已可用，部分特性仍在完善中。
+当前为早期版本（v0.1.0）。核心功能已可用，部分体验仍在继续完善。
 
-- MSI 安装包因依赖 WixToolset，暂未提供，后续版本补充
-- 已知限制：大文件（>100MB）暂不支持
+当前 Windows 发布包包括：
+
+- **InkLeaf Setup 0.1.0.exe** — NSIS 安装包
+- **InkLeaf 0.1.0.exe** — Portable 免安装版本
+- **InkLeaf 0.1.0.msi** — MSI 安装包
+
+已知限制：大文件（>100MB）暂不支持。
 
 This is an early release (v0.1.0). Core features are functional; some areas are still being refined.
 
-- MSI installer not yet available (requires WixToolset); planned for a future release
-- Known limit: files larger than 100 MB are not supported
+Current Windows release assets include:
+
+- **InkLeaf Setup 0.1.0.exe** — NSIS installer
+- **InkLeaf 0.1.0.exe** — Portable build
+- **InkLeaf 0.1.0.msi** — MSI installer
+
+Known limit: files larger than 100 MB are not supported.
 
 ## 技术栈 / Tech Stack
 
