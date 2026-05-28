@@ -425,7 +425,7 @@ export function SourceEditor({
           },
           '.cm-content': {
             fontFamily: 'var(--mono-font)',
-            padding: '10px 12px',
+            padding: 'var(--editor-top-padding, 8px) var(--editor-left-padding, 10px)',
             lineHeight: 'var(--editor-line-height-px)',
             cursor: 'text',
             caretColor: 'var(--editor-caret)',
@@ -447,7 +447,7 @@ export function SourceEditor({
             color: 'var(--muted)',
             fontSize: 'var(--editor-font-size)',
             lineHeight: 'var(--editor-line-height-px)',
-            paddingTop: '10px',
+            paddingTop: 'var(--editor-top-padding, 8px)',
           },
           '.cm-gutterElement': {
             fontSize: 'var(--editor-font-size)',
@@ -457,11 +457,11 @@ export function SourceEditor({
             boxSizing: 'border-box',
           },
           '.cm-activeLineGutter': {
-            backgroundColor: 'var(--editor-active-line)',
+            backgroundColor: 'transparent',
             color: 'var(--text)',
           },
           '.cm-activeLine': {
-            backgroundColor: 'var(--editor-active-line)',
+            backgroundColor: 'transparent',
           },
           '.cm-scroller': {
             fontFamily: 'var(--mono-font)',

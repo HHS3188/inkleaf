@@ -10,14 +10,16 @@ Reviewed the current InkLeaf Electron mainline:
 - Menu, toolbar, status bar, settings, help, startup page, and dialogs.
 - Legacy naming, fixtures, README, and docs.
 
-## Latest Round Fixes (c44b359)
+## Latest Round Fixes (notepad-like alignment)
 
-- **P0**: Status bar hidden on startup/empty state; only shows when a document is open in Reader/Source/Split mode.
-- **P0**: CodeMirror gutter `fontSize` changed from hardcoded `12px` to `var(--editor-font-size)` so line numbers scale with zoom.
-- **P1**: Light theme contrast improved: `--bg: #e9e9e9`, `--surface: #eeeeee`, `--border: #c9c9c9`, `--toolbar-bg: #ededed`, `--statusbar-bg: #dedede`.
-- **P1**: UI font weight increased to `500` for menu, toolbar, buttons, status bar; tab titles use `600`.
-- **P1**: UI font sizes bumped: menu `13px`, buttons `13px`, status bar `12px`.
-- **P1**: Find bar repositioned to top-right corner (like Windows Notepad), smaller border-radius, no shadow, compact height.
+- **P0**: CodeMirror active line background removed (transparent) — cursor-only position feedback like Notepad.
+- **P0**: Find bar repositioned to top-center (left: 50%, transform: translateX(-50%)) instead of right-aligned.
+- **P1**: Light theme further whitened: `--bg: #f0f0f0`, `--surface: #f6f6f6`, `--border: #b6b6b6`, `--text: #111111`.
+- **P1**: Font stack changed to `Microsoft YaHei UI` / `Segoe UI Variable Text` priority.
+- **P1**: Editor padding uses CSS variables `--editor-top-padding` / `--editor-left-padding` for gutter-content alignment.
+- **P1**: Minimum window size reduced to 540x380.
+- **P2**: Find bar max-width increased to 760px, input width 360px.
+- **Deferred**: Frameless window / custom titlebar — high risk, suggested for separate round.
 - **P1**: Settings modal now supports drag via header as drag handle (pointerdown/pointermove/pointerup), bounded to window.
 - **P2**: Added 480px responsive breakpoint: hides secondary status items, narrows sidebar, shrinks tabs.
 - **P2**: Updated `index-css.test.ts` to match new color values and find bar positioning.
