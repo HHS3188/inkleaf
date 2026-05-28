@@ -455,6 +455,8 @@ export function SourceEditor({
           },
           '.cm-gutterElement': {
             padding: '0 8px 0 6px',
+            lineHeight: 'var(--editor-line-height-px)',
+            minHeight: 'var(--editor-line-height-px)',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'transparent',

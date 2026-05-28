@@ -20,9 +20,8 @@ describe('SourceEditor typography theme', () => {
     expect(source).toContain("lineHeight: 'inherit'")
   })
 
-  it('does not force height/minHeight on cm-line or cm-gutterElement', () => {
+  it('does not force height/minHeight on cm-line', () => {
     expect(source).not.toMatch(/\.cm-line[^*][\s\S]*height:/)
-    expect(source).not.toMatch(/cm-gutterElement[\s\S]*height:/)
   })
 
   it('calls requestMeasure on settings change', () => {
@@ -44,12 +43,18 @@ describe('SourceEditor typography theme', () => {
     expect(source).not.toContain("fontSize: 'calc(var(--editor-font-size) * 0.86)'")
   })
 
-  it('does not set lineHeight on cm-gutters, cm-gutterElement, or cm-scroller', () => {
+  it('does not set lineHeight on cm-gutters or cm-scroller', () => {
     const gutterBlock = source.match(/\.cm-gutters['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
-    const gutterElementBlock = source.match(/\.cm-gutterElement['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
     const scrollerBlock = source.match(/\.cm-scroller['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
     expect(gutterBlock).not.toContain('lineHeight')
-    expect(gutterElementBlock).not.toContain('lineHeight')
     expect(scrollerBlock).not.toContain('lineHeight')
+  })
+
+  it('sets gutterElement lineHeight and minHeight to var(--editor-line-height-px)', () => {
+    const block = source.match(/\.cm-gutterElement['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(block).toContain("lineHeight: 'var(--editor-line-height-px)'")
+    expect(block).toContain("minHeight: 'var(--editor-line-height-px)'")
+    expect(block).not.toMatch(/lineHeight:\s*['"]\d+px['"]/)
+    expect(block).not.toMatch(/minHeight:\s*['"]\d+px['"]/)
   })
 })
