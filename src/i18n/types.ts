@@ -258,4 +258,9 @@ export interface I18N {
 
   'wordWrap.on': string
   'wordWrap.off': string
+
+  'defaultApp.title': string
+  'defaultApp.message': string
+  'defaultApp.openSettings': string
+  'defaultApp.later': string
 }

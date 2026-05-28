@@ -64,6 +64,7 @@ declare global {
       copyImageToAssets: (d: string, i: string) => Promise<CopiedAssetResult>
       openExternal: (url: string) => Promise<void>
       showItemInFolder: (p: string) => Promise<void>
+      openDefaultAppsSettings: () => Promise<void>
       showOpenDialog: (o: {
         multiple?: boolean
         directory?: boolean
@@ -149,6 +150,10 @@ export async function openExternal(url: string): Promise<void> {
 
 export async function showItemInFolder(p: string): Promise<void> {
   return api().showItemInFolder(p)
+}
+
+export async function openDefaultAppsSettings(): Promise<void> {
+  return api().openDefaultAppsSettings()
 }
 
 export async function getInitialArgs(): Promise<string[]> {

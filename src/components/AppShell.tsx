@@ -5,6 +5,7 @@ import {
   isElectronRuntime,
   onBeforeClose,
   onMenuCommand,
+  openDefaultAppsSettings,
   requestAppClose,
   respondToCloseRequest,
   showOpenDialog,
@@ -111,6 +112,15 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     fileName: string
     resolve: (choice: UnsavedChoice) => void
   } | null>(null)
+  const [showDefaultAppPrompt, setShowDefaultAppPrompt] = useState(() => {
+    if (!isElectronRuntime()) return false
+    if (typeof navigator !== 'undefined' && !navigator.platform.includes('Win')) return false
+    try {
+      return localStorage.getItem('inkleaf-hasSeenDefaultAppPrompt') !== 'true'
+    } catch {
+      return false
+    }
+  })
   const handledInitialArgs = useRef(false)
   const handledSingleInstancePayload = useRef<SingleInstancePayload | null>(null)
 
@@ -403,6 +413,20 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     clearDraftSnapshot()
     setRecoveryDraft(null)
   }, [])
+
+  const dismissDefaultAppPrompt = useCallback(() => {
+    try {
+      localStorage.setItem('inkleaf-hasSeenDefaultAppPrompt', 'true')
+    } catch {
+      // ignore
+    }
+    setShowDefaultAppPrompt(false)
+  }, [])
+
+  const handleOpenDefaultAppsSettings = useCallback(() => {
+    void openDefaultAppsSettings()
+    dismissDefaultAppPrompt()
+  }, [dismissDefaultAppPrompt])
 
   const handleSearch = useCallback(() => {
     if (!useDocumentStore.getState().current) return
@@ -766,6 +790,22 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       ) : null}
       {pendingUnsaved ? (
         <UnsavedChangesDialog fileName={pendingUnsaved.fileName} onChoose={handleUnsavedChoice} />
+      ) : null}
+      {showDefaultAppPrompt ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h2>{t('defaultApp.title')}</h2>
+            <p style={{ whiteSpace: 'pre-line' }}>{t('defaultApp.message')}</p>
+            <div className="modal-actions">
+              <button type="button" className="primary-button" onClick={handleOpenDefaultAppsSettings}>
+                {t('defaultApp.openSettings')}
+              </button>
+              <button type="button" className="secondary-button" onClick={dismissDefaultAppPrompt}>
+                {t('defaultApp.later')}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   )

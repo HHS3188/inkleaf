@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
   showItemInFolder: (path) =>
     ipcRenderer.invoke('open-in-file-manager', path),
+  openDefaultAppsSettings: () =>
+    ipcRenderer.invoke('open-default-apps-settings'),
 
   // Dialog operations
   showOpenDialog: (options) =>

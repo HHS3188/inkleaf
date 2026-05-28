@@ -24,6 +24,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - 自动保存与本地草稿恢复
 - 底部状态栏：行 / 列 / 字符数 / 文件类型 / 编码 / 缩放
 - 图片拖拽插入（Markdown）
+- Windows 文件关联（`.txt` / `.md` / `.markdown`）
 - Windows exe 安装包
 
 ---
@@ -38,6 +39,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - Auto-save and local draft recovery
 - Status bar: line, column, characters, file type, encoding, zoom
 - Image drag-and-drop insertion (Markdown)
+- Windows file associations (`.txt` / `.md` / `.markdown`)
 - Windows installer (exe)
 
 ## 设计取向 / Design Philosophy
@@ -56,15 +58,19 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 
 从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载：
 
-- **InkLeaf.Setup.0.1.0.exe** — Windows 安装包（推荐 Windows 10/11）
+- **InkLeaf.Setup.0.1.1.exe** — Windows 安装包（推荐 Windows 10/11）
 
 下载后运行安装包，按提示完成安装。安装完成后可从开始菜单搜索 **InkLeaf** 启动。
 
+安装包会注册 InkLeaf 为 `.txt` / `.md` / `.markdown` 的可选打开程序。首次启动时会提示是否打开 Windows 默认应用设置，由用户自行选择。也可手动设置：Windows 设置 → 应用 → 默认应用 → 搜索 `.txt` 或 `.md` → 选择 InkLeaf。
+
 Download from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf.Setup.0.1.0.exe** — Windows installer (recommended for Windows 10/11)
+- **InkLeaf.Setup.0.1.1.exe** — Windows installer (recommended for Windows 10/11)
 
 Run the installer and follow the setup wizard. After installation, launch **InkLeaf** from the Start menu.
+
+The installer registers InkLeaf as an available app for `.txt`, `.md`, and `.markdown`. On first launch, InkLeaf offers to open Windows Default Apps settings so you can set it as the default. You can also set it manually: Windows Settings → Apps → Default Apps → search for `.txt` or `.md` → choose InkLeaf.
 
 ## 开发 / Development
 
@@ -87,19 +93,19 @@ pnpm build          # Vite + Electron Builder 打包
 
 ## 项目状态 / Status
 
-当前为早期版本（v0.1.0）。核心功能已可用，部分体验仍在继续完善。
+当前为早期版本（v0.1.1）。核心功能已可用，部分体验仍在继续完善。
 
 当前 Windows 发布包：
 
-- **InkLeaf.Setup.0.1.0.exe** — NSIS 安装包
+- **InkLeaf.Setup.0.1.1.exe** — NSIS 安装包
 
 已知限制：大文件（>100MB）暂不支持。
 
-This is an early release (v0.1.0). Core features are functional; some areas are still being refined.
+This is an early release (v0.1.1). Core features are functional; some areas are still being refined.
 
 Current Windows release asset:
 
-- **InkLeaf.Setup.0.1.0.exe** — NSIS installer
+- **InkLeaf.Setup.0.1.1.exe** — NSIS installer
 
 Known limit: files larger than 100 MB are not supported.
 

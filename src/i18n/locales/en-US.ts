@@ -258,4 +258,9 @@ export const enUS: I18N = {
 
   'wordWrap.on': 'Word wrap on',
   'wordWrap.off': 'Word wrap off',
+
+  'defaultApp.title': 'Set as Default App',
+  'defaultApp.message': 'Make InkLeaf the default app for Markdown and TXT files?\nYou can change this later in Settings.',
+  'defaultApp.openSettings': 'Open Windows Default Apps',
+  'defaultApp.later': 'Later',
 }

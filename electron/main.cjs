@@ -305,13 +305,17 @@ ipcMain.handle('shell:open-external', async (_event, url) => {
   await shell.openExternal(url)
 })
 
+ipcMain.handle('open-default-apps-settings', async () => {
+  await shell.openExternal('ms-settings:defaultapps')
+})
+
 // ── Window creation ──────────────────────────────────────────────────
 
 function createWindow() {
   openPayloadQueue.markRendererUnavailable()
   const appIconPath = isDev
-    ? path.join(__dirname, 'inkleaf-icon.ico')
-    : path.join(process.resourcesPath, 'icon.ico')
+    ? path.join(__dirname, '..', 'build', 'icon.ico')
+    : path.join(process.resourcesPath, 'build', 'icon.ico')
 
   mainWindow = new BrowserWindow({
     width: 1180,

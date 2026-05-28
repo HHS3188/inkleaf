@@ -258,4 +258,9 @@ export const zhCN: I18N = {
 
   'wordWrap.on': '已开启自动换行',
   'wordWrap.off': '已关闭自动换行',
+
+  'defaultApp.title': '设为默认应用',
+  'defaultApp.message': '让 InkLeaf 成为 Markdown / TXT 默认打开应用？\n你可以稍后在设置里修改。',
+  'defaultApp.openSettings': '打开 Windows 默认应用设置',
+  'defaultApp.later': '稍后',
 }
