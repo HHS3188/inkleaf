@@ -38,22 +38,18 @@ describe('SourceEditor typography theme', () => {
     expect(source).not.toContain('drawSelection')
   })
 
-  it('uses same gutter font size as editor content', () => {
-    expect(source).toContain("fontSize: 'var(--editor-font-size)'")
-    expect(source).not.toContain("fontSize: 'calc(var(--editor-font-size) * 0.86)'")
+  it('does not import or call lineNumbers', () => {
+    expect(source).not.toMatch(/import[^]*lineNumbers/)
+    expect(source).not.toContain('lineNumbers()')
   })
 
-  it('does not set lineHeight on cm-gutters or cm-scroller', () => {
+  it('hides cm-gutters with display none', () => {
     const gutterBlock = source.match(/\.cm-gutters['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
-    const scrollerBlock = source.match(/\.cm-scroller['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(gutterBlock).not.toContain('lineHeight')
-    expect(scrollerBlock).not.toContain('lineHeight')
+    expect(gutterBlock).toContain("display: 'none'")
   })
 
-  it('sets gutterElement lineHeight to var(--editor-line-height-px) without minHeight', () => {
-    const block = source.match(/\.cm-gutterElement['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(block).toContain("lineHeight: 'var(--editor-line-height-px)'")
-    expect(block).not.toContain('minHeight')
-    expect(block).not.toMatch(/lineHeight:\s*['"]\d+px['"]/)
+  it('does not contain gutterElement or activeLineGutter styles', () => {
+    expect(source).not.toContain("'.cm-gutterElement':")
+    expect(source).not.toContain("'.cm-activeLineGutter':")
   })
 })

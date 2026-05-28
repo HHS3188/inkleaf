@@ -4,7 +4,6 @@ import { Compartment, EditorState } from '@codemirror/state'
 import {
   EditorView,
   keymap,
-  lineNumbers,
 } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap, redo, selectAll, undo } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
@@ -374,7 +373,6 @@ export function SourceEditor({
       doc: contentRef.current,
       extensions: [
         history(),
-        lineNumbers(),
         wrapCompartmentRef.current.of(wordWrapRef.current ? EditorView.lineWrapping : []),
         markdown(),
         search(),
@@ -446,20 +444,7 @@ export function SourceEditor({
             backgroundColor: 'var(--selection)',
           },
           '.cm-gutters': {
-            backgroundColor: 'var(--editor-gutter)',
-            borderRight: '1px solid var(--border)',
-            color: 'var(--muted)',
-            fontFamily: 'var(--mono-font)',
-            fontSize: 'var(--editor-font-size)',
-            paddingTop: 'var(--editor-top-padding, 8px)',
-          },
-          '.cm-gutterElement': {
-            padding: '0 8px 0 6px',
-            lineHeight: 'var(--editor-line-height-px)',
-          },
-          '.cm-activeLineGutter': {
-            backgroundColor: 'transparent',
-            color: 'var(--text)',
+            display: 'none',
           },
           '.cm-activeLine': {
             backgroundColor: 'transparent',
