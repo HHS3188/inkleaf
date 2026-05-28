@@ -35,9 +35,21 @@ describe('SourceEditor typography theme', () => {
     expect(source).toContain("fontWeight: 'inherit'")
   })
 
-  it('uses smaller gutter font size than editor content', () => {
-    expect(source).toContain("fontSize: 'calc(var(--editor-font-size) * 0.86)'")
-    expect(source).toContain("'.cm-gutterElement':")
-    expect(source).toContain("fontSize: 'inherit'")
+  it('does not import or call drawSelection', () => {
+    expect(source).not.toContain('drawSelection')
+  })
+
+  it('uses same gutter font size as editor content', () => {
+    expect(source).toContain("fontSize: 'var(--editor-font-size)'")
+    expect(source).not.toContain("fontSize: 'calc(var(--editor-font-size) * 0.86)'")
+  })
+
+  it('does not set lineHeight on cm-gutters, cm-gutterElement, or cm-scroller', () => {
+    const gutterBlock = source.match(/\.cm-gutters['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
+    const gutterElementBlock = source.match(/\.cm-gutterElement['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
+    const scrollerBlock = source.match(/\.cm-scroller['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(gutterBlock).not.toContain('lineHeight')
+    expect(gutterElementBlock).not.toContain('lineHeight')
+    expect(scrollerBlock).not.toContain('lineHeight')
   })
 })

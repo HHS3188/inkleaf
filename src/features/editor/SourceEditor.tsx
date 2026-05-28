@@ -3,7 +3,6 @@ import { copyImageToAssets } from '../../lib/platform-api'
 import { Compartment, EditorState } from '@codemirror/state'
 import {
   EditorView,
-  drawSelection,
   keymap,
   lineNumbers,
 } from '@codemirror/view'
@@ -376,7 +375,6 @@ export function SourceEditor({
       extensions: [
         history(),
         lineNumbers(),
-        drawSelection(),
         wrapCompartmentRef.current.of(wordWrapRef.current ? EditorView.lineWrapping : []),
         markdown(),
         search(),
@@ -441,10 +439,6 @@ export function SourceEditor({
             caretColor: 'var(--editor-caret)',
             userSelect: 'text',
           },
-          '.cm-cursorLayer': {
-            zIndex: '3',
-            pointerEvents: 'none',
-          },
           '&:not(.cm-focused) .cm-cursor': {
             borderLeftColor: 'transparent',
           },
@@ -455,13 +449,12 @@ export function SourceEditor({
             backgroundColor: 'var(--editor-gutter)',
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
-            fontSize: 'calc(var(--editor-font-size) * 0.86)',
-            lineHeight: 'var(--editor-line-height-px)',
+            fontFamily: 'var(--mono-font)',
+            fontSize: 'var(--editor-font-size)',
             paddingTop: 'var(--editor-top-padding, 8px)',
           },
           '.cm-gutterElement': {
-            fontSize: 'inherit',
-            lineHeight: 'var(--editor-line-height-px)',
+            padding: '0 8px 0 6px',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'transparent',
@@ -472,7 +465,6 @@ export function SourceEditor({
           },
           '.cm-scroller': {
             fontFamily: 'var(--mono-font)',
-            lineHeight: 'var(--editor-line-height-px)',
             cursor: 'text',
           },
           '.cm-line': {
@@ -482,15 +474,6 @@ export function SourceEditor({
           '.cm-line *': {
             fontSize: 'inherit',
             lineHeight: 'inherit',
-          },
-          '&.cm-focused .cm-cursor': {
-            borderLeftColor: 'var(--editor-caret)',
-            borderLeftWidth: '2px',
-            marginLeft: '-1px',
-          },
-          '&.cm-focused .cm-dropCursor': {
-            borderLeftColor: 'var(--editor-caret)',
-            borderLeftWidth: '2px',
           },
           '.tok-heading': {
             fontSize: 'inherit',
