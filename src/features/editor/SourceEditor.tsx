@@ -431,17 +431,9 @@ export function SourceEditor({
             caretColor: 'var(--editor-caret)',
             userSelect: 'text',
           },
-          '.cm-line': {
-            cursor: 'text',
-          },
           '.cm-cursorLayer': {
             zIndex: '3',
             pointerEvents: 'none',
-          },
-          '&.cm-focused .cm-cursor': {
-            borderLeftColor: 'var(--editor-caret)',
-            borderLeftWidth: '2px',
-            marginLeft: '-1px',
           },
           '&.cm-focused .cm-dropCursor': {
             borderLeftColor: 'var(--editor-caret)',
@@ -458,6 +450,12 @@ export function SourceEditor({
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
             fontSize: 'var(--editor-font-size)',
+            lineHeight: 'var(--app-line-height)',
+          },
+          '.cm-gutterElement': {
+            fontSize: 'var(--editor-font-size)',
+            lineHeight: 'var(--app-line-height)',
+            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'var(--editor-active-line)',
@@ -470,6 +468,16 @@ export function SourceEditor({
             fontFamily: 'var(--mono-font)',
             lineHeight: 'var(--app-line-height)',
             cursor: 'text',
+          },
+          '.cm-line': {
+            cursor: 'text',
+            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
+          },
+          '&.cm-focused .cm-cursor': {
+            borderLeftColor: 'var(--editor-caret)',
+            borderLeftWidth: '2px',
+            marginLeft: '-1px',
+            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
           },
           '.cm-searchMatch': {
             backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',

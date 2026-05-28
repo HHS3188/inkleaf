@@ -9,7 +9,7 @@ describe('layout css contracts', () => {
     expect(css).toContain('position: fixed')
     expect(css).toContain('right: 12px')
     expect(css).toContain('left: auto')
-    expect(css).toContain('max-width: min(560px, calc(100% - 24px))')
+    expect(css).toContain('max-width: min(620px, calc(100% - 24px))')
   })
 
   it('keeps the status bar presentational', () => {
@@ -17,10 +17,10 @@ describe('layout css contracts', () => {
   })
 
   it('uses a gray light theme surface palette', () => {
-    expect(css).toContain('--bg: #e9e9e9')
-    expect(css).toContain('--editor-bg: #f4f4f4')
-    expect(css).toContain('--toolbar-bg: #ededed')
-    expect(css).toContain('--statusbar-bg: #dedede')
+    expect(css).toContain('--bg: #e4e4e4')
+    expect(css).toContain('--editor-bg: #f0f0f0')
+    expect(css).toContain('--toolbar-bg: #e7e7e7')
+    expect(css).toContain('--statusbar-bg: #d8d8d8')
   })
 
   it('keeps settings and find surfaces opaque and responsive', () => {

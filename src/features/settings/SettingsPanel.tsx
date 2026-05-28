@@ -33,6 +33,27 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose, openPanel])
 
+  useEffect(() => {
+    if (!position) return
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+    const handleResize = () => {
+      const modal = modalRef.current
+      if (!modal) return
+      const rect = modal.getBoundingClientRect()
+      const maxX = window.innerWidth - rect.width - 8
+      const maxY = window.innerHeight - rect.height - 8
+      setPosition((prev) => {
+        if (!prev) return prev
+        return {
+          x: clamp(prev.x, 8, Math.max(8, maxX)),
+          y: clamp(prev.y, 8, Math.max(8, maxY)),
+        }
+      })
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [position])
+
   const handlePointerDown = useCallback((event: React.PointerEvent) => {
     const modal = modalRef.current
     if (!modal) return
