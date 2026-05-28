@@ -465,6 +465,10 @@ export function SourceEditor({
             cursor: 'text',
             lineHeight: 'var(--editor-line-height-px)',
           },
+          '.cm-line *': {
+            fontSize: 'inherit',
+            lineHeight: 'inherit',
+          },
           '&.cm-focused .cm-cursor': {
             borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',

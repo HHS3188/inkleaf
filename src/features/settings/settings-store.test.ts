@@ -43,4 +43,17 @@ describe('settings store', () => {
     expect(style.getPropertyValue('--reader-width')).toBe('860px')
     expect(style.getPropertyValue('--editor-font-size')).toBe('22px')
   })
+
+  it('decouples source editor line height from reader line height', () => {
+    useSettingsStore.getState().updateSettings({
+      fontSize: 16,
+      lineHeight: 1.7,
+      zoom: 200,
+    })
+
+    const style = document.documentElement.style
+    expect(style.getPropertyValue('--editor-font-size')).toBe('32px')
+    expect(style.getPropertyValue('--editor-line-height-px')).toBe('43px')
+    expect(style.getPropertyValue('--reader-line-height')).toBe('1.7')
+  })
 })

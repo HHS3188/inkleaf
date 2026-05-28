@@ -97,9 +97,11 @@ export function applyReaderSettings(settings: ReaderSettings) {
   root.style.setProperty('--reader-line-height', String(settings.lineHeight))
   root.style.setProperty('--reader-width', `${settings.readingWidth}px`)
   root.style.setProperty('--reader-zoom', String(settings.zoom / 100))
+  const editorLineHeightRatio = 1.35
   const editorFontSize = Math.round(settings.fontSize * (settings.zoom / 100))
+  const editorLineHeight = Math.round(editorFontSize * editorLineHeightRatio)
   root.style.setProperty('--editor-font-size', `${editorFontSize}px`)
-  root.style.setProperty('--editor-line-height-px', `${Math.round(editorFontSize * settings.lineHeight)}px`)
+  root.style.setProperty('--editor-line-height-px', `${editorLineHeight}px`)
 }
 
 function readSettings(): ReaderSettings {
