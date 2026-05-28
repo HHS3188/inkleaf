@@ -115,7 +115,7 @@ export const zhCN: I18N = {
   'unsaved.cancel': '取消',
 
   'document.newMarkdownName': '未命名.md',
-  'document.newMarkdownContent': '# 新文档\n',
+  'document.newMarkdownContent': '',
   'document.newTxtName': '未命名.txt',
   'document.newTxtContent': '',
 

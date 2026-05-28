@@ -115,7 +115,7 @@ export const enUS: I18N = {
   'unsaved.cancel': 'Cancel',
 
   'document.newMarkdownName': 'Untitled.md',
-  'document.newMarkdownContent': '# Untitled\n',
+  'document.newMarkdownContent': '',
   'document.newTxtName': 'Untitled.txt',
   'document.newTxtContent': '',
 
