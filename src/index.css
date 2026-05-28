@@ -161,15 +161,17 @@ button:disabled {
 
 .toolbar {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  align-content: center;
+  row-gap: 4px;
   gap: 6px;
   align-items: center;
   min-height: 44px;
   padding: 0 10px;
   border-bottom: 1px solid var(--border);
   background: var(--toolbar-bg);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .app-menu-bar {
@@ -471,13 +473,13 @@ button:disabled {
 }
 
 .toolbar-spacer {
-  flex: 1 1 auto;
-  min-width: 8px;
+  flex: 1 1 24px;
+  min-width: 0;
 }
 
 .toolbar-file-actions,
 .toolbar-modes {
-  flex-shrink: 0;
+  flex-shrink: 1;
 }
 
 .toolbar-group {
@@ -2354,6 +2356,12 @@ button:disabled {
   }
 }
 
+@media (max-width: 1100px) {
+  .tool-button-label {
+    display: none;
+  }
+}
+
 @media (max-width: 860px) {
   .app-shell {
     min-width: 0;
@@ -2443,8 +2451,7 @@ button:disabled {
 }
 
 @media (max-width: 680px) {
-  .app-menu-bar,
-  .toolbar {
+  .app-menu-bar {
     overflow-x: auto;
   }
 

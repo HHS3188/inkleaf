@@ -30,4 +30,21 @@ describe('layout css contracts', () => {
     expect(css).not.toContain('background: color-mix(in srgb, var(--surface) 96%, transparent)')
     expect(css).toContain('@media (max-width: 680px)')
   })
+
+  it('wraps toolbar instead of horizontal scrolling', () => {
+    const toolbarBlock = css.match(/\.toolbar\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(toolbarBlock).toContain('flex-wrap: wrap')
+    expect(toolbarBlock).not.toContain('flex-wrap: nowrap')
+    expect(toolbarBlock).not.toMatch(/overflow-x:\s*auto/)
+  })
+
+  it('does not re-enable toolbar overflow-x in media queries', () => {
+    const mediaBlocks = [...css.matchAll(/@media[^{]*\{[\s\S]*?\}\s*\}/g)]
+    for (const block of mediaBlocks) {
+      const text = block[0]
+      if (text.includes('.toolbar') && text.includes('overflow-x: auto')) {
+        expect(text).not.toMatch(/\.toolbar[\s\S]*overflow-x:\s*auto/)
+      }
+    }
+  })
 })

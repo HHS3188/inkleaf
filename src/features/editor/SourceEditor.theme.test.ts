@@ -50,11 +50,10 @@ describe('SourceEditor typography theme', () => {
     expect(scrollerBlock).not.toContain('lineHeight')
   })
 
-  it('sets gutterElement lineHeight and minHeight to var(--editor-line-height-px)', () => {
+  it('sets gutterElement lineHeight to var(--editor-line-height-px) without minHeight', () => {
     const block = source.match(/\.cm-gutterElement['"\s]*:\s*\{[^}]*\}/)?.[0] ?? ''
     expect(block).toContain("lineHeight: 'var(--editor-line-height-px)'")
-    expect(block).toContain("minHeight: 'var(--editor-line-height-px)'")
+    expect(block).not.toContain('minHeight')
     expect(block).not.toMatch(/lineHeight:\s*['"]\d+px['"]/)
-    expect(block).not.toMatch(/minHeight:\s*['"]\d+px['"]/)
   })
 })
