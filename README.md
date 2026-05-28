@@ -24,7 +24,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - 自动保存与本地草稿恢复
 - 底部状态栏：行 / 列 / 字符数 / 文件类型 / 编码 / 缩放
 - 图片拖拽插入（Markdown）
-- Windows exe 安装包与 portable 版本
+- Windows exe 安装包
 
 ---
 
@@ -38,7 +38,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - Auto-save and local draft recovery
 - Status bar: line, column, characters, file type, encoding, zoom
 - Image drag-and-drop insertion (Markdown)
-- Windows installer (exe) and portable builds
+- Windows installer (exe)
 
 ## 设计取向 / Design Philosophy
 
@@ -56,15 +56,15 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 
 从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载：
 
-- **InkLeaf Setup 0.1.0.exe** — NSIS 安装包（推荐 Windows 10/11）
-- **InkLeaf 0.1.0.exe** — Portable 免安装版本
-- **InkLeaf 0.1.0.msi** — MSI 安装包
+- **InkLeaf.Setup.0.1.0.exe** — Windows 安装包（推荐 Windows 10/11）
+
+下载后运行安装包，按提示完成安装。安装完成后可从开始菜单搜索 **InkLeaf** 启动。
 
 Download from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf Setup 0.1.0.exe** — NSIS installer (recommended for Windows 10/11)
-- **InkLeaf 0.1.0.exe** — Portable, no installation required
-- **InkLeaf 0.1.0.msi** — MSI installer
+- **InkLeaf.Setup.0.1.0.exe** — Windows installer (recommended for Windows 10/11)
+
+Run the installer and follow the setup wizard. After installation, launch **InkLeaf** from the Start menu.
 
 ## 开发 / Development
 
@@ -89,21 +89,17 @@ pnpm build          # Vite + Electron Builder 打包
 
 当前为早期版本（v0.1.0）。核心功能已可用，部分体验仍在继续完善。
 
-当前 Windows 发布包包括：
+当前 Windows 发布包：
 
-- **InkLeaf Setup 0.1.0.exe** — NSIS 安装包
-- **InkLeaf 0.1.0.exe** — Portable 免安装版本
-- **InkLeaf 0.1.0.msi** — MSI 安装包
+- **InkLeaf.Setup.0.1.0.exe** — NSIS 安装包
 
 已知限制：大文件（>100MB）暂不支持。
 
 This is an early release (v0.1.0). Core features are functional; some areas are still being refined.
 
-Current Windows release assets include:
+Current Windows release asset:
 
-- **InkLeaf Setup 0.1.0.exe** — NSIS installer
-- **InkLeaf 0.1.0.exe** — Portable build
-- **InkLeaf 0.1.0.msi** — MSI installer
+- **InkLeaf.Setup.0.1.0.exe** — NSIS installer
 
 Known limit: files larger than 100 MB are not supported.
 

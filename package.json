@@ -36,7 +36,7 @@
       }
     ],
     "win": {
-      "target": ["nsis", "msi", "portable"],
+      "target": ["nsis"],
       "icon": "electron/inkleaf-icon.ico"
     },
     "nsis": {
