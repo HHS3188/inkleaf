@@ -474,6 +474,11 @@ export function SourceEditor({
             borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',
           },
+          '.tok-heading': {
+            fontSize: 'inherit',
+            lineHeight: 'inherit',
+            fontWeight: 'bold',
+          },
           '.cm-searchMatch': {
             backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',
             outline: '1px solid color-mix(in srgb, #eab308 42%, transparent)',
