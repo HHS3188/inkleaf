@@ -15,6 +15,7 @@ import { FindBar } from '../../components/FindBar'
 import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
 import { useEditorStore } from './editor-store'
+import { useSettingsStore } from '../settings/settings-store'
 import {
   findTextMatches,
   getNextMatchIndex,
@@ -60,6 +61,9 @@ export function SourceEditor({
   const focusRequest = useEditorStore((state) => state.focusRequest)
   const commandRequest = useEditorStore((state) => state.commandRequest)
   const setCursorPosition = useEditorStore((state) => state.setCursorPosition)
+  const editorFontSize = useSettingsStore((state) => state.settings.fontSize)
+  const editorZoom = useSettingsStore((state) => state.settings.zoom)
+  const editorMonoFont = useSettingsStore((state) => state.settings.monoFont)
   const [findOpen, setFindOpen] = useState(false)
   const [findQuery, setFindQueryState] = useState('')
   const [replaceOpen, setReplaceOpen] = useState(false)
@@ -69,6 +73,16 @@ export function SourceEditor({
   const [findFocusKey, setFindFocusKey] = useState(0)
   const [findResult, setFindResult] = useState({ current: 0, total: 0 })
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) return
+    view.requestMeasure()
+    const frame = window.requestAnimationFrame(() => {
+      view.requestMeasure()
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [editorFontSize, editorZoom, editorMonoFont])
 
   useEffect(() => {
     contentRef.current = content
@@ -441,12 +455,12 @@ export function SourceEditor({
             backgroundColor: 'var(--editor-gutter)',
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
-            fontSize: 'var(--editor-font-size)',
+            fontSize: 'calc(var(--editor-font-size) * 0.86)',
             lineHeight: 'var(--editor-line-height-px)',
             paddingTop: 'var(--editor-top-padding, 8px)',
           },
           '.cm-gutterElement': {
-            fontSize: 'var(--editor-font-size)',
+            fontSize: 'inherit',
             lineHeight: 'var(--editor-line-height-px)',
           },
           '.cm-activeLineGutter': {
@@ -481,7 +495,7 @@ export function SourceEditor({
           '.tok-heading': {
             fontSize: 'inherit',
             lineHeight: 'inherit',
-            fontWeight: 'bold',
+            fontWeight: 'inherit',
           },
           '.cm-searchMatch': {
             backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',

@@ -24,4 +24,20 @@ describe('SourceEditor typography theme', () => {
     expect(source).not.toMatch(/\.cm-line[^*][\s\S]*height:/)
     expect(source).not.toMatch(/cm-gutterElement[\s\S]*height:/)
   })
+
+  it('calls requestMeasure on settings change', () => {
+    expect(source).toContain('requestMeasure()')
+    expect(source).toContain('editorFontSize, editorZoom, editorMonoFont')
+  })
+
+  it('normalizes tok-heading to inherit font properties', () => {
+    expect(source).toContain("'.tok-heading':")
+    expect(source).toContain("fontWeight: 'inherit'")
+  })
+
+  it('uses smaller gutter font size than editor content', () => {
+    expect(source).toContain("fontSize: 'calc(var(--editor-font-size) * 0.86)'")
+    expect(source).toContain("'.cm-gutterElement':")
+    expect(source).toContain("fontSize: 'inherit'")
+  })
 })
