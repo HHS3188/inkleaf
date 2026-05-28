@@ -316,8 +316,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1180,
     height: 780,
-    minWidth: 640,
-    minHeight: 460,
+    minWidth: 580,
+    minHeight: 400,
     backgroundColor: '#202020',
     title: 'InkLeaf',
     icon: appIconPath,

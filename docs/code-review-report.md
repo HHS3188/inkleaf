@@ -10,6 +10,18 @@ Reviewed the current InkLeaf Electron mainline:
 - Menu, toolbar, status bar, settings, help, startup page, and dialogs.
 - Legacy naming, fixtures, README, and docs.
 
+## Latest Round Fixes (c44b359)
+
+- **P0**: Status bar hidden on startup/empty state; only shows when a document is open in Reader/Source/Split mode.
+- **P0**: CodeMirror gutter `fontSize` changed from hardcoded `12px` to `var(--editor-font-size)` so line numbers scale with zoom.
+- **P1**: Light theme contrast improved: `--bg: #e9e9e9`, `--surface: #eeeeee`, `--border: #c9c9c9`, `--toolbar-bg: #ededed`, `--statusbar-bg: #dedede`.
+- **P1**: UI font weight increased to `500` for menu, toolbar, buttons, status bar; tab titles use `600`.
+- **P1**: UI font sizes bumped: menu `13px`, buttons `13px`, status bar `12px`.
+- **P1**: Find bar repositioned to top-right corner (like Windows Notepad), smaller border-radius, no shadow, compact height.
+- **P1**: Settings modal now supports drag via header as drag handle (pointerdown/pointermove/pointerup), bounded to window.
+- **P2**: Added 480px responsive breakpoint: hides secondary status items, narrows sidebar, shrinks tabs.
+- **P2**: Updated `index-css.test.ts` to match new color values and find bar positioning.
+
 ## Fixed P0/P1/P2 Issues
 
 - P1: Settings now opens from the top toolbar/menu as a centered modal with backdrop close, Escape close, bounded height, and scrollable content instead of occupying the page side panel.
@@ -18,7 +30,7 @@ Reviewed the current InkLeaf Electron mainline:
 - P1: Find/Replace is now an opaque fixed overlay with clearer controls, replace row layout, disabled states, and small-window width constraints.
 - P1: Status bar is fixed to the app bottom row, non-interactive, higher contrast, and trims secondary metadata on narrow windows.
 - P1: Light theme moved further toward a white-gray desktop palette across body, toolbar, editor, reader, preview, settings, menus, dialogs, and status bar.
-- P2: Electron minimum window size is now 640x460 with responsive toolbar, settings modal, help modal, find bar, tabs, and status bar constraints.
+- P2: Electron minimum window size reduced to 580x400 with responsive toolbar, settings modal, help modal, find bar, tabs, and status bar constraints.
 - P0: Source editor no longer rebuilds CodeMirror when AppShell callback props change after content updates; local edit guards prevent same-content external sync from replacing the editor document.
 - P1: Document state now supports real tabs with active tab id, dirty state per tab, tab switching, tab closing, and `+` new Markdown.
 - P1: Dirty tab close prompts before discard/save; quitting checks dirty tabs instead of only the active document.
@@ -39,7 +51,7 @@ Reviewed the current InkLeaf Electron mainline:
 - P2: Status bar now shows line, column, word count, character count, file type, zoom, line ending, encoding, and wrap state.
 - P2: Reader layout is left biased with safer wrapping for long TXT/Markdown/HTML content.
 - P2: Help dialog content is scrollable and bounded by viewport height.
-- P2: Small-window minimum changed to 640x460 with responsive toolbar/status behavior.
+- P2: Small-window minimum changed to 580x400 with responsive toolbar/status behavior.
 - P3: Removed obsolete desktop runtime files and misleading validation docs.
 - P3: Updated fixtures and docs to InkLeaf naming.
 
