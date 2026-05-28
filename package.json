@@ -1,6 +1,6 @@
 {
   "name": "inkleaf",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "InkLeaf / 墨笺 — A clean local reader and editor for Markdown, TXT, and HTML.",
   "author": "InkLeaf",
   "private": true,

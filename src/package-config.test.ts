@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
+const mainCjs = readFileSync('electron/main.cjs', 'utf8')
 
 describe('package.json build config', () => {
   it('uses nsis as the only Windows target', () => {
@@ -25,5 +26,20 @@ describe('package.json build config', () => {
     for (const assoc of pkg.build.fileAssociations) {
       expect(assoc.icon).toBe('build/icon.ico')
     }
+  })
+
+  it('exports icon.ico via extraResources', () => {
+    const toPaths = pkg.build.extraResources.map((r: { to: string }) => r.to)
+    expect(toPaths).toContain('icon.ico')
+  })
+})
+
+describe('electron/main.cjs icon path', () => {
+  it('uses resourcesPath/icon.ico for packaged mode', () => {
+    expect(mainCjs).toContain("process.resourcesPath, 'icon.ico'")
+  })
+
+  it('does not use resourcesPath/build/icon.ico', () => {
+    expect(mainCjs).not.toContain("process.resourcesPath, 'build', 'icon.ico'")
   })
 })
