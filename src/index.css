@@ -1,22 +1,23 @@
 :root {
   color-scheme: light;
   --accent: #3b82f6;
-  --bg: #e4e4e4;
-  --surface: #ececec;
-  --surface-subtle: #e1e1e1;
-  --surface-elevated: #f2f2f2;
-  --toolbar-bg: #e7e7e7;
-  --sidebar-bg: #e3e3e3;
-  --statusbar-bg: #d8d8d8;
-  --text: #1e1e1e;
-  --muted: #4e4e4e;
-  --text-subtle: #666666;
-  --border: #bcbcbc;
-  --border-subtle: #cccccc;
+  --bg: #eeeeee;
+  --surface: #f4f4f4;
+  --surface-subtle: #e8e8e8;
+  --surface-elevated: #f8f8f8;
+  --toolbar-bg: #ececec;
+  --sidebar-bg: #e8e8e8;
+  --statusbar-bg: #dedede;
+  --text: #171717;
+  --muted: #3f3f3f;
+  --text-subtle: #5f5f5f;
+  --border: #b8b8b8;
+  --border-subtle: #c8c8c8;
   --danger: #dc2626;
   --shadow: 0 8px 28px rgb(15 23 42 / 12%);
   --accent-muted: rgb(59 130 246 / 14%);
   --selection: rgb(59 130 246 / 20%);
+  --input-bg: #f9f9f9;
   --app-font-size: 16px;
   --app-line-height: 1.7;
   --reader-font-size: 16px;
@@ -24,15 +25,16 @@
   --reader-width: 980px;
   --reader-zoom: 1;
   --body-font:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --mono-font: 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
+    'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  --mono-font: 'Cascadia Mono', 'Cascadia Code', Consolas, 'Microsoft YaHei UI', monospace;
   --editor-font-size: 16px;
-  --editor-bg: #f0f0f0;
-  --editor-gutter: #e7e7e7;
+  --editor-line-height-px: calc(16px * 1.7);
+  --editor-bg: #f7f7f7;
+  --editor-gutter: #ececec;
   --editor-active-line: rgb(59 130 246 / 8%);
   --editor-caret: #2563eb;
-  --reader-bg: #eeeeee;
-  --preview-bg: #eeeeee;
+  --reader-bg: #f4f4f4;
+  --preview-bg: #f4f4f4;
   --motion-fast: 120ms ease;
   --motion-medium: 170ms ease;
 }
@@ -63,6 +65,31 @@
 
 * {
   box-sizing: border-box;
+}
+
+.app-menu,
+.app-menu-bar,
+.toolbar,
+.tab-strip,
+.status-bar,
+.find-bar,
+.settings-modal header,
+.outline-sidebar,
+.icon-button,
+.tool-button,
+.segmented-button,
+.primary-button,
+.secondary-button {
+  user-select: none;
+}
+
+.cm-editor,
+.reader-view,
+.reader-content,
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
 }
 
 :root[data-theme='dark'] * {
@@ -1434,28 +1461,28 @@ button:disabled {
   align-items: center;
   gap: 6px;
   width: max-content;
-  max-width: min(620px, calc(100% - 24px));
-  min-height: 40px;
-  padding: 6px 8px;
+  max-width: min(680px, calc(100% - 24px));
+  min-height: 44px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--surface-elevated);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 14%);
-  font-size: 14px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  font-size: 15px;
   font-weight: 500;
   animation: findBarIn var(--motion-fast);
 }
 
 .find-bar--replace {
   display: grid;
-  grid-template-columns: auto minmax(180px, 280px) minmax(52px, auto) repeat(6, 28px);
-  width: min(560px, calc(100% - 24px));
+  grid-template-columns: auto minmax(200px, 320px) minmax(60px, auto) repeat(6, 30px);
+  width: min(680px, calc(100% - 24px));
 }
 
 :root[data-theme='dark'] .find-bar {
   border-color: #454545;
   background: var(--surface-elevated);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 36%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 36%);
 }
 
 .find-scope {
@@ -1470,13 +1497,13 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: clamp(180px, 26vw, 300px);
+  width: clamp(200px, 28vw, 340px);
   min-width: 0;
-  min-height: 30px;
+  min-height: 32px;
   padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: var(--surface);
+  background: var(--input-bg, var(--surface));
   color: var(--muted);
 }
 
@@ -1489,14 +1516,14 @@ button:disabled {
 }
 
 .replace-input-wrap {
-  flex: 1 1 220px;
+  flex: 1 1 240px;
 }
 
 .find-replace-button {
-  height: 30px;
-  min-height: 30px;
+  height: 32px;
+  min-height: 32px;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 :root[data-theme='dark'] .find-input-wrap {
@@ -1511,7 +1538,7 @@ button:disabled {
   outline: none;
   background: transparent;
   color: var(--text);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -1520,16 +1547,16 @@ button:disabled {
 }
 
 .find-count {
-  min-width: 52px;
+  min-width: 56px;
   color: var(--muted);
   font-family: var(--mono-font);
-  font-size: 13px;
+  font-size: 14px;
   text-align: center;
   white-space: nowrap;
 }
 
 .find-count.empty {
-  min-width: 72px;
+  min-width: 76px;
   color: var(--danger);
   font-family: inherit;
 }
@@ -1538,8 +1565,8 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;

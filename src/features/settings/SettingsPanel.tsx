@@ -55,6 +55,8 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
   }, [position])
 
   const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    const target = event.target as HTMLElement
+    if (target.closest('button, input, select, textarea, a, [data-no-drag]')) return
     const modal = modalRef.current
     if (!modal) return
     const rect = modal.getBoundingClientRect()
@@ -133,6 +135,8 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
           <button
             type="button"
             className="icon-button"
+            data-no-drag
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={onClose}
             aria-label={t('settings.close')}
             title={t('settings.close')}

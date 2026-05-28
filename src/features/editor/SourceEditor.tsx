@@ -425,8 +425,8 @@ export function SourceEditor({
           },
           '.cm-content': {
             fontFamily: 'var(--mono-font)',
-            padding: '16px 20px',
-            lineHeight: 'var(--app-line-height)',
+            padding: '10px 12px',
+            lineHeight: 'var(--editor-line-height-px)',
             cursor: 'text',
             caretColor: 'var(--editor-caret)',
             userSelect: 'text',
@@ -434,10 +434,6 @@ export function SourceEditor({
           '.cm-cursorLayer': {
             zIndex: '3',
             pointerEvents: 'none',
-          },
-          '&.cm-focused .cm-dropCursor': {
-            borderLeftColor: 'var(--editor-caret)',
-            borderLeftWidth: '2px',
           },
           '&:not(.cm-focused) .cm-cursor': {
             borderLeftColor: 'transparent',
@@ -450,12 +446,15 @@ export function SourceEditor({
             borderRight: '1px solid var(--border)',
             color: 'var(--muted)',
             fontSize: 'var(--editor-font-size)',
-            lineHeight: 'var(--app-line-height)',
+            lineHeight: 'var(--editor-line-height-px)',
+            paddingTop: '10px',
           },
           '.cm-gutterElement': {
             fontSize: 'var(--editor-font-size)',
-            lineHeight: 'var(--app-line-height)',
-            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
+            lineHeight: 'var(--editor-line-height-px)',
+            minHeight: 'var(--editor-line-height-px)',
+            height: 'var(--editor-line-height-px)',
+            boxSizing: 'border-box',
           },
           '.cm-activeLineGutter': {
             backgroundColor: 'var(--editor-active-line)',
@@ -466,18 +465,27 @@ export function SourceEditor({
           },
           '.cm-scroller': {
             fontFamily: 'var(--mono-font)',
-            lineHeight: 'var(--app-line-height)',
+            lineHeight: 'var(--editor-line-height-px)',
             cursor: 'text',
           },
           '.cm-line': {
             cursor: 'text',
-            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
+            minHeight: 'var(--editor-line-height-px)',
+            height: 'var(--editor-line-height-px)',
+            boxSizing: 'border-box',
           },
           '&.cm-focused .cm-cursor': {
             borderLeftColor: 'var(--editor-caret)',
             borderLeftWidth: '2px',
             marginLeft: '-1px',
-            minHeight: 'calc(var(--editor-font-size) * var(--app-line-height))',
+            height: 'var(--editor-line-height-px) !important',
+            minHeight: 'var(--editor-line-height-px)',
+          },
+          '&.cm-focused .cm-dropCursor': {
+            borderLeftColor: 'var(--editor-caret)',
+            borderLeftWidth: '2px',
+            height: 'var(--editor-line-height-px) !important',
+            minHeight: 'var(--editor-line-height-px)',
           },
           '.cm-searchMatch': {
             backgroundColor: 'color-mix(in srgb, #facc15 46%, transparent)',
