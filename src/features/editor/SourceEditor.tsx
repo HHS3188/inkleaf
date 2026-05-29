@@ -13,6 +13,7 @@ import { FindBar } from '../../components/FindBar'
 import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
 import { useEditorStore, type MarkdownAction } from './editor-store'
+import { selectionLineFill } from './selection-line-fill'
 import { useSettingsStore } from '../settings/settings-store'
 import {
   findTextMatches,
@@ -379,6 +380,7 @@ export function SourceEditor({
         markdown(),
         search(),
         highlightSelectionMatches(),
+        ...selectionLineFill,
         keymap.of([
           {
             key: 'Mod-f',
@@ -443,6 +445,9 @@ export function SourceEditor({
             borderLeftColor: 'transparent',
           },
           '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+            backgroundColor: 'var(--selection)',
+          },
+          '& .cm-line::selection': {
             backgroundColor: 'var(--selection)',
           },
           '.cm-gutters': {

@@ -9,3 +9,6 @@ target
 .vscode
 mitm_mcp_traffic.db
 pnpm-workspace.yaml
+
+# User icon source material
+InkLeaf_icon/
