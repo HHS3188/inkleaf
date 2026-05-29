@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
 import { useT } from '../../i18n'
-import { normalizeSelectionText } from '../../lib/selection-sync'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -48,12 +47,6 @@ export function SplitEditor({
   const liveRatioRef = useRef(ratio)
   const [dragging, setDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const [readerHighlight, setReaderHighlight] = useState<string | null>(null)
-
-  const handleSelectionChange = useCallback((text: string) => {
-    const normalized = normalizeSelectionText(text)
-    setReaderHighlight(normalized.length >= 2 ? normalized : null)
-  }, [])
 
   const updateRatio = useCallback((nextRatio: number) => {
     liveRatioRef.current = nextRatio
@@ -104,7 +97,6 @@ export function SplitEditor({
               targetLine={targetLine}
               onTargetLineHandled={onTargetLineHandled}
               onOpenGotoLine={onOpenGotoLine}
-              onSelectionChange={handleSelectionChange}
             />
           </div>
         </section>
@@ -119,7 +111,7 @@ export function SplitEditor({
           <div className="split-pane-label">
             <span>{t('toolbar.reader')}</span>
           </div>
-          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} variant="split" highlightText={readerHighlight} />
+          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} variant="split" />
         </section>
       </div>
     </ErrorBoundary>

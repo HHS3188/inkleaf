@@ -246,6 +246,7 @@ export const enUS: I18N = {
   'status.autoSaved': 'Auto saved',
   'status.saved': 'Saved',
   'status.draftSaved': 'Recovery draft saved',
+  'status.fileNotFound': 'File not found, removed from recent',
 
   'goto.title': 'Go to Line',
   'goto.placeholder': 'Line number',

@@ -8,6 +8,7 @@ import {
   onMenuCommand,
   openDefaultAppsSettings,
   openExternal,
+  pathExists,
   requestAppClose,
   respondToCloseRequest,
   showOpenDialog,
@@ -317,12 +318,19 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
 
   const handleOpenPath = useCallback(
     async (path: string) => {
+      const exists = await pathExists(path)
+      if (!exists) {
+        removeRecentFile(path)
+        refreshRecentFiles()
+        setStatusMessage(t('status.fileNotFound'))
+        return
+      }
       setTargetLine(undefined)
       setMode('reader')
       await openDocument(path)
       refreshRecentFiles()
     },
-    [openDocument, refreshRecentFiles, setMode],
+    [openDocument, refreshRecentFiles, setMode, t],
   )
 
   const handleOpen = useCallback(async () => {

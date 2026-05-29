@@ -85,9 +85,9 @@ describe('layout css contracts', () => {
     expect(readerPaperBlock).toContain('border')
   })
 
-  it('has .reader-paper with box-shadow', () => {
+  it('has .reader-paper without box-shadow', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(readerPaperBlock).toContain('box-shadow')
+    expect(readerPaperBlock).not.toContain('box-shadow')
   })
 
   it('does not center .reader-paper (left-aligned via asymmetric margin)', () => {
@@ -134,9 +134,5 @@ describe('layout css contracts', () => {
   it('.split-divider visual line is 1px wide', () => {
     const beforeBlock = css.match(/\.split-divider::before\s*\{[^}]*\}/)?.[0] ?? ''
     expect(beforeBlock).toContain('width: 1px')
-  })
-
-  it('.selection-highlight class exists', () => {
-    expect(css).toContain('.selection-highlight')
   })
 })
