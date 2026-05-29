@@ -311,7 +311,7 @@ export function AppMenuBar({
         <MenuItem
           label={t('menu.zoomIn')}
           shortcut="Ctrl+="
-          onSelect={() => run(() => onZoomChange(Math.min(200, zoom + 10)))}
+          onSelect={() => run(() => onZoomChange(Math.min(300, zoom + 10)))}
         />
         <MenuItem
           label={t('menu.zoomOut')}

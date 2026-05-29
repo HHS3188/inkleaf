@@ -1214,6 +1214,8 @@ button:disabled {
   overflow-x: hidden;
   overflow-y: auto;
   background: transparent;
+  padding-block: clamp(12px, 2vh, 32px);
+  padding-inline: clamp(12px, 2vw, 40px);
 }
 
 .reader-surface {
@@ -1237,9 +1239,9 @@ button:disabled {
 }
 
 .reader-paper {
-  max-width: 960px;
-  margin: clamp(16px, 3vh, 40px) clamp(16px, 3vw, 48px) clamp(16px, 3vh, 40px) clamp(24px, 5vw, 96px);
-  padding: clamp(24px, 3vw, 48px) clamp(20px, 4vw, 64px);
+  max-width: 1180px;
+  margin: clamp(8px, 2vh, 24px) clamp(8px, 2vw, 32px) clamp(8px, 2vh, 24px) clamp(16px, 3vw, 64px);
+  padding: clamp(20px, 3vw, 44px) clamp(24px, 4vw, 56px) clamp(20px, 3vw, 44px) clamp(28px, 4vw, 60px);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);

@@ -70,6 +70,11 @@ describe('layout css contracts', () => {
     expect(readerPaperBlock).toContain('max-width')
   })
 
+  it('has .reader-paper max-width of 1180px', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('max-width: 1180px')
+  })
+
   it('has .reader-paper with background', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
     expect(readerPaperBlock).toContain('background')
@@ -93,5 +98,10 @@ describe('layout css contracts', () => {
   it('has transparent background on .reader-view', () => {
     const readerViewBlock = css.match(/\.reader-view\s*\{[^}]*\}/)?.[0] ?? ''
     expect(readerViewBlock).toContain('background: transparent')
+  })
+
+  it('has padding-block on .reader-view for reduced blank space', () => {
+    const readerViewBlock = css.match(/\.reader-view\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerViewBlock).toContain('padding-block')
   })
 })

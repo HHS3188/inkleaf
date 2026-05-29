@@ -137,7 +137,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
 
   const changeZoom = useCallback(
     (zoom: number) => {
-      updateSettings({ zoom: Math.min(200, Math.max(70, zoom)) })
+      updateSettings({ zoom: Math.min(300, Math.max(70, zoom)) })
     },
     [updateSettings],
   )
@@ -562,7 +562,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       }
       if (event.key === '=' || event.key === '+') {
         event.preventDefault()
-        changeZoom(Math.min(200, settings.zoom + 10))
+        changeZoom(Math.min(300, settings.zoom + 10))
         return
       }
       if (event.key === '-') {
@@ -614,7 +614,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       if (command === 'mode-source' && currentDocument) setMode('source')
       if (command === 'mode-split' && currentDocument) setMode('split')
       if (command === 'toggle-outline' && currentDocument) setOutlineCollapsed((value) => !value)
-      if (command === 'zoom-in') changeZoom(Math.min(200, settings.zoom + 10))
+      if (command === 'zoom-in') changeZoom(Math.min(300, settings.zoom + 10))
       if (command === 'zoom-out') changeZoom(Math.max(70, settings.zoom - 10))
       if (command === 'zoom-reset') changeZoom(100)
       if (command === 'theme-system') setThemeMode('system')

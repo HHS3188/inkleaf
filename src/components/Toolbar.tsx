@@ -141,7 +141,7 @@ export function Toolbar({
           <button type="button" className="zoom-display" onClick={() => onZoomChange(100)} title={t('toolbar.zoomReset.tooltip')}>
             {zoom}%
           </button>
-          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.min(200, zoom + 10))} title={t('toolbar.zoomIn.tooltip')}>
+          <button type="button" className="icon-button" onClick={() => onZoomChange(Math.min(300, zoom + 10))} title={t('toolbar.zoomIn.tooltip')}>
             <Plus size={14} aria-hidden="true" />
           </button>
         </div>

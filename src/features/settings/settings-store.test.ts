@@ -48,12 +48,12 @@ describe('settings store', () => {
     useSettingsStore.getState().updateSettings({
       fontSize: 16,
       lineHeight: 1.7,
-      zoom: 200,
+      zoom: 300,
     })
 
     const style = document.documentElement.style
-    expect(style.getPropertyValue('--editor-font-size')).toBe('32px')
-    expect(style.getPropertyValue('--editor-line-height-px')).toBe('43px')
+    expect(style.getPropertyValue('--editor-font-size')).toBe('48px')
+    expect(style.getPropertyValue('--editor-line-height-px')).toBe('65px')
     expect(style.getPropertyValue('--reader-line-height')).toBe('1.7')
   })
 })

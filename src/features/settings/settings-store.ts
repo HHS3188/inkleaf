@@ -121,7 +121,7 @@ function readSettings(): ReaderSettings {
       fontSize: clampNumber(candidate.fontSize, 12, 28, defaultSettings.fontSize),
       lineHeight: clampNumber(candidate.lineHeight, 1.2, 2.4, defaultSettings.lineHeight),
       readingWidth: clampNumber(candidate.readingWidth, 560, 1280, defaultSettings.readingWidth),
-      zoom: clampNumber(candidate.zoom, 70, 200, defaultSettings.zoom),
+      zoom: clampNumber(candidate.zoom, 70, 300, defaultSettings.zoom),
       wordWrap:
         typeof candidate.wordWrap === 'boolean' ? candidate.wordWrap : defaultSettings.wordWrap,
       showStatusBar:
