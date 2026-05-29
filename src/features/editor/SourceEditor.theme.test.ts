@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const source = readFileSync('src/features/editor/SourceEditor.tsx', 'utf8')
+const storeSource = readFileSync('src/features/editor/editor-store.ts', 'utf8')
 
 describe('SourceEditor typography theme', () => {
   it('uses shared typography variables for CodeMirror font size and line height', () => {
@@ -51,5 +52,25 @@ describe('SourceEditor typography theme', () => {
   it('does not contain gutterElement or activeLineGutter styles', () => {
     expect(source).not.toContain("'.cm-gutterElement':")
     expect(source).not.toContain("'.cm-activeLineGutter':")
+  })
+})
+
+describe('SourceEditor markdown action', () => {
+  it('has applyMarkdownAction function in SourceEditor.tsx', () => {
+    expect(source).toContain('applyMarkdownAction')
+    expect(source).toContain('function applyMarkdownAction')
+  })
+
+  it('has MarkdownAction type in editor-store.ts', () => {
+    expect(storeSource).toContain('MarkdownAction')
+    expect(storeSource).toContain("type MarkdownAction")
+  })
+
+  it('does not contain lineNumbers() in SourceEditor.tsx', () => {
+    expect(source).not.toContain('lineNumbers()')
+  })
+
+  it('does not contain drawSelection() in SourceEditor.tsx', () => {
+    expect(source).not.toContain('drawSelection()')
   })
 })

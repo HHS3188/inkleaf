@@ -63,4 +63,25 @@ describe('layout css contracts', () => {
   it('defines motion-smooth variable', () => {
     expect(css).toContain('--motion-smooth')
   })
+
+  it('has .reader-paper container with max-width', () => {
+    expect(css).toContain('.reader-paper')
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('max-width')
+  })
+
+  it('has .reader-paper with background', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('background')
+  })
+
+  it('has .reader-paper with border', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('border')
+  })
+
+  it('has .reader-paper with box-shadow', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('box-shadow')
+  })
 })

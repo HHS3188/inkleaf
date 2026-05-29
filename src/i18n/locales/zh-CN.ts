@@ -271,4 +271,17 @@ export const zhCN: I18N = {
   'update.message': 'InkLeaf 有新版本可用。',
   'update.openRelease': '在 GitHub 查看',
   'update.later': '稍后',
+
+  'markdownToolbar.label': '格式',
+  'markdownToolbar.bold': '加粗',
+  'markdownToolbar.italic': '斜体',
+  'markdownToolbar.heading': '标题',
+  'markdownToolbar.quote': '引用',
+  'markdownToolbar.ul': '无序列表',
+  'markdownToolbar.ol': '有序列表',
+  'markdownToolbar.task': '任务列表',
+  'markdownToolbar.link': '链接',
+  'markdownToolbar.code': '行内代码',
+  'markdownToolbar.codeblock': '代码块',
+  'markdownToolbar.hr': '分割线',
 }

@@ -271,4 +271,17 @@ export interface I18N {
   'update.message': string
   'update.openRelease': string
   'update.later': string
+
+  'markdownToolbar.label': string
+  'markdownToolbar.bold': string
+  'markdownToolbar.italic': string
+  'markdownToolbar.heading': string
+  'markdownToolbar.quote': string
+  'markdownToolbar.ul': string
+  'markdownToolbar.ol': string
+  'markdownToolbar.task': string
+  'markdownToolbar.link': string
+  'markdownToolbar.code': string
+  'markdownToolbar.codeblock': string
+  'markdownToolbar.hr': string
 }

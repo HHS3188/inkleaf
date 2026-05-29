@@ -13,6 +13,19 @@ export type EditorCommand =
   | 'goto-line'
   | 'insert-date-time'
 
+export type MarkdownAction =
+  | 'bold'
+  | 'italic'
+  | 'heading'
+  | 'quote'
+  | 'ul'
+  | 'ol'
+  | 'task'
+  | 'link'
+  | 'code'
+  | 'codeblock'
+  | 'hr'
+
 export type CursorPosition = {
   line: number
   column: number
@@ -24,10 +37,12 @@ type EditorState = {
   focusRequest: number
   cursor: CursorPosition
   commandRequest: { id: number; command: EditorCommand } | null
+  markdownAction: { id: number; action: MarkdownAction } | null
   setMode: (mode: EditorMode) => void
   requestSearch: () => void
   requestFocus: () => void
   requestEditorCommand: (command: EditorCommand) => void
+  requestMarkdownAction: (action: MarkdownAction) => void
   setCursorPosition: (position: CursorPosition) => void
 }
 
@@ -37,6 +52,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   focusRequest: 0,
   cursor: { line: 1, column: 1 },
   commandRequest: null,
+  markdownAction: null,
   setMode: (mode) =>
     set((state) => ({
       mode,
@@ -49,6 +65,13 @@ export const useEditorStore = create<EditorState>((set) => ({
       commandRequest: {
         id: (state.commandRequest?.id ?? 0) + 1,
         command,
+      },
+    })),
+  requestMarkdownAction: (action) =>
+    set((state) => ({
+      markdownAction: {
+        id: (state.markdownAction?.id ?? 0) + 1,
+        action,
       },
     })),
   setCursorPosition: (position) => set({ cursor: position }),

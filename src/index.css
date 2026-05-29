@@ -1234,6 +1234,31 @@ button:disabled {
   border-radius: 8px;
 }
 
+.reader-paper {
+  max-width: 960px;
+  margin: clamp(16px, 3vh, 40px) auto;
+  padding: clamp(24px, 3vw, 48px) clamp(20px, 4vw, 64px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 6%);
+  min-height: 60vh;
+}
+
+:root[data-theme='dark'] .reader-paper {
+  background: var(--surface-elevated);
+  border-color: var(--border-subtle);
+  box-shadow: 0 2px 16px rgb(0 0 0 / 20%);
+}
+
+.preview-pane .reader-paper {
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: auto;
+}
+
 /* ---- Markdown typography ---- */
 
 .markdown-body h1 {
@@ -2237,6 +2262,26 @@ button:disabled {
   display: flex;
   gap: 8px;
   margin-top: 4px;
+}
+
+.markdown-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--toolbar-bg);
+  flex-wrap: wrap;
+}
+
+.markdown-toolbar .icon-button {
+  width: 28px;
+  height: 28px;
+}
+
+.markdown-toolbar .icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .about-link {

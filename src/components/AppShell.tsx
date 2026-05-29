@@ -45,6 +45,7 @@ import { AppMenuBar } from './AppMenuBar'
 import { AboutDialog } from './AboutDialog'
 import { UnsavedChangesDialog, type UnsavedChoice } from './UnsavedChangesDialog'
 import { GotoLineDialog } from './GotoLineDialog'
+import { MarkdownToolbar } from './MarkdownToolbar'
 import { StatusBar } from './StatusBar'
 import { TabStrip } from './TabStrip'
 import { ReaderView } from '../features/reader/ReaderView'
@@ -96,6 +97,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const setMode = useEditorStore((state) => state.setMode)
   const requestSearch = useEditorStore((state) => state.requestSearch)
   const requestEditorCommand = useEditorStore((state) => state.requestEditorCommand)
+  const requestMarkdownAction = useEditorStore((state) => state.requestMarkdownAction)
   const cursor = useEditorStore((state) => state.cursor)
   const settings = useSettingsStore((state) => state.settings)
   const updateSettings = useSettingsStore((state) => state.updateSettings)
@@ -748,6 +750,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         onToggleOutline={() => setOutlineCollapsed(!outlineCollapsed)}
         onToggleHelp={() => setHelpOpen(!helpOpen)}
       />
+
+      {currentDocument && currentDocument.fileType === 'markdown' && (mode === 'source' || mode === 'split') ? (
+        <MarkdownToolbar
+          onAction={(action) => requestMarkdownAction(action)}
+          disabled={!currentDocument}
+        />
+      ) : null}
 
       {error ? <ErrorState message={error} onDismiss={() => setError(null)} /> : null}
 

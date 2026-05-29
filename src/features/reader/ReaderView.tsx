@@ -37,12 +37,14 @@ export function ReaderView({ document, settings, onEditRequest }: ReaderViewProp
   return (
     <ErrorBoundary compact>
       <div className="reader-view" onDoubleClick={handleDoubleClick}>
-        {document.size > LARGE_TEXT_FILE_BYTES ? (
-          <div className="large-file-warning">
-            {t('largeFile.warning')}
-          </div>
-        ) : null}
-        {renderDocument(document, settings)}
+        <div className="reader-paper">
+          {document.size > LARGE_TEXT_FILE_BYTES ? (
+            <div className="large-file-warning">
+              {t('largeFile.warning')}
+            </div>
+          ) : null}
+          {renderDocument(document, settings)}
+        </div>
       </div>
     </ErrorBoundary>
   )

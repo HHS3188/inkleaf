@@ -12,7 +12,7 @@ import { useT } from '../../i18n'
 import { FindBar } from '../../components/FindBar'
 import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
-import { useEditorStore } from './editor-store'
+import { useEditorStore, type MarkdownAction } from './editor-store'
 import { useSettingsStore } from '../settings/settings-store'
 import {
   findTextMatches,
@@ -58,6 +58,8 @@ export function SourceEditor({
   const handledSearchRequestRef = useRef(searchRequest)
   const focusRequest = useEditorStore((state) => state.focusRequest)
   const commandRequest = useEditorStore((state) => state.commandRequest)
+  const markdownAction = useEditorStore((state) => state.markdownAction)
+  const handledMarkdownActionRef = useRef(0)
   const setCursorPosition = useEditorStore((state) => state.setCursorPosition)
   const editorFontSize = useSettingsStore((state) => state.settings.fontSize)
   const editorZoom = useSettingsStore((state) => state.settings.zoom)
@@ -549,6 +551,15 @@ export function SourceEditor({
   }, [commandRequest, runSourceCommand])
 
   useEffect(() => {
+    if (!markdownAction || markdownAction.id === handledMarkdownActionRef.current) return
+    handledMarkdownActionRef.current = markdownAction.id
+    const view = viewRef.current
+    if (!view) return
+    applyMarkdownAction(view, markdownAction.action)
+    view.focus()
+  }, [markdownAction])
+
+  useEffect(() => {
     if (focusRequest > 0 && viewRef.current) {
       viewRef.current.focus()
     }
@@ -704,6 +715,68 @@ function ContextMenuItem({ label, onSelect }: { label: string; onSelect: () => v
       {label}
     </button>
   )
+}
+
+function applyMarkdownAction(view: EditorView, action: MarkdownAction) {
+  const state = view.state
+  const selection = state.selection.main
+  const selected = state.sliceDoc(selection.from, selection.to)
+  const line = state.doc.lineAt(selection.head)
+
+  const wrap = (before: string, after: string, placeholder: string) => {
+    const text = selected || placeholder
+    const insert = before + text + after
+    view.dispatch({
+      changes: { from: selection.from, to: selection.to, insert },
+      selection: { anchor: selection.from + before.length, head: selection.from + before.length + text.length },
+    })
+  }
+
+  const prefixLine = (prefix: string) => {
+    view.dispatch({
+      changes: { from: line.from, to: line.from, insert: prefix },
+      selection: { anchor: line.from + prefix.length },
+    })
+  }
+
+  switch (action) {
+    case 'bold':
+      wrap('**', '**', 'bold text')
+      break
+    case 'italic':
+      wrap('*', '*', 'italic text')
+      break
+    case 'heading':
+      prefixLine('## ')
+      break
+    case 'quote':
+      prefixLine('> ')
+      break
+    case 'ul':
+      prefixLine('- ')
+      break
+    case 'ol':
+      prefixLine('1. ')
+      break
+    case 'task':
+      prefixLine('- [ ] ')
+      break
+    case 'link':
+      wrap('[', '](url)', 'link text')
+      break
+    case 'code':
+      wrap('`', '`', 'code')
+      break
+    case 'codeblock':
+      wrap('```\n', '\n```', 'code block')
+      break
+    case 'hr':
+      view.dispatch({
+        changes: { from: line.to, to: line.to, insert: '\n\n---\n' },
+        selection: { anchor: line.to + 5 },
+      })
+      break
+  }
 }
 
 async function handleImageDrop(

@@ -271,4 +271,17 @@ export const enUS: I18N = {
   'update.message': 'A new version of InkLeaf is available.',
   'update.openRelease': 'View on GitHub',
   'update.later': 'Later',
+
+  'markdownToolbar.label': 'Formatting',
+  'markdownToolbar.bold': 'Bold',
+  'markdownToolbar.italic': 'Italic',
+  'markdownToolbar.heading': 'Heading',
+  'markdownToolbar.quote': 'Quote',
+  'markdownToolbar.ul': 'Unordered List',
+  'markdownToolbar.ol': 'Ordered List',
+  'markdownToolbar.task': 'Task List',
+  'markdownToolbar.link': 'Link',
+  'markdownToolbar.code': 'Inline Code',
+  'markdownToolbar.codeblock': 'Code Block',
+  'markdownToolbar.hr': 'Horizontal Rule',
 }
