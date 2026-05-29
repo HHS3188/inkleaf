@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useT } from '../../i18n'
 import { normalizeSelectionText } from '../../lib/selection-sync'
-import { extractTopVisibleText, findAnchorScrollTop } from '../../lib/scroll-anchor'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -55,111 +54,6 @@ export function SplitEditor({
     const normalized = normalizeSelectionText(text)
     setReaderHighlight(normalized.length >= 2 ? normalized : null)
   }, [])
-
-  // --- Scroll sync ---
-  const isSyncingRef = useRef(false)
-  const sourceScrollRef = useRef<HTMLDivElement | null>(null)
-  const previewScrollRef = useRef<HTMLDivElement | null>(null)
-  const lastSourceScrollTopRef = useRef(0)
-  const lastPreviewScrollTopRef = useRef(0)
-
-  // Lazily resolve scroll containers from DOM
-  const resolveScrollContainers = useCallback(() => {
-    if (!containerRef.current) return
-    if (!sourceScrollRef.current) {
-      sourceScrollRef.current = containerRef.current.querySelector('.source-pane .cm-scroller')
-    }
-    if (!previewScrollRef.current) {
-      previewScrollRef.current = containerRef.current.querySelector('.preview-pane .reader-view')
-    }
-  }, [])
-
-  const handleSourceScroll = useCallback(() => {
-    if (isSyncingRef.current || dragging) return
-    resolveScrollContainers()
-    const source = sourceScrollRef.current
-    const preview = previewScrollRef.current
-    if (!source || !preview) return
-
-    const newScrollTop = source.scrollTop
-    // Ignore pure horizontal scrolling — only react when scrollTop actually changes
-    if (Math.abs(newScrollTop - lastSourceScrollTopRef.current) < 1) return
-    lastSourceScrollTopRef.current = newScrollTop
-
-    // Try anchor-based sync first
-    const anchorText = extractTopVisibleText(source, newScrollTop)
-    const anchorTarget = findAnchorScrollTop(preview, anchorText)
-
-    isSyncingRef.current = true
-    requestAnimationFrame(() => {
-      if (anchorTarget !== null) {
-        preview.scrollTop = anchorTarget
-      } else {
-        // Fallback to ratio-based sync
-        const sourceMax = source.scrollHeight - source.clientHeight
-        if (sourceMax > 0) {
-          preview.scrollTop =
-            (newScrollTop / sourceMax) * (preview.scrollHeight - preview.clientHeight)
-        }
-      }
-      lastPreviewScrollTopRef.current = preview.scrollTop
-      isSyncingRef.current = false
-    })
-  }, [resolveScrollContainers, dragging])
-
-  const handlePreviewScroll = useCallback(() => {
-    if (isSyncingRef.current || dragging) return
-    resolveScrollContainers()
-    const source = sourceScrollRef.current
-    const preview = previewScrollRef.current
-    if (!source || !preview) return
-
-    const newScrollTop = preview.scrollTop
-    // Ignore pure horizontal scrolling — only react when scrollTop actually changes
-    if (Math.abs(newScrollTop - lastPreviewScrollTopRef.current) < 1) return
-    lastPreviewScrollTopRef.current = newScrollTop
-
-    // Try anchor-based sync first (Preview → Source)
-    const anchorText = extractTopVisibleText(preview, newScrollTop)
-    const anchorTarget = findAnchorScrollTop(source, anchorText)
-
-    isSyncingRef.current = true
-    requestAnimationFrame(() => {
-      if (anchorTarget !== null) {
-        source.scrollTop = anchorTarget
-      } else {
-        // Fallback to ratio-based sync
-        const previewMax = preview.scrollHeight - preview.clientHeight
-        if (previewMax > 0) {
-          source.scrollTop =
-            (newScrollTop / previewMax) * (source.scrollHeight - source.clientHeight)
-        }
-      }
-      lastSourceScrollTopRef.current = source.scrollTop
-      isSyncingRef.current = false
-    })
-  }, [resolveScrollContainers, dragging])
-
-  // Attach / detach scroll listeners
-  useEffect(() => {
-    // Delay to let SourceEditor (CodeMirror) mount
-    const timer = setTimeout(() => {
-      resolveScrollContainers()
-      const source = sourceScrollRef.current
-      const preview = previewScrollRef.current
-      if (source) source.addEventListener('scroll', handleSourceScroll, { passive: true })
-      if (preview) preview.addEventListener('scroll', handlePreviewScroll, { passive: true })
-    }, 200)
-
-    return () => {
-      clearTimeout(timer)
-      // Clean up on unmount — refs may already be stale but try anyway
-      sourceScrollRef.current?.removeEventListener('scroll', handleSourceScroll)
-      previewScrollRef.current?.removeEventListener('scroll', handlePreviewScroll)
-      sourceScrollRef.current = null
-      previewScrollRef.current = null
-    }
-  }, [resolveScrollContainers, handleSourceScroll, handlePreviewScroll])
 
   const updateRatio = useCallback((nextRatio: number) => {
     liveRatioRef.current = nextRatio

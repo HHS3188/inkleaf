@@ -107,7 +107,7 @@ describe('layout css contracts', () => {
 
   it('.reader-view--split .reader-paper has no border', () => {
     const splitPaperBlock = css.match(/\.reader-view--split\s+\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(splitPaperBlock).toContain('border: none')
+    expect(splitPaperBlock).toMatch(/border:\s*0\b/)
   })
 
   it('.split-divider has width of 6px', () => {
@@ -131,9 +131,9 @@ describe('layout css contracts', () => {
     expect(css).not.toContain('.split-divider::after')
   })
 
-  it('.split-divider visual line is 2px wide', () => {
+  it('.split-divider visual line is 1px wide', () => {
     const beforeBlock = css.match(/\.split-divider::before\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(beforeBlock).toContain('width: 2px')
+    expect(beforeBlock).toContain('width: 1px')
   })
 
   it('.selection-highlight class exists', () => {

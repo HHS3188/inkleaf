@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { useT } from '../../i18n'
 import { LARGE_TEXT_FILE_BYTES } from '../../lib/constants'
 import { highlightTextInDom } from '../../lib/selection-sync'
@@ -27,8 +27,11 @@ export function ReaderView({
   const paperRef = useRef<HTMLDivElement | null>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
 
-  // Apply DOM highlighting when highlightText changes
-  useEffect(() => {
+  // Apply DOM highlighting when highlightText changes.
+  // useLayoutEffect fires synchronously after React commits DOM changes
+  // but before the browser paints, so marks are inserted in the same
+  // commit cycle and won't be wiped by a subsequent reconciliation.
+  useLayoutEffect(() => {
     const container = paperRef.current
     // Clean up previous highlights
     cleanupRef.current?.()
@@ -36,13 +39,9 @@ export function ReaderView({
 
     if (!container || !highlightText) return
 
-    // Wait for the DOM to settle after content render
-    const raf = requestAnimationFrame(() => {
-      cleanupRef.current = highlightTextInDom(container, highlightText)
-    })
+    cleanupRef.current = highlightTextInDom(container, highlightText)
 
     return () => {
-      cancelAnimationFrame(raf)
       cleanupRef.current?.()
       cleanupRef.current = null
     }

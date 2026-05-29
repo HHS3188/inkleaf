@@ -1267,16 +1267,15 @@ button:disabled {
 }
 
 .reader-view--split .reader-paper {
-  border: none;
+  border: 0;
   box-shadow: none;
   background: transparent;
   border-radius: 0;
   max-width: none;
   width: 100%;
   margin: 0;
-  padding: clamp(16px, 2vw, 32px);
-  padding-inline-start: clamp(16px, 1.8vw, 28px);
-  padding-inline-end: clamp(16px, 2vw, 32px);
+  padding: clamp(14px, 1.8vw, 28px);
+  min-height: auto;
   overflow-x: hidden;
 }
 
@@ -1291,8 +1290,10 @@ button:disabled {
 /* ---- Selection sync highlight ---- */
 
 .selection-highlight {
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  border-radius: 2px;
+  background: rgba(96, 165, 250, 0.28);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 /* ---- Markdown typography ---- */
@@ -1745,7 +1746,10 @@ button:disabled {
 .split-divider {
   flex: 0 0 6px;
   width: 6px;
+  min-width: 6px;
   background: transparent;
+  border: 0;
+  box-shadow: none;
   position: relative;
   cursor: col-resize;
 }
@@ -1753,20 +1757,17 @@ button:disabled {
 .split-divider::before {
   content: "";
   position: absolute;
+  inset-block: 0;
   left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
+  width: 1px;
   transform: translateX(-50%);
   background: var(--border);
-  transition: background var(--motion-fast, 0.12s);
+  transition: background var(--motion-fast, 0.12s), width var(--motion-fast, 0.12s);
 }
 
-.split-divider:hover::before {
-  background: var(--accent);
-}
-
+.split-divider:hover::before,
 .split-divider.dragging::before {
+  width: 2px;
   background: var(--accent);
 }
 
@@ -1774,11 +1775,9 @@ button:disabled {
   background: var(--border-subtle);
 }
 
-:root[data-theme='dark'] .split-divider:hover::before {
-  background: var(--accent);
-}
-
+:root[data-theme='dark'] .split-divider:hover::before,
 :root[data-theme='dark'] .split-divider.dragging::before {
+  width: 2px;
   background: var(--accent);
 }
 
