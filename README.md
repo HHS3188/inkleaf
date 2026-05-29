@@ -25,6 +25,8 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - 底部状态栏：行 / 列 / 字符数 / 文件类型 / 编码 / 缩放
 - 图片拖拽插入（Markdown）
 - Windows 文件关联（`.txt` / `.md` / `.markdown`）
+- 启动时自动检查 GitHub 更新
+- 关于页显示版本号与 GitHub 链接
 - Windows exe 安装包
 
 ---
@@ -40,6 +42,8 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 - Status bar: line, column, characters, file type, encoding, zoom
 - Image drag-and-drop insertion (Markdown)
 - Windows file associations (`.txt` / `.md` / `.markdown`)
+- Auto-check for GitHub updates on startup
+- About dialog with version and GitHub links
 - Windows installer (exe)
 
 ## 设计取向 / Design Philosophy
@@ -58,7 +62,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 
 从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载：
 
-- **InkLeaf.Setup.0.1.2.exe** — Windows 安装包（推荐 Windows 10/11）
+- **InkLeaf.Setup.0.1.3.exe** — Windows 安装包（推荐 Windows 10/11）
 
 下载后运行安装包，按提示完成安装。安装完成后可从开始菜单搜索 **InkLeaf** 启动。
 
@@ -66,7 +70,7 @@ InkLeaf is a Windows-first local text reader and lightweight editor. No cloud de
 
 Download from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf.Setup.0.1.2.exe** — Windows installer (recommended for Windows 10/11)
+- **InkLeaf.Setup.0.1.3.exe** — Windows installer (recommended for Windows 10/11)
 
 Run the installer and follow the setup wizard. After installation, launch **InkLeaf** from the Start menu.
 
@@ -93,19 +97,19 @@ pnpm build          # Vite + Electron Builder 打包
 
 ## 项目状态 / Status
 
-当前为早期版本（v0.1.2）。核心功能已可用，部分体验仍在继续完善。
+当前为早期版本（v0.1.3）。核心功能已可用，部分体验仍在继续完善。
 
 当前 Windows 发布包：
 
-- **InkLeaf.Setup.0.1.2.exe** — NSIS 安装包
+- **InkLeaf.Setup.0.1.3.exe** — NSIS 安装包
 
 已知限制：大文件（>100MB）暂不支持。
 
-This is an early release (v0.1.2). Core features are functional; some areas are still being refined.
+This is an early release (v0.1.3). Core features are functional; some areas are still being refined.
 
 Current Windows release asset:
 
-- **InkLeaf.Setup.0.1.2.exe** — NSIS installer
+- **InkLeaf.Setup.0.1.3.exe** — NSIS installer
 
 Known limit: files larger than 100 MB are not supported.
 

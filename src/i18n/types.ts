@@ -263,4 +263,12 @@ export interface I18N {
   'defaultApp.message': string
   'defaultApp.openSettings': string
   'defaultApp.later': string
+
+  'about.version': string
+  'about.releases': string
+
+  'update.title': string
+  'update.message': string
+  'update.openRelease': string
+  'update.later': string
 }

@@ -2,15 +2,18 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useT } from '../i18n'
 import type { SingleInstancePayload } from '../lib/platform-api'
 import {
+  checkForUpdates,
   isElectronRuntime,
   onBeforeClose,
   onMenuCommand,
   openDefaultAppsSettings,
+  openExternal,
   requestAppClose,
   respondToCloseRequest,
   showOpenDialog,
   showSaveDialog,
   showItemInFolder,
+  type UpdateCheckResult,
 } from '../lib/platform-api'
 import { getFirstOpenableArg } from '../features/document/open-document'
 import {
@@ -121,6 +124,8 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       return false
     }
   })
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null)
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
   const handledInitialArgs = useRef(false)
   const handledSingleInstancePayload = useRef<SingleInstancePayload | null>(null)
 
@@ -428,6 +433,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     dismissDefaultAppPrompt()
   }, [dismissDefaultAppPrompt])
 
+  const handleOpenUpdateRelease = useCallback(() => {
+    if (updateInfo?.releaseUrl) {
+      void openExternal(updateInfo.releaseUrl)
+    }
+    setShowUpdatePrompt(false)
+  }, [updateInfo])
+
   const handleSearch = useCallback(() => {
     if (!useDocumentStore.getState().current) return
     if (mode === 'reader') setMode('source')
@@ -634,6 +646,18 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   }, [ensureAllTabsReadyToClose])
 
   useEffect(() => {
+    if (!isElectronRuntime()) return
+    checkForUpdates()
+      .then((result) => {
+        if (result.hasUpdate && result.remoteVersion) {
+          setUpdateInfo(result)
+          setShowUpdatePrompt(true)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
     if (isElectronRuntime()) return
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!useDocumentStore.getState().tabs.some((tab) => tab.dirty)) return
@@ -802,6 +826,26 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
               </button>
               <button type="button" className="secondary-button" onClick={dismissDefaultAppPrompt}>
                 {t('defaultApp.later')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {showUpdatePrompt && updateInfo ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h2>{t('update.title')}</h2>
+            <p>
+              {t('update.message')}
+              {' '}
+              {updateInfo.currentVersion} → {updateInfo.remoteVersion}
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="primary-button" onClick={handleOpenUpdateRelease}>
+                {t('update.openRelease')}
+              </button>
+              <button type="button" className="secondary-button" onClick={() => setShowUpdatePrompt(false)}>
+                {t('update.later')}
               </button>
             </div>
           </div>

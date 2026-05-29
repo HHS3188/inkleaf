@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('open-in-file-manager', path),
   openDefaultAppsSettings: () =>
     ipcRenderer.invoke('open-default-apps-settings'),
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
 
   // Dialog operations
   showOpenDialog: (options) =>

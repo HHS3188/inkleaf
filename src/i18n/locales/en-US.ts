@@ -263,4 +263,12 @@ export const enUS: I18N = {
   'defaultApp.message': 'Make InkLeaf the default app for Markdown and TXT files?\nYou can change this later in Settings.',
   'defaultApp.openSettings': 'Open Windows Default Apps',
   'defaultApp.later': 'Later',
+
+  'about.version': 'Version:',
+  'about.releases': 'Releases',
+
+  'update.title': 'Update Available',
+  'update.message': 'A new version of InkLeaf is available.',
+  'update.openRelease': 'View on GitHub',
+  'update.later': 'Later',
 }

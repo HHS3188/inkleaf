@@ -1,6 +1,10 @@
-import { useEffect } from 'react'
-import { Leaf, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ExternalLink, Leaf, X } from 'lucide-react'
 import { useT } from '../i18n'
+import { getAppVersion, isElectronRuntime, openExternal } from '../lib/platform-api'
+
+const GITHUB_URL = 'https://github.com/HHS3188/inkleaf'
+const RELEASES_URL = 'https://github.com/HHS3188/inkleaf/releases'
 
 type AboutDialogProps = {
   onClose: () => void
@@ -8,6 +12,7 @@ type AboutDialogProps = {
 
 export function AboutDialog({ onClose }: AboutDialogProps) {
   const t = useT()
+  const [version, setVersion] = useState('')
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -16,6 +21,19 @@ export function AboutDialog({ onClose }: AboutDialogProps) {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  useEffect(() => {
+    if (!isElectronRuntime()) return
+    getAppVersion().then(setVersion).catch(() => {})
+  }, [])
+
+  const handleOpenUrl = (url: string) => {
+    if (isElectronRuntime()) {
+      void openExternal(url)
+    } else {
+      window.open(url, '_blank', 'noopener')
+    }
+  }
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -40,7 +58,32 @@ export function AboutDialog({ onClose }: AboutDialogProps) {
             <X size={16} aria-hidden="true" />
           </button>
         </header>
-        <p>{t('app.aboutBody')}</p>
+        <div className="about-body">
+          {version ? (
+            <p className="about-version">
+              {t('about.version')} <strong>{version}</strong>
+            </p>
+          ) : null}
+          <p>{t('app.aboutBody')}</p>
+          <div className="about-links">
+            <button
+              type="button"
+              className="secondary-button about-link"
+              onClick={() => handleOpenUrl(GITHUB_URL)}
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+              GitHub
+            </button>
+            <button
+              type="button"
+              className="secondary-button about-link"
+              onClick={() => handleOpenUrl(RELEASES_URL)}
+            >
+              <ExternalLink size={14} aria-hidden="true" />
+              {t('about.releases')}
+            </button>
+          </div>
+        </div>
       </section>
     </div>
   )

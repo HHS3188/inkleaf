@@ -309,6 +309,43 @@ ipcMain.handle('open-default-apps-settings', async () => {
   await shell.openExternal('ms-settings:defaultapps')
 })
 
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion()
+})
+
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    const response = await net.fetch('https://api.github.com/repos/HHS3188/inkleaf/releases/latest')
+    if (!response.ok) return { error: 'HTTP ' + response.status }
+    const data = await response.json()
+    const remoteTag = data.tag_name || ''
+    const remoteVersion = remoteTag.replace(/^v/, '')
+    const currentVersion = app.getVersion()
+    return {
+      currentVersion,
+      remoteVersion,
+      remoteTag,
+      releaseUrl: data.html_url || '',
+      releaseName: data.name || '',
+      hasUpdate: compareVersions(remoteVersion, currentVersion) > 0,
+    }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
+  }
+})
+
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] || 0
+    const nb = pb[i] || 0
+    if (na > nb) return 1
+    if (na < nb) return -1
+  }
+  return 0
+}
+
 // ── Window creation ──────────────────────────────────────────────────
 
 function createWindow() {

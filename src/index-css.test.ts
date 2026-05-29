@@ -47,4 +47,20 @@ describe('layout css contracts', () => {
       }
     }
   })
+
+  it('has opaque modal-card background', () => {
+    const cardBlock = css.match(/\.modal-card\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(cardBlock).toContain('background: var(--surface)')
+    expect(cardBlock).not.toMatch(/background:\s*transparent/)
+  })
+
+  it('has modal-backdrop with blur and dark overlay', () => {
+    const backdropBlock = css.match(/\.modal-backdrop\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(backdropBlock).toContain('backdrop-filter: blur')
+    expect(backdropBlock).toContain('background:')
+  })
+
+  it('defines motion-smooth variable', () => {
+    expect(css).toContain('--motion-smooth')
+  })
 })

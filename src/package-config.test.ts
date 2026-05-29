@@ -43,3 +43,23 @@ describe('electron/main.cjs icon path', () => {
     expect(mainCjs).not.toContain("process.resourcesPath, 'build', 'icon.ico'")
   })
 })
+
+describe('NSIS config', () => {
+  it('does not allow changing installation directory', () => {
+    expect(pkg.build.nsis.allowToChangeInstallationDirectory).toBe(false)
+  })
+
+  it('preserves app data on uninstall', () => {
+    expect(pkg.build.nsis.deleteAppDataOnUninstall).toBe(false)
+  })
+})
+
+describe('update check', () => {
+  it('has compareVersions function in main.cjs', () => {
+    expect(mainCjs).toContain('function compareVersions')
+  })
+
+  it('fetches from GitHub releases API', () => {
+    expect(mainCjs).toContain('api.github.com/repos/HHS3188/inkleaf/releases/latest')
+  })
+})

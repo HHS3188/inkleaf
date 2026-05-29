@@ -25,6 +25,16 @@ export type SingleInstancePayload = {
   cwd: string
 }
 
+export type UpdateCheckResult = {
+  currentVersion?: string
+  remoteVersion?: string
+  remoteTag?: string
+  releaseUrl?: string
+  releaseName?: string
+  hasUpdate?: boolean
+  error?: string
+}
+
 export type MenuCommand =
   | 'new-markdown'
   | 'new-txt'
@@ -65,6 +75,8 @@ declare global {
       openExternal: (url: string) => Promise<void>
       showItemInFolder: (p: string) => Promise<void>
       openDefaultAppsSettings: () => Promise<void>
+      getAppVersion: () => Promise<string>
+      checkForUpdates: () => Promise<UpdateCheckResult>
       showOpenDialog: (o: {
         multiple?: boolean
         directory?: boolean
@@ -154,6 +166,14 @@ export async function showItemInFolder(p: string): Promise<void> {
 
 export async function openDefaultAppsSettings(): Promise<void> {
   return api().openDefaultAppsSettings()
+}
+
+export async function getAppVersion(): Promise<string> {
+  return api().getAppVersion()
+}
+
+export async function checkForUpdates(): Promise<UpdateCheckResult> {
+  return api().checkForUpdates()
 }
 
 export async function getInitialArgs(): Promise<string[]> {

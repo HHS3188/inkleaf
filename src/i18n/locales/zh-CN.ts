@@ -263,4 +263,12 @@ export const zhCN: I18N = {
   'defaultApp.message': '让 InkLeaf 成为 Markdown / TXT 默认打开应用？\n你可以稍后在设置里修改。',
   'defaultApp.openSettings': '打开 Windows 默认应用设置',
   'defaultApp.later': '稍后',
+
+  'about.version': '版本：',
+  'about.releases': '版本发布',
+
+  'update.title': '发现新版本',
+  'update.message': 'InkLeaf 有新版本可用。',
+  'update.openRelease': '在 GitHub 查看',
+  'update.later': '稍后',
 }
