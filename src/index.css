@@ -841,12 +841,14 @@ button:disabled {
 .empty-state {
   display: grid;
   grid-template-columns: minmax(280px, 380px) minmax(360px, 700px);
-  gap: clamp(24px, 4vw, 54px);
-  align-content: center;
+  gap: clamp(16px, 3vw, 40px);
   justify-content: center;
+  align-content: safe center;
   height: 100%;
-  padding: clamp(32px, 7vh, 74px) clamp(32px, 7vw, 96px);
+  min-height: 0;
+  padding: clamp(20px, 4vh, 48px) clamp(24px, 5vw, 72px);
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .empty-intro,
@@ -1211,7 +1213,7 @@ button:disabled {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  background: var(--reader-bg);
+  background: transparent;
 }
 
 .reader-surface {
@@ -1236,13 +1238,13 @@ button:disabled {
 
 .reader-paper {
   max-width: 960px;
-  margin: clamp(16px, 3vh, 40px) auto;
+  margin: clamp(16px, 3vh, 40px) clamp(16px, 3vw, 48px) clamp(16px, 3vh, 40px) clamp(24px, 5vw, 96px);
   padding: clamp(24px, 3vw, 48px) clamp(20px, 4vw, 64px);
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: 0 2px 12px rgb(0 0 0 / 6%);
-  min-height: 60vh;
+  min-height: 40vh;
 }
 
 :root[data-theme='dark'] .reader-paper {

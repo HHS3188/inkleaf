@@ -84,4 +84,14 @@ describe('layout css contracts', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
     expect(readerPaperBlock).toContain('box-shadow')
   })
+
+  it('does not center .reader-paper (left-aligned via asymmetric margin)', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).not.toMatch(/margin:[^;]*\bauto\b/)
+  })
+
+  it('has transparent background on .reader-view', () => {
+    const readerViewBlock = css.match(/\.reader-view\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerViewBlock).toContain('background: transparent')
+  })
 })
