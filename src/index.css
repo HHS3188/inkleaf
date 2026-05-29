@@ -1225,8 +1225,8 @@ button:disabled {
 
 .reader-surface {
   width: min(var(--reader-width), 100%);
-  margin-left: clamp(32px, 6vw, 96px);
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
   padding: 32px clamp(20px, 4vw, 72px) 96px;
   font-size: calc(var(--reader-font-size) * var(--reader-zoom));
   line-height: var(--reader-line-height);

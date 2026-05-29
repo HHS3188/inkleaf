@@ -4,7 +4,7 @@ import { RangeSetBuilder } from '@codemirror/state'
 const selectionFillLine = Decoration.line({
   attributes: {
     style:
-      'background-color: var(--selection); box-shadow: inset 0 0 0 9999px var(--selection);',
+      'background-color: rgba(59, 130, 246, 0.08); box-shadow: inset 0 0 0 9999px rgba(59, 130, 246, 0.08);',
   },
 })
 
@@ -16,10 +16,10 @@ const selectionFillTheme = EditorView.theme({
     right: '0 !important',
     width: 'auto !important',
   },
-  // Selection background on text spans within the layer
+  // Real selection background — deeper blue for actual selected text
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground':
     {
-      backgroundColor: 'var(--selection)',
+      backgroundColor: 'rgba(59, 130, 246, 0.3)',
     },
 })
 
