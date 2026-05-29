@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useT } from '../../i18n'
+import { normalizeSelectionText } from '../../lib/selection-sync'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { CurrentDocument } from '../document/document-types'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -47,6 +48,83 @@ export function SplitEditor({
   const liveRatioRef = useRef(ratio)
   const [dragging, setDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [readerHighlight, setReaderHighlight] = useState<string | null>(null)
+
+  const handleSelectionChange = useCallback((text: string) => {
+    const normalized = normalizeSelectionText(text)
+    setReaderHighlight(normalized.length >= 2 ? normalized : null)
+  }, [])
+
+  // --- Scroll sync ---
+  const isSyncingRef = useRef(false)
+  const sourceScrollRef = useRef<HTMLDivElement | null>(null)
+  const previewScrollRef = useRef<HTMLDivElement | null>(null)
+
+  // Lazily resolve scroll containers from DOM
+  const resolveScrollContainers = useCallback(() => {
+    if (!containerRef.current) return
+    if (!sourceScrollRef.current) {
+      sourceScrollRef.current = containerRef.current.querySelector('.source-pane .cm-scroller')
+    }
+    if (!previewScrollRef.current) {
+      previewScrollRef.current = containerRef.current.querySelector('.preview-pane .reader-view')
+    }
+  }, [])
+
+  const handleSourceScroll = useCallback(() => {
+    if (isSyncingRef.current) return
+    resolveScrollContainers()
+    const source = sourceScrollRef.current
+    const preview = previewScrollRef.current
+    if (!source || !preview) return
+    const sourceMax = source.scrollHeight - source.clientHeight
+    if (sourceMax <= 0) return
+    const ratio = source.scrollTop / sourceMax
+    isSyncingRef.current = true
+    requestAnimationFrame(() => {
+      const previewMax = preview.scrollHeight - preview.clientHeight
+      preview.scrollTop = ratio * previewMax
+      isSyncingRef.current = false
+    })
+  }, [resolveScrollContainers])
+
+  const handlePreviewScroll = useCallback(() => {
+    if (isSyncingRef.current) return
+    resolveScrollContainers()
+    const source = sourceScrollRef.current
+    const preview = previewScrollRef.current
+    if (!source || !preview) return
+    const previewMax = preview.scrollHeight - preview.clientHeight
+    if (previewMax <= 0) return
+    const ratio = preview.scrollTop / previewMax
+    isSyncingRef.current = true
+    requestAnimationFrame(() => {
+      const sourceMax = source.scrollHeight - source.clientHeight
+      source.scrollTop = ratio * sourceMax
+      isSyncingRef.current = false
+    })
+  }, [resolveScrollContainers])
+
+  // Attach / detach scroll listeners
+  useEffect(() => {
+    // Delay to let SourceEditor (CodeMirror) mount
+    const timer = setTimeout(() => {
+      resolveScrollContainers()
+      const source = sourceScrollRef.current
+      const preview = previewScrollRef.current
+      if (source) source.addEventListener('scroll', handleSourceScroll, { passive: true })
+      if (preview) preview.addEventListener('scroll', handlePreviewScroll, { passive: true })
+    }, 200)
+
+    return () => {
+      clearTimeout(timer)
+      // Clean up on unmount — refs may already be stale but try anyway
+      sourceScrollRef.current?.removeEventListener('scroll', handleSourceScroll)
+      previewScrollRef.current?.removeEventListener('scroll', handlePreviewScroll)
+      sourceScrollRef.current = null
+      previewScrollRef.current = null
+    }
+  }, [resolveScrollContainers, handleSourceScroll, handlePreviewScroll])
 
   const updateRatio = useCallback((nextRatio: number) => {
     liveRatioRef.current = nextRatio
@@ -97,6 +175,7 @@ export function SplitEditor({
               targetLine={targetLine}
               onTargetLineHandled={onTargetLineHandled}
               onOpenGotoLine={onOpenGotoLine}
+              onSelectionChange={handleSelectionChange}
             />
           </div>
         </section>
@@ -111,7 +190,7 @@ export function SplitEditor({
           <div className="split-pane-label">
             <span>{t('toolbar.reader')}</span>
           </div>
-          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} />
+          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} variant="split" highlightText={readerHighlight} />
         </section>
       </div>
     </ErrorBoundary>

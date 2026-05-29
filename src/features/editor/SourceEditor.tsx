@@ -28,6 +28,7 @@ type SourceEditorProps = {
   targetLine?: number
   onTargetLineHandled?: () => void
   onOpenGotoLine?: () => void
+  onSelectionChange?: (text: string) => void
 }
 
 export function SourceEditor({
@@ -37,6 +38,7 @@ export function SourceEditor({
   targetLine,
   onTargetLineHandled,
   onOpenGotoLine,
+  onSelectionChange,
 }: SourceEditorProps) {
   const t = useT()
   const shellRef = useRef<HTMLDivElement | null>(null)
@@ -49,6 +51,7 @@ export function SourceEditor({
   const lastLocalContentRef = useRef(content)
   const documentPathRef = useRef(documentPath)
   const onOpenGotoLineRef = useRef(onOpenGotoLine)
+  const onSelectionChangeRef = useRef(onSelectionChange)
   const findOpenRef = useRef(false)
   const findStateRef = useRef({ query: '', matchCase: false, wholeWord: false })
   const handledCommandIdRef = useRef(0)
@@ -95,6 +98,10 @@ export function SourceEditor({
   useEffect(() => {
     onOpenGotoLineRef.current = onOpenGotoLine
   }, [onOpenGotoLine])
+
+  useEffect(() => {
+    onSelectionChangeRef.current = onSelectionChange
+  }, [onSelectionChange])
 
   useEffect(() => {
     wordWrapRef.current = wordWrap
@@ -422,6 +429,11 @@ export function SourceEditor({
           }
           if (update.docChanged || update.selectionSet) {
             updateCursorPosition(update.view)
+          }
+          if (update.selectionSet) {
+            const sel = update.state.selection.main
+            const text = sel.empty ? '' : update.state.sliceDoc(sel.from, sel.to)
+            onSelectionChangeRef.current?.(text)
           }
         }),
         EditorView.theme({

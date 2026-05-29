@@ -70,9 +70,9 @@ describe('layout css contracts', () => {
     expect(readerPaperBlock).toContain('max-width')
   })
 
-  it('has .reader-paper max-width of 1180px', () => {
+  it('has .reader-paper max-width of 1320px', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(readerPaperBlock).toContain('max-width: 1180px')
+    expect(readerPaperBlock).toContain('max-width: 1320px')
   })
 
   it('has .reader-paper with background', () => {
@@ -103,5 +103,19 @@ describe('layout css contracts', () => {
   it('has padding-block on .reader-view for reduced blank space', () => {
     const readerViewBlock = css.match(/\.reader-view\s*\{[^}]*\}/)?.[0] ?? ''
     expect(readerViewBlock).toContain('padding-block')
+  })
+
+  it('.reader-view--split .reader-paper has no border', () => {
+    const splitPaperBlock = css.match(/\.reader-view--split\s+\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(splitPaperBlock).toContain('border: none')
+  })
+
+  it('.split-divider has width of 4px', () => {
+    const dividerBlock = css.match(/\.split-divider\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(dividerBlock).toContain('width: 4px')
+  })
+
+  it('.selection-highlight class exists', () => {
+    expect(css).toContain('.selection-highlight')
   })
 })
