@@ -1218,6 +1218,11 @@ button:disabled {
   padding-inline: clamp(12px, 2vw, 40px);
 }
 
+.reader-content {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .reader-surface {
   width: min(var(--reader-width), 100%);
   margin-left: clamp(32px, 6vw, 96px);
@@ -1241,7 +1246,7 @@ button:disabled {
 .reader-paper {
   max-width: 1320px;
   margin: clamp(8px, 2vh, 24px) clamp(8px, 2vw, 32px) clamp(8px, 2vh, 24px) clamp(12px, 2.2vw, 40px);
-  padding-inline-start: clamp(32px, 3.8vw, 60px);
+  padding-inline-start: clamp(24px, 2.4vw, 42px);
   padding-inline-end: clamp(24px, 3vw, 48px);
   padding-block: clamp(20px, 3vw, 44px);
   border: 1px solid var(--border);
@@ -1257,6 +1262,10 @@ button:disabled {
   box-shadow: 0 2px 16px rgb(0 0 0 / 20%);
 }
 
+.reader-view--split {
+  overflow-x: hidden;
+}
+
 .reader-view--split .reader-paper {
   border: none;
   box-shadow: none;
@@ -1266,6 +1275,9 @@ button:disabled {
   width: 100%;
   margin: 0;
   padding: clamp(16px, 2vw, 32px);
+  padding-inline-start: clamp(16px, 1.8vw, 28px);
+  padding-inline-end: clamp(16px, 2vw, 32px);
+  overflow-x: hidden;
 }
 
 .preview-pane .reader-paper {
@@ -1731,54 +1743,43 @@ button:disabled {
 }
 
 .split-divider {
+  flex: 0 0 6px;
+  width: 6px;
+  background: transparent;
   position: relative;
-  width: 4px;
-  flex-shrink: 0;
   cursor: col-resize;
-  background: var(--border-subtle);
-  transition: background var(--motion-fast, 0.12s);
 }
 
-.split-divider::after {
+.split-divider::before {
+  content: "";
   position: absolute;
-  inset: 0 1px;
-  content: '';
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
   background: var(--border);
   transition: background var(--motion-fast, 0.12s);
 }
 
-.split-divider:hover {
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface-subtle));
-}
-
-.split-divider.dragging {
-  background: color-mix(in srgb, var(--accent) 16%, var(--surface-subtle));
-}
-
-.split-divider:hover::after,
-.split-divider.dragging::after {
+.split-divider:hover::before {
   background: var(--accent);
 }
 
-:root[data-theme='dark'] .split-divider {
-  background: #252525;
+.split-divider.dragging::before {
+  background: var(--accent);
 }
 
-:root[data-theme='dark'] .split-divider::after {
-  background: #363636;
+:root[data-theme='dark'] .split-divider::before {
+  background: var(--border-subtle);
 }
 
-:root[data-theme='dark'] .split-divider:hover {
-  background: #2b2b2b;
+:root[data-theme='dark'] .split-divider:hover::before {
+  background: var(--accent);
 }
 
-:root[data-theme='dark'] .split-divider.dragging {
-  background: color-mix(in srgb, var(--accent) 12%, #2b2b2b);
-}
-
-:root[data-theme='dark'] .split-divider:hover::after,
-:root[data-theme='dark'] .split-divider.dragging::after {
-  background: color-mix(in srgb, var(--accent) 58%, #6a6a6a);
+:root[data-theme='dark'] .split-divider.dragging::before {
+  background: var(--accent);
 }
 
 .preview-pane {

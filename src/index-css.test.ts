@@ -110,9 +110,30 @@ describe('layout css contracts', () => {
     expect(splitPaperBlock).toContain('border: none')
   })
 
-  it('.split-divider has width of 4px', () => {
+  it('.split-divider has width of 6px', () => {
     const dividerBlock = css.match(/\.split-divider\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(dividerBlock).toContain('width: 4px')
+    expect(dividerBlock).toContain('width: 6px')
+  })
+
+  it('.reader-paper padding-inline-start is smaller (not clamp(32px...))', () => {
+    const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(readerPaperBlock).toContain('padding-inline-start')
+    expect(readerPaperBlock).not.toMatch(/padding-inline-start:\s*clamp\(32px/)
+  })
+
+  it('.reader-view--split has overflow-x hidden', () => {
+    const splitBlock = css.match(/\.reader-view--split\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(splitBlock).toContain('overflow-x: hidden')
+  })
+
+  it('.split-divider uses ::before (not ::after) for the visual line', () => {
+    expect(css).toContain('.split-divider::before')
+    expect(css).not.toContain('.split-divider::after')
+  })
+
+  it('.split-divider visual line is 2px wide', () => {
+    const beforeBlock = css.match(/\.split-divider::before\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(beforeBlock).toContain('width: 2px')
   })
 
   it('.selection-highlight class exists', () => {
