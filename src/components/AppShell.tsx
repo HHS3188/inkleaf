@@ -327,7 +327,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         return
       }
       setTargetLine(undefined)
-      setMode('reader')
+      setMode('source')
       await openDocument(path)
       refreshRecentFiles()
     },
@@ -339,7 +339,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       const selected = await showOpenDialog({ multiple: false, filters: openFileFilters })
       if (typeof selected === 'string') {
         setTargetLine(undefined)
-        setMode('reader')
+        setMode('source')
         await openDocument(selected)
         refreshRecentFiles()
       }
@@ -485,11 +485,17 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const handleOutlineLineJump = useCallback(
     (line: number) => {
       if (!currentDocument) return
+      if (mode === 'reader') {
+        // In Reader mode, scroll to heading by line number via data attribute
+        const heading = globalThis.document.querySelector(`[data-source-line="${line}"]`)
+        if (heading) {
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+        return
+      }
       setTargetLine(line)
-      if (mode === 'source' || mode === 'split') return
-      setMode('source')
     },
-    [currentDocument, mode, setMode],
+    [currentDocument, mode],
   )
 
   const setThemeMode = useCallback(

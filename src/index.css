@@ -1232,8 +1232,6 @@ button:disabled {
   overflow-x: hidden;
   overflow-y: auto;
   background: transparent;
-  padding-block: clamp(12px, 2vh, 32px);
-  padding-inline: clamp(12px, 2vw, 40px);
 }
 
 .reader-content {

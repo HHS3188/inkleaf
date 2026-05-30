@@ -515,12 +515,46 @@ export function SourceEditor({
     const handleDrop = (event: DragEvent) => {
       if (!event.dataTransfer?.files.length) return
       event.preventDefault()
+      event.stopPropagation() // block CodeMirror's default file-content drop
       const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
+      const insertPos = pos ?? view.state.selection.main.head
       dropPosRef.current = null
-      void handleImageDrop(event.dataTransfer.files, documentPathRef.current, view, setError, {
-        noDocumentPath: t('editor.dragDropNoDoc'),
-        noImagePath: t('editor.dragDropNoPath'),
-      }, pos)
+
+      const files = Array.from(event.dataTransfer.files)
+      const imageFiles = files.filter((f) => isImageFile(f.name))
+      const nonImageFiles = files.filter((f) => !isImageFile(f.name))
+
+      // Handle images via existing logic
+      if (imageFiles.length > 0) {
+        const imageList = imageFiles.length === 1
+          ? event.dataTransfer.files
+          : (() => { const d = new DataTransfer(); imageFiles.forEach((f) => d.items.add(f)); return d.files })()
+        void handleImageDrop(imageList, documentPathRef.current, view, setError, {
+          noDocumentPath: t('editor.dragDropNoDoc'),
+          noImagePath: t('editor.dragDropNoPath'),
+        }, insertPos)
+      }
+
+      // Handle non-image files: insert Markdown file links
+      for (const file of nonImageFiles) {
+        const filePath = window.electronAPI?.getPathForFile?.(file)
+          ?? (file as File & { path?: string }).path
+          ?? ''
+        if (!filePath) {
+          setError(t('editor.dragDropNoPath'))
+          continue
+        }
+        const link = formatMarkdownFileLink(filePath, file.name)
+        view.dispatch({
+          changes: { from: insertPos, to: insertPos, insert: link },
+          selection: { anchor: insertPos + link.length },
+        })
+      }
+
+      if (nonImageFiles.length > 0) {
+        view.focus()
+        setError(null)
+      }
     }
 
     host.addEventListener('dragover', handleDragOver)
@@ -845,6 +879,20 @@ function formatMarkdownImageDestination(relativePath: string): string {
     .map((segment) => encodeURIComponent(segment))
     .join('/')
   return `<${encoded}>`
+}
+
+function isImageFile(filePath: string): boolean {
+  const ext = filePath.split('.').pop()?.toLowerCase() ?? ''
+  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)
+}
+
+function formatMarkdownFileLink(filePath: string, displayName: string): string {
+  const normalized = filePath.replace(/\\/g, '/')
+  const encoded = normalized
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
+  return `[${displayName}](<${encoded}>)`
 }
 
 function findDroppedImagePath(files: FileList): string | null {

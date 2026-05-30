@@ -100,9 +100,11 @@ describe('layout css contracts', () => {
     expect(readerViewBlock).toContain('background: transparent')
   })
 
-  it('has padding-block on .reader-view for reduced blank space', () => {
+  it('has .reader-view without double border (no padding + margin overlap)', () => {
     const readerViewBlock = css.match(/\.reader-view\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(readerViewBlock).toContain('padding-block')
+    // .reader-view should not have padding that creates double-border effect with .reader-paper margin
+    expect(readerViewBlock).not.toContain('padding-block')
+    expect(readerViewBlock).not.toContain('padding-inline')
   })
 
   it('.reader-view--split .reader-paper has no border', () => {
