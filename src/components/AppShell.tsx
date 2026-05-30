@@ -406,14 +406,6 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     void showItemInFolder(path)
   }, [])
 
-  const handleOpenFolder = useCallback(async () => {
-    try {
-      await showOpenDialog({ directory: true, multiple: false })
-    } catch (errorValue) {
-      setError(errorValue instanceof Error ? errorValue.message : String(errorValue))
-    }
-  }, [setError])
-
   const handleRestoreDraft = useCallback(async () => {
     const draft = recoveryDraft ?? readDraftSnapshot()
     if (!draft) return
@@ -880,7 +872,6 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
           onNewMarkdown={() => void handleNewMarkdown()}
           onNewTxt={() => void handleNewTxt()}
           onOpen={() => void handleOpen()}
-          onOpenFolder={() => void handleOpenFolder()}
           onOpenRecent={(path) => void handleOpenPath(path)}
           onRemoveRecent={handleRemoveRecent}
           onOpenRecentFolder={handleOpenRecentFolder}

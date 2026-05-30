@@ -11,7 +11,6 @@ type EmptyStateProps = {
   onNewMarkdown: () => void
   onNewTxt: () => void
   onOpen: () => void
-  onOpenFolder: () => void
   onOpenRecent: (path: string) => void
   onRemoveRecent: (path: string) => void
   onOpenRecentFolder: (path: string) => void
@@ -27,7 +26,6 @@ export function EmptyState({
   onNewMarkdown,
   onNewTxt,
   onOpen,
-  onOpenFolder,
   onOpenRecent,
   onRemoveRecent,
   onOpenRecentFolder,
@@ -139,11 +137,6 @@ export function EmptyState({
           <button type="button" className="secondary-button large-action" onClick={onOpen}>
             <FolderOpen size={18} aria-hidden="true" />
             {t('empty.openFile')}
-          </button>
-          {/* Hidden: folder browsing is not yet implemented (v0.2) */}
-          <button type="button" className="secondary-button large-action" style={{ display: 'none' }} disabled onClick={onOpenFolder}>
-            <FolderOpen size={18} aria-hidden="true" />
-            {t('empty.openFolder')}
           </button>
         </div>
         <div className="empty-utility-actions">
