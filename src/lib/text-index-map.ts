@@ -45,6 +45,57 @@ export function findTextOffset(
 }
 
 /**
+ * Find text offset with context-aware matching for repeated text.
+ * Uses surrounding context to disambiguate when the same text appears
+ * multiple times in the document.
+ */
+export function findTextOffsetWithContext(
+  container: HTMLElement,
+  searchText: string,
+  contextBefore: string = '',
+  contextAfter: string = '',
+): { start: number; end: number } | null {
+  const plainText = container.textContent ?? ''
+
+  // Try exact match first
+  const idx = plainText.indexOf(searchText)
+  if (idx === -1) return null
+
+  // If only one match, use it
+  const secondIdx = plainText.indexOf(searchText, idx + 1)
+  if (secondIdx === -1) return { start: idx, end: idx + searchText.length }
+
+  // Multiple matches — use context to disambiguate
+  if (contextBefore || contextAfter) {
+    let searchFrom = 0
+    let found = plainText.indexOf(searchText, searchFrom)
+    while (found !== -1) {
+      const beforeOk =
+        !contextBefore ||
+        (found >= contextBefore.length &&
+          plainText.slice(found - contextBefore.length, found) === contextBefore)
+      const afterOk =
+        !contextAfter ||
+        (found + searchText.length + contextAfter.length <= plainText.length &&
+          plainText.slice(
+            found + searchText.length,
+            found + searchText.length + contextAfter.length,
+          ) === contextAfter)
+
+      if (beforeOk && afterOk) {
+        return { start: found, end: found + searchText.length }
+      }
+
+      searchFrom = found + 1
+      found = plainText.indexOf(searchText, searchFrom)
+    }
+  }
+
+  // No confident match with context — return first occurrence as fallback
+  return { start: idx, end: idx + searchText.length }
+}
+
+/**
  * Apply highlight spans to text nodes overlapping [matchStart, matchEnd].
  * Returns a cleanup function that removes all highlights.
  */

@@ -53,10 +53,14 @@ export function SplitEditor({
   const [mappedHighlightForSource, setMappedHighlightForSource] = useState<{ from: number; to: number } | null>(null)
 
   const handleSourceSelectionChange = useCallback((text: string) => {
+    // Source selection changed: clear any source-mapped highlight, set reader highlight
+    setMappedHighlightForSource(null)
     setMappedHighlightForReader(text.length >= 2 ? text : null)
   }, [])
 
   const handleReaderSelectionChange = useCallback((text: string) => {
+    // Reader selection changed: clear any reader-mapped highlight, set source highlight
+    setMappedHighlightForReader(null)
     if (!text || text.length < 2) {
       setMappedHighlightForSource(null)
       return

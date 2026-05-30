@@ -1,7 +1,12 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useT } from '../../i18n'
 import { LARGE_TEXT_FILE_BYTES } from '../../lib/constants'
-import { buildTextIndexMap, findTextOffset, applyHighlight } from '../../lib/text-index-map'
+import {
+  buildTextIndexMap,
+  findTextOffsetWithContext,
+  applyHighlight,
+  clearHighlights,
+} from '../../lib/text-index-map'
 import type { CurrentDocument } from '../document/document-types'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import type { ReaderSettings } from '../settings/settings-store'
@@ -31,17 +36,26 @@ export function ReaderView({
 
   // Source -> Reader mapped highlight
   useLayoutEffect(() => {
-    // Clean up previous highlights
+    if (!paperRef.current) return
+    const container = paperRef.current
+
+    // Clean up previous highlights (both via cleanupRef and class-based)
     if (cleanupRef.current) {
       cleanupRef.current()
       cleanupRef.current = null
     }
+    clearHighlights(container, 'mapped-selection')
 
-    if (!highlightText || !paperRef.current) return
+    if (!highlightText) return
 
-    const container = paperRef.current
     const entries = buildTextIndexMap(container)
-    const match = findTextOffset(container, highlightText)
+
+    // Extract context from source selection for disambiguation
+    // Use first/last 20 chars of highlight as surrounding context
+    const contextBefore = highlightText.slice(0, 20)
+    const contextAfter = highlightText.slice(-20)
+
+    const match = findTextOffsetWithContext(container, highlightText, contextBefore, contextAfter)
 
     if (match) {
       cleanupRef.current = applyHighlight(entries, match.start, match.end, 'mapped-selection')
