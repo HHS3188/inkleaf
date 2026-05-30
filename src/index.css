@@ -95,6 +95,20 @@ textarea,
   user-select: text;
 }
 
+/* Deep blue selection for Source editor (CodeMirror) */
+.cm-editor .cm-content::selection,
+.cm-editor .cm-content *::selection,
+.cm-editor .cm-line::selection,
+.cm-editor .cm-line *::selection {
+  background-color: rgba(37, 99, 235, 0.68) !important;
+}
+
+/* Deep blue selection for Reader content */
+.reader-paper ::selection,
+.reader-paper *::selection {
+  background-color: rgba(37, 99, 235, 0.65);
+}
+
 :root[data-theme='dark'] * {
   scrollbar-color: #5a5a5a #252525;
 }

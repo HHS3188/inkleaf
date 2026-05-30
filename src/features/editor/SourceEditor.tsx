@@ -444,15 +444,15 @@ export function SourceEditor({
             borderLeftColor: 'transparent',
           },
           '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-            backgroundColor: 'rgba(37, 99, 235, 0.55)',
+            backgroundColor: 'rgba(37, 99, 235, 0.68)',
           },
           '.cm-selectionLayer': {
             left: '0',
             right: '0',
             width: 'auto',
           },
-          '& .cm-line::selection': {
-            backgroundColor: 'rgba(37, 99, 235, 0.55)',
+          '& .cm-line::selection, & .cm-line *::selection': {
+            backgroundColor: 'rgba(37, 99, 235, 0.68)',
           },
           '.cm-gutters': {
             display: 'none',
