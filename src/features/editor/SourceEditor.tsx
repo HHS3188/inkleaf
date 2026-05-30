@@ -9,8 +9,8 @@ import { defaultKeymap, history, historyKeymap, redo, selectAll, undo } from '@c
 import { markdown } from '@codemirror/lang-markdown'
 import { SearchQuery, highlightSelectionMatches, search, setSearchQuery } from '@codemirror/search'
 import { useT } from '../../i18n'
+import type { I18N } from '../../i18n/types'
 import { FindBar } from '../../components/FindBar'
-import { isSupportedImagePath } from '../resources/resource-policy'
 import { useDocumentStore } from '../document/document-store'
 import { useEditorStore, type MarkdownAction } from './editor-store'
 // selection-line-fill disabled: real selection is handled by CodeMirror native + CSS only.
@@ -521,40 +521,7 @@ export function SourceEditor({
       dropPosRef.current = null
 
       const files = Array.from(event.dataTransfer.files)
-      const imageFiles = files.filter((f) => isImageFile(f.name))
-      const nonImageFiles = files.filter((f) => !isImageFile(f.name))
-
-      // Handle images via existing logic
-      if (imageFiles.length > 0) {
-        const imageList = imageFiles.length === 1
-          ? event.dataTransfer.files
-          : (() => { const d = new DataTransfer(); imageFiles.forEach((f) => d.items.add(f)); return d.files })()
-        void handleImageDrop(imageList, documentPathRef.current, view, setError, {
-          noDocumentPath: t('editor.dragDropNoDoc'),
-          noImagePath: t('editor.dragDropNoPath'),
-        }, insertPos)
-      }
-
-      // Handle non-image files: insert Markdown file links
-      for (const file of nonImageFiles) {
-        const filePath = window.electronAPI?.getPathForFile?.(file)
-          ?? (file as File & { path?: string }).path
-          ?? ''
-        if (!filePath) {
-          setError(t('editor.dragDropNoPath'))
-          continue
-        }
-        const link = formatMarkdownFileLink(filePath, file.name)
-        view.dispatch({
-          changes: { from: insertPos, to: insertPos, insert: link },
-          selection: { anchor: insertPos + link.length },
-        })
-      }
-
-      if (nonImageFiles.length > 0) {
-        view.focus()
-        setError(null)
-      }
+      void processDroppedFiles(files, documentPathRef.current, view, setError, insertPos, t)
     }
 
     host.addEventListener('dragover', handleDragOver)
@@ -836,40 +803,49 @@ function applyMarkdownAction(view: EditorView, action: MarkdownAction) {
   }
 }
 
-async function handleImageDrop(
-  files: FileList,
+async function processDroppedFiles(
+  files: File[],
   documentPath: string | null,
   view: EditorView,
-  setError: (message: string | null) => void,
-  messages: { noDocumentPath: string; noImagePath: string },
-  dropPos?: number | null,
+  setError: (msg: string | null) => void,
+  insertPos: number,
+  t: (key: keyof I18N) => string,
 ) {
-  if (!documentPath) {
-    setError(messages.noDocumentPath)
-    return
+  const insertParts: string[] = []
+
+  for (const file of files) {
+    const filePath = findDroppedFilePath(file)
+    if (!filePath) {
+      setError(t('editor.dragDropNoPath'))
+      continue
+    }
+
+    if (isImageFile(filePath)) {
+      if (!documentPath) {
+        setError(t('editor.dragDropNoDoc'))
+        continue
+      }
+      try {
+        const result = await copyImageToAssets(documentPath, filePath)
+        insertParts.push(`![image](${formatMarkdownImageDestination(result.relative_path)})`)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    } else {
+      insertParts.push(formatMarkdownFileLink(filePath, file.name))
+    }
   }
 
-  const filePath = findDroppedImagePath(files)
-  if (!filePath) {
-    setError(messages.noImagePath)
-    return
-  }
+  if (insertParts.length === 0) return
 
-  try {
-    const result = await copyImageToAssets(documentPath, filePath)
-    const insert = `![image](${formatMarkdownImageDestination(result.relative_path)})`
-    // Use drop position if available, otherwise fall back to current selection
-    const insertPos = dropPos ?? view.state.selection.main.head
-    view.dispatch({
-      changes: { from: insertPos, to: insertPos, insert },
-      selection: { anchor: insertPos + insert.length },
-      scrollIntoView: true,
-    })
-    view.focus()
-    setError(null)
-  } catch (error) {
-    setError(error instanceof Error ? error.message : String(error))
-  }
+  const insertText = insertParts.join('\n') + '\n'
+  view.dispatch({
+    changes: { from: insertPos, to: insertPos, insert: insertText },
+    selection: { anchor: insertPos + insertText.length },
+    scrollIntoView: true,
+  })
+  view.focus()
+  setError(null)
 }
 
 function formatMarkdownImageDestination(relativePath: string): string {
@@ -895,18 +871,10 @@ function formatMarkdownFileLink(filePath: string, displayName: string): string {
   return `[${displayName}](<${encoded}>)`
 }
 
-function findDroppedImagePath(files: FileList): string | null {
-  for (const file of Array.from(files)) {
-    // Prefer Electron webUtils.getPathForFile (reliable in modern Electron)
-    const bridgePath = window.electronAPI?.getPathForFile?.(file)
-    if (bridgePath && isSupportedImagePath(bridgePath)) {
-      return bridgePath
-    }
-    // Fallback to legacy file.path property
-    const legacyPath = (file as File & { path?: string }).path
-    if (legacyPath && isSupportedImagePath(legacyPath)) {
-      return legacyPath
-    }
-  }
-  return null
+function findDroppedFilePath(file: File): string | null {
+  return (
+    window.electronAPI?.getPathForFile?.(file) ??
+    (file as File & { path?: string }).path ??
+    null
+  )
 }

@@ -4,6 +4,9 @@ import type { ReaderSettings } from '../settings/settings-store'
 import { MissingImageCard } from './MissingImageCard'
 import { resolveImageSource, type ResolvedImageSource } from './image-path-resolver'
 
+// Session-level cache: only cache positive results to avoid stale false for newly copied images
+const pathExistsTrueCache = new Set<string>()
+
 type ResourceImageProps = {
   src?: string
   alt?: string
@@ -42,10 +45,18 @@ export function ResourceImage({
       }
     }
 
+    // Use positive cache to avoid repeated IPC for known-existing files
+    if (pathExistsTrueCache.has(resolved.absolutePath)) {
+      setExists(true)
+      return () => { active = false }
+    }
+
     setExists(null)
     pathExists(resolved.absolutePath)
       .then((value) => {
-        if (active) setExists(value)
+        if (!active) return
+        if (value) pathExistsTrueCache.add(resolved.absolutePath!)
+        setExists(value)
       })
       .catch(() => {
         if (active) setExists(false)

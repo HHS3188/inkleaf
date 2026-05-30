@@ -121,6 +121,7 @@ export const zhCN: I18N = {
 
   'outline.title': '大纲',
   'outline.empty': '当前文档没有标题',
+  'outline.headingNotFound': '标题未找到',
 
   'settings.title': '设置',
   'settings.close': '关闭',

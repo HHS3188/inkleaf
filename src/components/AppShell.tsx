@@ -483,19 +483,20 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   )
 
   const handleOutlineLineJump = useCallback(
-    (line: number) => {
+    (line: number, slug?: string) => {
       if (!currentDocument) return
-      if (mode === 'reader') {
-        // In Reader mode, scroll to heading by line number via data attribute
-        const heading = globalThis.document.querySelector(`[data-source-line="${line}"]`)
-        if (heading) {
-          heading.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (mode === 'reader' && slug) {
+        const el = globalThis.document.getElementById(slug)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          return
         }
+        setStatusMessage(t('outline.headingNotFound'))
         return
       }
       setTargetLine(line)
     },
-    [currentDocument, mode],
+    [currentDocument, mode, t],
   )
 
   const setThemeMode = useCallback(
@@ -701,16 +702,19 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     recentCleanupDoneRef.current = true
 
     const cleanup = async () => {
-      let removedCount = 0
-      for (const file of recentFiles) {
-        try {
-          const exists = await pathExists(file.path)
-          if (!exists) {
-            removeRecentFile(file.path)
-            removedCount++
+      const results = await Promise.all(
+        recentFiles.map(async (file) => {
+          try {
+            return { path: file.path, exists: await pathExists(file.path) }
+          } catch {
+            return { path: file.path, exists: false }
           }
-        } catch {
-          removeRecentFile(file.path)
+        }),
+      )
+      let removedCount = 0
+      for (const result of results) {
+        if (!result.exists) {
+          removeRecentFile(result.path)
           removedCount++
         }
       }

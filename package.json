@@ -36,12 +36,17 @@
       }
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.ico"
     },
     "fileAssociations": [
       {
-        "ext": ["md", "markdown"],
+        "ext": [
+          "md",
+          "markdown"
+        ],
         "name": "Markdown Document",
         "description": "Markdown document",
         "role": "Editor",
@@ -71,6 +76,7 @@
     "@codemirror/view": "^6.38.8",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
+    "github-slugger": "^2.0.0",
     "lucide-react": "^0.475.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

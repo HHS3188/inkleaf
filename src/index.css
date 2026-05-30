@@ -1265,15 +1265,7 @@ button:disabled {
   padding-inline-start: clamp(28px, 2.8vw, 48px);
   padding-inline-end: clamp(24px, 3vw, 48px);
   padding-block: clamp(20px, 3vw, 44px);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
   min-height: 40vh;
-}
-
-:root[data-theme='dark'] .reader-paper {
-  background: var(--surface-elevated);
-  border-color: var(--border-subtle);
 }
 
 .reader-view--split {

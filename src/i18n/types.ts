@@ -121,6 +121,7 @@ export interface I18N {
 
   'outline.title': string
   'outline.empty': string
+  'outline.headingNotFound': string
 
   'settings.title': string
   'settings.close': string

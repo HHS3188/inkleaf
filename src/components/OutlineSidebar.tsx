@@ -7,7 +7,7 @@ import { extractOutline } from '../features/outline/extract-outline'
 type OutlineSidebarProps = {
   collapsed: boolean
   onToggle: () => void
-  onLineJump?: (line: number) => void
+  onLineJump?: (line: number, slug?: string) => void
   syncLineJumpOnDomHit?: boolean
 }
 
@@ -78,10 +78,10 @@ export function OutlineSidebar({
                     if (el) {
                       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
                       if (syncLineJumpOnDomHit) {
-                        onLineJump?.(item.line)
+                        onLineJump?.(item.line, item.slug)
                       }
                     } else {
-                      onLineJump?.(item.line)
+                      onLineJump?.(item.line, item.slug)
                     }
                   }}
                 >

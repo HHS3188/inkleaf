@@ -1,3 +1,4 @@
+import GithubSlugger from 'github-slugger'
 import type { OutlineItem } from './outline-types'
 
 export function extractOutline(content: string): OutlineItem[] {
@@ -35,12 +36,6 @@ export function extractOutline(content: string): OutlineItem[] {
 }
 
 export function slugifyHeading(text: string): string {
-  const slug = text
-    .toLowerCase()
-    .replace(/[^\w一-鿿\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-
-  return slug || 'heading'
+  const slugger = new GithubSlugger()
+  return slugger.slug(text)
 }

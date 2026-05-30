@@ -75,14 +75,14 @@ describe('layout css contracts', () => {
     expect(readerPaperBlock).toContain('max-width: 1320px')
   })
 
-  it('has .reader-paper with background', () => {
+  it('has .reader-paper without background (flat reading surface)', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(readerPaperBlock).toContain('background')
+    expect(readerPaperBlock).not.toMatch(/background/)
   })
 
-  it('has .reader-paper with border', () => {
+  it('has .reader-paper without border (flat reading surface)', () => {
     const readerPaperBlock = css.match(/\.reader-paper\s*\{[^}]*\}/)?.[0] ?? ''
-    expect(readerPaperBlock).toContain('border')
+    expect(readerPaperBlock).not.toMatch(/border/)
   })
 
   it('has .reader-paper without box-shadow', () => {

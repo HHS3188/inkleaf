@@ -29,6 +29,9 @@ importers:
       dompurify:
         specifier: ^3.3.0
         version: 3.4.5
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       lucide-react:
         specifier: ^0.475.0
         version: 0.475.0(react@19.2.6)

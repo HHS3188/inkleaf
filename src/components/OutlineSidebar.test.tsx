@@ -47,6 +47,6 @@ describe('OutlineSidebar', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Details' }))
 
-    expect(onLineJump).toHaveBeenCalledWith(3)
+    expect(onLineJump).toHaveBeenCalledWith(3, 'details')
   })
 })

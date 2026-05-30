@@ -121,6 +121,7 @@ export const enUS: I18N = {
 
   'outline.title': 'Outline',
   'outline.empty': 'No headings in this document',
+  'outline.headingNotFound': 'Heading not found',
 
   'settings.title': 'Settings',
   'settings.close': 'Close',
