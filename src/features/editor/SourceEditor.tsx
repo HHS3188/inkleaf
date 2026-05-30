@@ -444,7 +444,7 @@ export function SourceEditor({
             borderLeftColor: 'transparent',
           },
           '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-            backgroundColor: 'rgba(37, 99, 235, 0.68)',
+            backgroundColor: '#2563eb',
           },
           '.cm-selectionLayer': {
             left: '0',
@@ -452,7 +452,8 @@ export function SourceEditor({
             width: 'auto',
           },
           '& .cm-line::selection, & .cm-line *::selection': {
-            backgroundColor: 'rgba(37, 99, 235, 0.68)',
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
           },
           '.cm-gutters': {
             display: 'none',

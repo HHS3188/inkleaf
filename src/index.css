@@ -95,18 +95,22 @@ textarea,
   user-select: text;
 }
 
-/* Deep blue selection for Source editor (CodeMirror) */
+/* Solid deep blue selection for Source editor (CodeMirror) */
 .cm-editor .cm-content::selection,
 .cm-editor .cm-content *::selection,
 .cm-editor .cm-line::selection,
 .cm-editor .cm-line *::selection {
-  background-color: rgba(37, 99, 235, 0.68) !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
-/* Deep blue selection for Reader content */
+/* Solid deep blue selection for Reader content */
 .reader-paper ::selection,
-.reader-paper *::selection {
-  background-color: rgba(37, 99, 235, 0.65);
+.reader-paper *::selection,
+.markdown-body ::selection,
+.markdown-body *::selection {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 :root[data-theme='dark'] * {
