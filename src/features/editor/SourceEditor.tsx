@@ -2,8 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { copyImageToAssets } from '../../lib/platform-api'
 import { Compartment, EditorState } from '@codemirror/state'
 import {
+  Decoration,
+  DecorationSet,
   EditorView,
   keymap,
+  ViewPlugin,
+  ViewUpdate,
 } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap, redo, selectAll, undo } from '@codemirror/commands'
 import { markdown } from '@codemirror/lang-markdown'
@@ -29,6 +33,38 @@ type SourceEditorProps = {
   targetLine?: number
   onTargetLineHandled?: () => void
   onOpenGotoLine?: () => void
+  onSelectionChange?: (selectedText: string) => void
+  mappedHighlight?: { from: number; to: number } | null
+}
+
+const mappedMark = Decoration.mark({ class: 'cm-mapped-selection' })
+
+// Module-level state for the mapped highlight range, kept in sync by the component.
+let _currentMappedRange: { from: number; to: number } | null = null
+
+function buildMappedDecorations(
+  view: EditorView,
+  range: { from: number; to: number } | null,
+): DecorationSet {
+  if (!range) return Decoration.none
+  const from = Math.max(0, Math.min(range.from, view.state.doc.length))
+  const to = Math.max(from, Math.min(range.to, view.state.doc.length))
+  if (from >= to) return Decoration.none
+  return Decoration.set([mappedMark.range(from, to)])
+}
+
+class MappedHighlightView {
+  decorations: DecorationSet
+
+  constructor(view: EditorView) {
+    this.decorations = buildMappedDecorations(view, _currentMappedRange)
+  }
+
+  update(update: ViewUpdate) {
+    if (update.docChanged || update.selectionSet) {
+      this.decorations = buildMappedDecorations(update.view, _currentMappedRange)
+    }
+  }
 }
 
 export function SourceEditor({
@@ -38,6 +74,8 @@ export function SourceEditor({
   targetLine,
   onTargetLineHandled,
   onOpenGotoLine,
+  onSelectionChange,
+  mappedHighlight,
 }: SourceEditorProps) {
   const t = useT()
   const shellRef = useRef<HTMLDivElement | null>(null)
@@ -62,6 +100,8 @@ export function SourceEditor({
   const markdownAction = useEditorStore((state) => state.markdownAction)
   const handledMarkdownActionRef = useRef(0)
   const setCursorPosition = useEditorStore((state) => state.setCursorPosition)
+  const onSelectionChangeRef = useRef(onSelectionChange)
+  const mappedHighlightRef = useRef<{ from: number; to: number } | null>(null)
   const editorFontSize = useSettingsStore((state) => state.settings.fontSize)
   const editorZoom = useSettingsStore((state) => state.settings.zoom)
   const editorMonoFont = useSettingsStore((state) => state.settings.monoFont)
@@ -96,6 +136,17 @@ export function SourceEditor({
   useEffect(() => {
     onOpenGotoLineRef.current = onOpenGotoLine
   }, [onOpenGotoLine])
+
+  useEffect(() => {
+    onSelectionChangeRef.current = onSelectionChange
+  }, [onSelectionChange])
+
+  useEffect(() => {
+    _currentMappedRange = mappedHighlight ?? null
+    mappedHighlightRef.current = _currentMappedRange
+    // Force ViewPlugin to rebuild decorations
+    viewRef.current?.requestMeasure()
+  }, [mappedHighlight])
 
   useEffect(() => {
     wordWrapRef.current = wordWrap
@@ -381,6 +432,9 @@ export function SourceEditor({
         search(),
         highlightSelectionMatches(),
         ...selectionLineFill,
+        ViewPlugin.fromClass(MappedHighlightView, {
+          decorations: (v) => v.decorations,
+        }),
         keymap.of([
           {
             key: 'Mod-f',
@@ -424,6 +478,15 @@ export function SourceEditor({
           }
           if (update.docChanged || update.selectionSet) {
             updateCursorPosition(update.view)
+            if (onSelectionChangeRef.current) {
+              const sel = update.state.selection.main
+              if (sel.empty) {
+                onSelectionChangeRef.current('')
+              } else {
+                const text = update.state.sliceDoc(sel.from, sel.to)
+                onSelectionChangeRef.current(text)
+              }
+            }
           }
         }),
         EditorView.theme({

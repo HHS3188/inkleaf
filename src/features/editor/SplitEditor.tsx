@@ -48,6 +48,28 @@ export function SplitEditor({
   const [dragging, setDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
+  // Selection mapping state
+  const [mappedHighlightForReader, setMappedHighlightForReader] = useState<string | null>(null)
+  const [mappedHighlightForSource, setMappedHighlightForSource] = useState<{ from: number; to: number } | null>(null)
+
+  const handleSourceSelectionChange = useCallback((text: string) => {
+    setMappedHighlightForReader(text.length >= 2 ? text : null)
+  }, [])
+
+  const handleReaderSelectionChange = useCallback((text: string) => {
+    if (!text || text.length < 2) {
+      setMappedHighlightForSource(null)
+      return
+    }
+    const sourceText = document.content
+    const idx = sourceText.indexOf(text)
+    if (idx >= 0) {
+      setMappedHighlightForSource({ from: idx, to: idx + text.length })
+    } else {
+      setMappedHighlightForSource(null)
+    }
+  }, [document.content])
+
   const updateRatio = useCallback((nextRatio: number) => {
     liveRatioRef.current = nextRatio
     setRatio(nextRatio)
@@ -97,6 +119,8 @@ export function SplitEditor({
               targetLine={targetLine}
               onTargetLineHandled={onTargetLineHandled}
               onOpenGotoLine={onOpenGotoLine}
+              onSelectionChange={handleSourceSelectionChange}
+              mappedHighlight={mappedHighlightForSource}
             />
           </div>
         </section>
@@ -111,7 +135,14 @@ export function SplitEditor({
           <div className="split-pane-label">
             <span>{t('toolbar.reader')}</span>
           </div>
-          <ReaderView document={document} settings={settings} onEditRequest={onEditRequest} variant="split" />
+          <ReaderView
+            document={document}
+            settings={settings}
+            onEditRequest={onEditRequest}
+            variant="split"
+            highlightText={mappedHighlightForReader}
+            onSelectionChange={handleReaderSelectionChange}
+          />
         </section>
       </div>
     </ErrorBoundary>

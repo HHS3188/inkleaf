@@ -1277,6 +1277,20 @@ button:disabled {
   overflow-x: hidden;
 }
 
+/* Source mapped highlight (from Reader selection) */
+.cm-mapped-selection {
+  background: rgba(59, 130, 246, 0.12);
+  border-radius: 2px;
+}
+
+/* Reader mapped highlight (from Source selection) */
+.mapped-selection {
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .preview-pane .reader-paper {
   max-width: 100%;
   margin: 0;
