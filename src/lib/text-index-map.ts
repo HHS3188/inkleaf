@@ -1,3 +1,6 @@
+// Currently unused: selection mapping between Source and Reader was removed.
+// This file is kept for reference only.
+
 export type TextNodeEntry = { node: Text; start: number; end: number }
 
 /**

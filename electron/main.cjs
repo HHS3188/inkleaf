@@ -4,6 +4,7 @@ const path = require('path')
 const crypto = require('crypto')
 const { fileURLToPath, pathToFileURL } = require('url')
 const { createOpenPayloadQueue } = require('./open-payload-queue.cjs')
+const { isAllowedExternalUrl, isAllowedAssetPath } = require('./security-utils.cjs')
 
 const isDev = !app.isPackaged
 app.setName('InkLeaf')
@@ -302,6 +303,9 @@ ipcMain.handle('dialog:show-message', async (_event, options) => {
 // ── IPC: Shell ────────────────────────────────────────────────────────
 
 ipcMain.handle('shell:open-external', async (_event, url) => {
+  if (!isAllowedExternalUrl(url)) {
+    throw new Error('Only http and https URLs are allowed')
+  }
   await shell.openExternal(url)
 })
 
@@ -376,6 +380,9 @@ function createWindow() {
     protocol.handle('inkleaf', (request) => {
       const parsed = new URL(request.url)
       const filePath = path.resolve(decodeURIComponent(parsed.pathname.replace(/^\/+/, '')))
+      if (!isAllowedAssetPath(filePath)) {
+        return new Response('Forbidden asset type', { status: 403 })
+      }
       return net.fetch(pathToFileURL(filePath).toString())
     })
   }

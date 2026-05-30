@@ -140,7 +140,8 @@ export function EmptyState({
             <FolderOpen size={18} aria-hidden="true" />
             {t('empty.openFile')}
           </button>
-          <button type="button" className="secondary-button large-action" onClick={onOpenFolder}>
+          {/* Hidden: folder browsing is not yet implemented (v0.2) */}
+          <button type="button" className="secondary-button large-action" style={{ display: 'none' }} disabled onClick={onOpenFolder}>
             <FolderOpen size={18} aria-hidden="true" />
             {t('empty.openFolder')}
           </button>
