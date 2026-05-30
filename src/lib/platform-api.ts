@@ -72,6 +72,7 @@ declare global {
       writeTextFile: (p: string, c: string) => Promise<void>
       pathExists: (p: string) => Promise<boolean>
       copyImageToAssets: (d: string, i: string) => Promise<CopiedAssetResult>
+      getPathForFile: (file: File) => string
       openExternal: (url: string) => Promise<void>
       showItemInFolder: (p: string) => Promise<void>
       openDefaultAppsSettings: () => Promise<void>

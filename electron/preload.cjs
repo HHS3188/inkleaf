@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer, webUtils } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
@@ -25,6 +25,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('dialog:save-file', options),
   showMessageDialog: (options) =>
     ipcRenderer.invoke('dialog:show-message', options),
+
+  // File utilities
+  getPathForFile: (file) => {
+    try {
+      return webUtils.getPathForFile(file)
+    } catch {
+      return ''
+    }
+  },
 
   // App operations
   getInitialArgs: () => ipcRenderer.invoke('get-initial-args'),

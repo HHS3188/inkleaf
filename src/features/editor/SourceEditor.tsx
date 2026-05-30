@@ -825,10 +825,15 @@ async function handleImageDrop(
 
 function findDroppedImagePath(files: FileList): string | null {
   for (const file of Array.from(files)) {
-    const fileWithPath = file as File & { path?: string }
-    const candidate = fileWithPath.path
-    if (candidate && isSupportedImagePath(candidate)) {
-      return candidate
+    // Prefer Electron webUtils.getPathForFile (reliable in modern Electron)
+    const bridgePath = window.electronAPI?.getPathForFile?.(file)
+    if (bridgePath && isSupportedImagePath(bridgePath)) {
+      return bridgePath
+    }
+    // Fallback to legacy file.path property
+    const legacyPath = (file as File & { path?: string }).path
+    if (legacyPath && isSupportedImagePath(legacyPath)) {
+      return legacyPath
     }
   }
   return null
