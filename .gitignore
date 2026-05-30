@@ -12,3 +12,6 @@ pnpm-workspace.yaml
 
 # User icon source material
 InkLeaf_icon/
+
+# CodeGraph index
+.codegraph/
