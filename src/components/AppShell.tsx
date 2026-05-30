@@ -131,6 +131,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
   const handledInitialArgs = useRef(false)
   const handledSingleInstancePayload = useRef<SingleInstancePayload | null>(null)
+  const recentCleanupDoneRef = useRef(false)
 
   const refreshRecentFiles = useCallback(() => {
     setRecentFiles(getRecentFiles())
@@ -687,6 +688,33 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     const filePath = getFirstOpenableArg(lastSingleInstancePayload.args)
     if (filePath) void handleOpenPath(filePath)
   }, [handleOpenPath, lastSingleInstancePayload])
+
+  useEffect(() => {
+    if (recentCleanupDoneRef.current) return
+    if (recentFiles.length === 0) return
+    recentCleanupDoneRef.current = true
+
+    const cleanup = async () => {
+      let removedCount = 0
+      for (const file of recentFiles) {
+        try {
+          const exists = await pathExists(file.path)
+          if (!exists) {
+            removeRecentFile(file.path)
+            removedCount++
+          }
+        } catch {
+          removeRecentFile(file.path)
+          removedCount++
+        }
+      }
+      if (removedCount > 0) {
+        refreshRecentFiles()
+        setStatusMessage(t('status.recentCleanedUp').replace('{count}', String(removedCount)))
+      }
+    }
+    void cleanup()
+  }, [recentFiles, refreshRecentFiles, t])
 
   const showOutline = currentDocument !== null
 

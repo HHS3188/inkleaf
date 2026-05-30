@@ -247,6 +247,7 @@ export const enUS: I18N = {
   'status.saved': 'Saved',
   'status.draftSaved': 'Recovery draft saved',
   'status.fileNotFound': 'File not found, removed from recent',
+  'status.recentCleanedUp': 'Removed {count} missing file(s) from recent',
 
   'goto.title': 'Go to Line',
   'goto.placeholder': 'Line number',

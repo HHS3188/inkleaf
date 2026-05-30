@@ -500,16 +500,25 @@ export function SourceEditor({
     const handleDragOver = (event: DragEvent) => {
       if (event.dataTransfer?.types.includes('Files')) {
         event.preventDefault()
+        event.dataTransfer.dropEffect = 'copy'
+        // Move cursor to drop position for visual feedback
+        const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
+        if (pos != null) {
+          view.dispatch({
+            selection: { anchor: pos },
+          })
+        }
       }
     }
 
     const handleDrop = (event: DragEvent) => {
       if (!event.dataTransfer?.files.length) return
       event.preventDefault()
+      const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
       void handleImageDrop(event.dataTransfer.files, documentPathRef.current, view, setError, {
         noDocumentPath: t('editor.dragDropNoDoc'),
         noImagePath: t('editor.dragDropNoPath'),
-      })
+      }, pos)
     }
 
     host.addEventListener('dragover', handleDragOver)
@@ -795,6 +804,7 @@ async function handleImageDrop(
   view: EditorView,
   setError: (message: string | null) => void,
   messages: { noDocumentPath: string; noImagePath: string },
+  dropPos?: number | null,
 ) {
   if (!documentPath) {
     setError(messages.noDocumentPath)
@@ -809,11 +819,13 @@ async function handleImageDrop(
 
   try {
     const result = await copyImageToAssets(documentPath, filePath)
-    const insert = `![image](${result.relative_path})`
-    const selection = view.state.selection.main
+    const relativePath = result.relative_path.replace(/\\/g, '/')
+    const insert = `![image](${relativePath})`
+    // Use drop position if available, otherwise fall back to current selection
+    const insertPos = dropPos ?? view.state.selection.main.head
     view.dispatch({
-      changes: { from: selection.from, to: selection.to, insert },
-      selection: { anchor: selection.from + insert.length },
+      changes: { from: insertPos, to: insertPos, insert },
+      selection: { anchor: insertPos + insert.length },
       scrollIntoView: true,
     })
     view.focus()

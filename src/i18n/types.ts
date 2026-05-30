@@ -247,6 +247,7 @@ export interface I18N {
   'status.saved': string
   'status.draftSaved': string
   'status.fileNotFound': string
+  'status.recentCleanedUp': string
 
   'goto.title': string
   'goto.placeholder': string

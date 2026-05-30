@@ -247,6 +247,7 @@ export const zhCN: I18N = {
   'status.saved': '已保存',
   'status.draftSaved': '恢复草稿已保存',
   'status.fileNotFound': '文件不存在，已从最近打开中移除',
+  'status.recentCleanedUp': '已从最近打开中移除 {count} 个不存在的文件',
 
   'goto.title': '转到行',
   'goto.placeholder': '输入行号',
