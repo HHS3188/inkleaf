@@ -1,7 +1,7 @@
 {
   "name": "inkleaf",
   "version": "0.1.3",
-  "description": "InkLeaf / 墨笺 — A clean local reader and editor for Markdown, TXT, and HTML.",
+  "description": "A local reader and editor for Markdown, TXT, and HTML.",
   "author": "InkLeaf",
   "private": true,
   "type": "module",

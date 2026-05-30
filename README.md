@@ -1,121 +1,114 @@
-# InkLeaf / 墨笺
+# InkLeaf
 
-Windows 本地优先的轻量 Markdown / TXT / HTML 阅读编辑器。
+A local-first reader and editor for Markdown, TXT, and HTML on Windows.
 
-A quiet, local-first reader and editor for Markdown, TXT, and HTML on Windows.
+[中文说明](README.zh-CN.md)
 
----
+## Overview
 
-## 简介 / About
+InkLeaf is a Windows desktop application for reading and light editing of Markdown, TXT, and HTML files. Built with Electron, React, TypeScript, and CodeMirror 6, it provides a clean, distraction-free reading and writing experience.
 
-墨笺是一个面向 Windows 的本地文本阅读与轻量编辑工具。不依赖云服务，不开屏广告，启动即用。适合日常文档阅读、写作草稿、Markdown 预览和源码查看。
-
-InkLeaf is a Windows-first local text reader and lightweight editor. No cloud dependency, no startup ads — just open and use. Designed for everyday document reading, writing drafts, Markdown preview, and source viewing.
-
-## 功能 / Features
-
-- 打开与编辑 Markdown / TXT / HTML 文件
-- Reader（阅读）、Source（源码）、Split（分屏）三种模式
-- 多标签页，支持脏状态标记与关闭确认
-- 查找 / 替换 / 跳转到行
-- 浅色 / 深色主题切换
-- 字号、缩放（70%–200%）、行高、字体设置
-- 最近文件列表
-- 自动保存与本地草稿恢复
-- 底部状态栏：行 / 列 / 字符数 / 文件类型 / 编码 / 缩放
-- 图片拖拽插入（Markdown）
-- Windows 文件关联（`.txt` / `.md` / `.markdown`）
-- 启动时自动检查 GitHub 更新
-- 关于页显示版本号与 GitHub 链接
-- Windows exe 安装包
-
----
+## Features
 
 - Open and edit Markdown, TXT, and HTML files
 - Reader, Source, and Split modes
-- Real editor tabs with dirty state and close confirmation
+- Multi-tab interface with dirty state tracking
 - Find, Replace, Go to Line
 - Light and dark themes
-- Font size, zoom (70%–200%), line height, and font settings
-- Recent files list
+- Font size, zoom (70%–300%), line height, and font settings
+- Recent files with automatic cleanup of missing entries
 - Auto-save and local draft recovery
-- Status bar: line, column, characters, file type, encoding, zoom
-- Image drag-and-drop insertion (Markdown)
-- Windows file associations (`.txt` / `.md` / `.markdown`)
-- Auto-check for GitHub updates on startup
-- About dialog with version and GitHub links
-- Windows installer (exe)
+- Status bar with line, column, characters, file type, encoding, and zoom
+- Markdown formatting toolbar in Source mode
+- Image drag-and-drop with automatic asset management
+- File drag-and-drop with Markdown link insertion
+- Outline sidebar for heading navigation
+- Windows file associations (`.txt`, `.md`, `.markdown`)
+- First-run default app prompt
+- Startup update check via GitHub Releases
 
-## 设计取向 / Design Philosophy
-
-- **本地优先**：所有文件操作在本地完成，不上传到任何云端
-- **轻量清爽**：接近记事本 / Typora 的桌面体验，无多余干扰
-- **Source 模式无行号**：行号 gutter 已移除，行列信息通过底部状态栏显示
-
----
-
-- **Local-first**: all file operations stay on your machine
-- **Lightweight and clean**: Notepad / Typora-like desktop experience, no distractions
-- **No line numbers in Source mode**: gutter removed; line/column shown in status bar
-
-## 安装 / Installation
-
-从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载：
-
-- **InkLeaf.Setup.0.1.3.exe** — Windows 安装包（推荐 Windows 10/11）
-
-下载后运行安装包，按提示完成安装。安装完成后可从开始菜单搜索 **InkLeaf** 启动。
-
-安装包会注册 InkLeaf 为 `.txt` / `.md` / `.markdown` 的可选打开程序。首次启动时会提示是否打开 Windows 默认应用设置，由用户自行选择。也可手动设置：Windows 设置 → 应用 → 默认应用 → 搜索 `.txt` 或 `.md` → 选择 InkLeaf。
+## Installation
 
 Download from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf.Setup.0.1.3.exe** — Windows installer (recommended for Windows 10/11)
+- **InkLeaf Setup 0.1.3.exe** — Windows installer (recommended for Windows 10/11)
 
 Run the installer and follow the setup wizard. After installation, launch **InkLeaf** from the Start menu.
 
-The installer registers InkLeaf as an available app for `.txt`, `.md`, and `.markdown`. On first launch, InkLeaf offers to open Windows Default Apps settings so you can set it as the default. You can also set it manually: Windows Settings → Apps → Default Apps → search for `.txt` or `.md` → choose InkLeaf.
+The installer registers InkLeaf as an available app for `.txt`, `.md`, and `.markdown`. On first launch, InkLeaf offers to open Windows Default Apps settings.
 
-## 开发 / Development
+## Usage
+
+### File Operations
+
+- `Ctrl+N` — New Markdown
+- `Ctrl+Shift+N` — New TXT
+- `Ctrl+O` — Open file
+- `Ctrl+S` — Save
+- `Ctrl+Shift+S` — Save As
+- `Ctrl+W` — Close tab
+
+### Editing
+
+- `Ctrl+F` — Find
+- `Ctrl+H` — Replace
+- `Ctrl+G` — Go to Line
+- `Ctrl+Z` / `Ctrl+Y` — Undo / Redo
+
+### View Modes
+
+- `Ctrl+1` — Reader mode
+- `Ctrl+2` — Source mode
+- `Ctrl+3` — Split mode
+- `Ctrl+Shift+L` — Toggle outline
+- `Ctrl+mouse wheel` — Zoom
+
+## Development
 
 ```powershell
 pnpm install
 pnpm dev
 ```
 
-`pnpm dev` starts Vite at `http://127.0.0.1:1420` and launches Electron after the renderer is ready.
-
-常用命令 / Common commands:
+### Commands
 
 ```powershell
-pnpm typecheck      # TypeScript 类型检查
+pnpm typecheck      # TypeScript type checking
 pnpm lint           # ESLint
-pnpm test           # Vitest 单元测试
-pnpm vite:build     # Vite 生产构建
-pnpm build          # Vite + Electron Builder 打包
+pnpm test           # Vitest unit tests
+pnpm vite:build     # Vite production build
+pnpm build          # Vite + Electron Builder packaging
 ```
 
-## 项目状态 / Status
+## Verification
 
-当前为早期版本（v0.1.3）。核心功能已可用，部分体验仍在继续完善。
+```powershell
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm vite:build
+powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1
+```
 
-当前 Windows 发布包：
+## Release
 
-- **InkLeaf.Setup.0.1.3.exe** — NSIS 安装包
+Build the installer:
 
-已知限制：大文件（>100MB）暂不支持。
+```powershell
+Remove-Item -Recurse -Force .\release -ErrorAction SilentlyContinue
+pnpm build
+```
 
-This is an early release (v0.1.3). Core features are functional; some areas are still being refined.
+Output: `release/InkLeaf Setup 0.1.3.exe`
 
-Current Windows release asset:
+## Known Limitations
 
-- **InkLeaf.Setup.0.1.3.exe** — NSIS installer
+- Files larger than 100 MB are not supported
+- Source ↔ Reader synchronized selection mapping is disabled in v0.1.3; will be redesigned with Markdown AST source mapping in a future release
 
-Known limit: files larger than 100 MB are not supported.
+## Tech Stack
 
-## 技术栈 / Tech Stack
-
-Electron, React 19, TypeScript, Vite, pnpm, CodeMirror 6, react-markdown, Zustand, CSS variables
+Electron, React 19, TypeScript, Vite, pnpm, CodeMirror 6, react-markdown, Zustand
 
 ## License
 

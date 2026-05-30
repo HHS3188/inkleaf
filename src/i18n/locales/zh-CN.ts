@@ -2,7 +2,7 @@ import type { I18N } from '../types'
 
 export const zhCN: I18N = {
   'app.name': '墨笺',
-  'app.brand': '墨笺 InkLeaf',
+  'app.brand': 'InkLeaf',
   'app.description': '简洁的 Markdown / TXT / HTML 本地阅读编辑器',
   'app.aboutTitle': '关于 墨笺',
   'app.aboutBody': '墨笺 InkLeaf\n本地 Markdown / TXT / HTML 阅读编辑器',
