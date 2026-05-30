@@ -53,6 +53,7 @@ export function SourceEditor({
   const findOpenRef = useRef(false)
   const findStateRef = useRef({ query: '', matchCase: false, wholeWord: false })
   const handledCommandIdRef = useRef(0)
+  const dropPosRef = useRef<number | null>(null)
   const updateContent = useDocumentStore((state) => state.updateContent)
   const setError = useDocumentStore((state) => state.setError)
   const searchRequest = useEditorStore((state) => state.searchRequest)
@@ -501,20 +502,21 @@ export function SourceEditor({
       if (event.dataTransfer?.types.includes('Files')) {
         event.preventDefault()
         event.dataTransfer.dropEffect = 'copy'
-        // Move cursor to drop position for visual feedback
+        // Store drop position without moving real cursor
         const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
-        if (pos != null) {
-          view.dispatch({
-            selection: { anchor: pos },
-          })
-        }
+        dropPosRef.current = pos ?? null
       }
+    }
+
+    const handleDragLeave = () => {
+      dropPosRef.current = null
     }
 
     const handleDrop = (event: DragEvent) => {
       if (!event.dataTransfer?.files.length) return
       event.preventDefault()
       const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
+      dropPosRef.current = null
       void handleImageDrop(event.dataTransfer.files, documentPathRef.current, view, setError, {
         noDocumentPath: t('editor.dragDropNoDoc'),
         noImagePath: t('editor.dragDropNoPath'),
@@ -523,10 +525,12 @@ export function SourceEditor({
 
     host.addEventListener('dragover', handleDragOver)
     host.addEventListener('drop', handleDrop)
+    host.addEventListener('dragleave', handleDragLeave)
 
     return () => {
       host.removeEventListener('dragover', handleDragOver)
       host.removeEventListener('drop', handleDrop)
+      host.removeEventListener('dragleave', handleDragLeave)
       view.destroy()
       viewRef.current = null
     }
@@ -819,8 +823,7 @@ async function handleImageDrop(
 
   try {
     const result = await copyImageToAssets(documentPath, filePath)
-    const relativePath = result.relative_path.replace(/\\/g, '/')
-    const insert = `![image](${relativePath})`
+    const insert = `![image](${formatMarkdownImageDestination(result.relative_path)})`
     // Use drop position if available, otherwise fall back to current selection
     const insertPos = dropPos ?? view.state.selection.main.head
     view.dispatch({
@@ -833,6 +836,15 @@ async function handleImageDrop(
   } catch (error) {
     setError(error instanceof Error ? error.message : String(error))
   }
+}
+
+function formatMarkdownImageDestination(relativePath: string): string {
+  const normalized = relativePath.replace(/\\/g, '/')
+  const encoded = normalized
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
+  return `<${encoded}>`
 }
 
 function findDroppedImagePath(files: FileList): string | null {

@@ -378,12 +378,16 @@ function createWindow() {
     assetProtocolRegistered = true
     // Custom protocol for local image serving (inkleaf:///path)
     protocol.handle('inkleaf', (request) => {
-      const parsed = new URL(request.url)
-      const filePath = path.resolve(decodeURIComponent(parsed.pathname.replace(/^\/+/, '')))
-      if (!isAllowedAssetPath(filePath)) {
-        return new Response('Forbidden asset type', { status: 403 })
+      try {
+        const parsed = new URL(request.url)
+        const filePath = path.resolve(decodeURIComponent(parsed.pathname.replace(/^\/+/, '')))
+        if (!isAllowedAssetPath(filePath)) {
+          return new Response('Forbidden asset type', { status: 403 })
+        }
+        return net.fetch(pathToFileURL(filePath).toString())
+      } catch (error) {
+        return new Response('Failed to load asset: ' + (error instanceof Error ? error.message : String(error)), { status: 500 })
       }
-      return net.fetch(pathToFileURL(filePath).toString())
     })
   }
 

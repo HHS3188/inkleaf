@@ -120,6 +120,14 @@ export function resolveImageSource(source: string | undefined, options: ResolveO
   }
 }
 
+function safeDecodeUriComponent(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 function sourceToLocalPath(source: string, documentPath: string | null): string | null {
   if (isFileSource(source)) {
     return fileUrlToPath(source)
@@ -142,7 +150,7 @@ function sourceToLocalPath(source: string, documentPath: string | null): string 
     return null
   }
 
-  return joinPath(base, decodeURIComponent(source))
+  return joinPath(base, safeDecodeUriComponent(source))
 }
 
 function safeConvertFileSrc(path: string): string {
