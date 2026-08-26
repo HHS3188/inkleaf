@@ -132,12 +132,20 @@ export interface I18N {
   'settings.fontSize': string
   'settings.lineHeight': string
   'settings.readingWidth': string
+  'settings.readingPreset': string
+  'settings.readingPreset.focused': string
+  'settings.readingPreset.focused.desc': string
+  'settings.readingPreset.comfortable': string
+  'settings.readingPreset.comfortable.desc': string
+  'settings.readingPreset.wide': string
+  'settings.readingPreset.wide.desc': string
   'settings.wordWrap': string
   'settings.autoSave': string
   'settings.autoSave.off': string
   'settings.autoSave.30s': string
   'settings.autoSave.1m': string
   'settings.autoSave.5m': string
+  'settings.reopenLastSession': string
   'settings.autoRenderTxtImages': string
   'settings.allowRemoteImages': string
   'settings.setDefaultOpener': string
@@ -225,6 +233,7 @@ export interface I18N {
   'key.save': string
   'key.saveAs': string
   'key.closeFile': string
+  'key.switchTab': string
   'key.search': string
   'key.replace': string
   'key.gotoLine': string
@@ -249,6 +258,7 @@ export interface I18N {
   'status.draftSaved': string
   'status.fileNotFound': string
   'status.recentCleanedUp': string
+  'status.sessionRestored': string
 
   'goto.title': string
   'goto.placeholder': string

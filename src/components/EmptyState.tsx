@@ -126,17 +126,17 @@ export function EmptyState({
           </div>
         </div>
         <div className="empty-actions">
-          <button type="button" className="primary-button large-action" onClick={onNewMarkdown}>
+          <button type="button" className="primary-button large-action" onClick={onOpen}>
+            <FolderOpen size={18} aria-hidden="true" />
+            {t('empty.openFile')}
+          </button>
+          <button type="button" className="secondary-button large-action" onClick={onNewMarkdown}>
             <FilePlus2 size={18} aria-hidden="true" />
             {t('empty.newMarkdown')}
           </button>
           <button type="button" className="secondary-button large-action" onClick={onNewTxt}>
             <FileText size={18} aria-hidden="true" />
             {t('empty.newTxt')}
-          </button>
-          <button type="button" className="secondary-button large-action" onClick={onOpen}>
-            <FolderOpen size={18} aria-hidden="true" />
-            {t('empty.openFile')}
           </button>
         </div>
         <div className="empty-utility-actions">

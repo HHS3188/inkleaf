@@ -11,6 +11,7 @@ export type FontChoice =
   | 'jetbrains-mono'
 
 export type AutoSaveInterval = 0 | 30 | 60 | 300
+export type ReadingPreset = 'focused' | 'comfortable' | 'wide'
 
 export type ReaderSettings = {
   themeMode: ThemeMode
@@ -24,8 +25,18 @@ export type ReaderSettings = {
   wordWrap: boolean
   showStatusBar: boolean
   autoSaveInterval: AutoSaveInterval
+  reopenLastSession: boolean
   autoRenderTxtImages: boolean
   allowRemoteImages: boolean
+}
+
+export const readingPresets: Record<
+  ReadingPreset,
+  Pick<ReaderSettings, 'fontSize' | 'lineHeight' | 'readingWidth'>
+> = {
+  focused: { fontSize: 17, lineHeight: 1.85, readingWidth: 720 },
+  comfortable: { fontSize: 16, lineHeight: 1.75, readingWidth: 880 },
+  wide: { fontSize: 16, lineHeight: 1.6, readingWidth: 1160 },
 }
 
 type SettingsState = {
@@ -41,13 +52,12 @@ export const defaultSettings: ReaderSettings = {
   accentColor: 'blue',
   bodyFont: 'system',
   monoFont: 'cascadia-code',
-  fontSize: 16,
-  lineHeight: 1.7,
-  readingWidth: 980,
+  ...readingPresets.comfortable,
   zoom: 100,
   wordWrap: true,
   showStatusBar: true,
   autoSaveInterval: 0,
+  reopenLastSession: true,
   autoRenderTxtImages: true,
   allowRemoteImages: false,
 }
@@ -131,6 +141,10 @@ function readSettings(): ReaderSettings {
       autoSaveInterval: isAutoSaveInterval(candidate.autoSaveInterval)
         ? candidate.autoSaveInterval
         : defaultSettings.autoSaveInterval,
+      reopenLastSession:
+        typeof candidate.reopenLastSession === 'boolean'
+          ? candidate.reopenLastSession
+          : defaultSettings.reopenLastSession,
       autoRenderTxtImages:
         typeof candidate.autoRenderTxtImages === 'boolean'
           ? candidate.autoRenderTxtImages
@@ -143,6 +157,20 @@ function readSettings(): ReaderSettings {
   } catch {
     return defaultSettings
   }
+}
+
+export function getActiveReadingPreset(settings: ReaderSettings): ReadingPreset | null {
+  for (const preset of Object.keys(readingPresets) as ReadingPreset[]) {
+    const values = readingPresets[preset]
+    if (
+      settings.fontSize === values.fontSize &&
+      settings.lineHeight === values.lineHeight &&
+      settings.readingWidth === values.readingWidth
+    ) {
+      return preset
+    }
+  }
+  return null
 }
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {

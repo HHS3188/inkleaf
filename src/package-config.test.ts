@@ -9,8 +9,8 @@ describe('package.json build config', () => {
     expect(pkg.build.win.target).toEqual(['nsis'])
   })
 
-  it('sets win.icon to build/icon.ico', () => {
-    expect(pkg.build.win.icon).toBe('build/icon.ico')
+  it('uses the tracked Electron icon for Windows packaging', () => {
+    expect(pkg.build.win.icon).toBe('electron/inkleaf-icon.ico')
   })
 
   it('registers file associations for md, markdown, and txt', () => {
@@ -22,9 +22,9 @@ describe('package.json build config', () => {
     expect(exts).toContain('txt')
   })
 
-  it('sets file association icons to build/icon.ico', () => {
+  it('uses the tracked Electron icon for file associations', () => {
     for (const assoc of pkg.build.fileAssociations) {
-      expect(assoc.icon).toBe('build/icon.ico')
+      expect(assoc.icon).toBe('electron/inkleaf-icon.ico')
     }
   })
 
@@ -37,6 +37,10 @@ describe('package.json build config', () => {
 describe('electron/main.cjs icon path', () => {
   it('uses resourcesPath/icon.ico for packaged mode', () => {
     expect(mainCjs).toContain("process.resourcesPath, 'icon.ico'")
+  })
+
+  it('uses electron/inkleaf-icon.ico for development mode', () => {
+    expect(mainCjs).toContain("path.join(__dirname, 'inkleaf-icon.ico')")
   })
 
   it('does not use resourcesPath/build/icon.ico', () => {

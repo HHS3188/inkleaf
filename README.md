@@ -35,20 +35,22 @@ The project focuses on three things:
 | File types | Markdown, TXT, HTML |
 | View modes | Reader, Source, Split |
 | Editing | CodeMirror 6 editor, find, replace, go to line, Markdown toolbar |
-| Local workflow | Multi-tab editing, dirty state, auto-save, draft recovery, recent file cleanup |
+| Local workflow | Multi-tab editing, session restore, dirty state, auto-save, draft recovery, recent file cleanup |
 | Navigation | Outline sidebar, heading navigation, status bar |
-| Appearance | Light/dark themes, zoom 70%–300%, font and line-height settings |
+| Appearance | Light/dark themes, three reading presets, zoom 70%–300%, font and line-height settings |
 | Windows integration | Installer, Start menu entry, `.txt` / `.md` / `.markdown` file association |
 | Security surface | Markdown/HTML sanitization, external-link handling, filesystem paths, Electron IPC |
 
 ## Features
 
 - Open and edit Markdown, TXT, and HTML files.
+- Existing files open in Reader mode; the Source editor loads only when needed.
 - Reader, Source, and Split modes.
-- Multi-tab interface with dirty state tracking and close confirmation.
+- Multi-tab interface with `Ctrl+Tab` cycling, startup session restore, dirty state tracking, and close confirmation.
 - Find, Replace, and Go to Line.
 - Light and dark themes.
 - Font size, zoom, line height, and font settings.
+- Focused, Comfortable, and Wide one-click reading presets.
 - Recent files with automatic cleanup of missing entries.
 - Auto-save and local draft recovery.
 - Status bar with line, column, characters, file type, encoding, and zoom.
@@ -64,7 +66,7 @@ The project focuses on three things:
 
 Download the latest Windows installer from [GitHub Releases](https://github.com/HHS3188/inkleaf/releases):
 
-- **InkLeaf Setup 0.1.3.exe** — recommended for Windows 10/11.
+- **InkLeaf Setup 0.1.4.exe** — recommended for Windows 10/11.
 
 Run the installer and launch **InkLeaf** from the Start menu.
 
@@ -82,6 +84,8 @@ The installer registers InkLeaf as an available app for `.txt`, `.md`, and `.mar
 | `Ctrl+S` | Save |
 | `Ctrl+Shift+S` | Save As |
 | `Ctrl+W` | Close tab |
+| `Ctrl+Tab` | Next tab |
+| `Ctrl+Shift+Tab` | Previous tab |
 
 ### Editing
 
@@ -165,7 +169,7 @@ pnpm build
 Expected output:
 
 ```text
-release/InkLeaf Setup 0.1.3.exe
+release/InkLeaf Setup 0.1.4.exe
 ```
 
 ## Roadmap
@@ -174,12 +178,12 @@ release/InkLeaf Setup 0.1.3.exe
 - Add stronger large-file handling and progressive loading.
 - Expand automated regression coverage for file operations and Electron IPC.
 - Improve release automation and security checks.
-- Add more polished reading themes and layout presets.
+- Continue improving keyboard navigation and accessibility.
 
 ## Known limitations
 
 - Files larger than 100 MB are not supported.
-- Source ↔ Reader synchronized selection mapping is disabled in v0.1.3 and will be redesigned with Markdown AST source mapping in a future release.
+- Source ↔ Reader synchronized selection mapping is disabled in v0.1.4 and will be redesigned with Markdown AST source mapping in a future release.
 
 ## Tech stack
 

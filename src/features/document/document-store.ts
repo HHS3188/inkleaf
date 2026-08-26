@@ -20,6 +20,7 @@ type DocumentState = {
   newDocument: (input: NewDocumentInput) => void
   openDocument: (path: string) => Promise<void>
   switchTab: (tabId: string) => void
+  cycleTab: (direction: -1 | 1) => void
   closeTab: (tabId: string) => void
   updateContent: (content: string) => void
   saveCurrentDocument: (pathOverride?: string) => Promise<string | null>
@@ -158,6 +159,19 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       ...syncCurrent(state.tabs, tabId),
       error: null,
     })),
+  cycleTab: (direction) =>
+    set((state) => {
+      if (state.tabs.length < 2) return state
+      const currentIndex = Math.max(
+        0,
+        state.tabs.findIndex((tab) => tab.id === state.activeTabId),
+      )
+      const nextIndex = (currentIndex + direction + state.tabs.length) % state.tabs.length
+      return {
+        ...syncCurrent(state.tabs, state.tabs[nextIndex]?.id ?? state.activeTabId),
+        error: null,
+      }
+    }),
   closeTab: (tabId) =>
     set((state) => {
       const index = state.tabs.findIndex((tab) => tab.id === tabId)

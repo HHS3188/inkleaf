@@ -16,6 +16,7 @@ const settings = {
   wordWrap: true,
   showStatusBar: true,
   autoSaveInterval: 0 as const,
+  reopenLastSession: true,
   autoRenderTxtImages: true,
   themeMode: 'light' as const,
   accentColor: 'blue' as const,

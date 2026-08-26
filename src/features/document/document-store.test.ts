@@ -84,6 +84,22 @@ describe('document tabs store', () => {
     expect(useDocumentStore.getState().current?.id).toBe(second.id)
   })
 
+  it('cycles tabs in both directions and wraps at the ends', () => {
+    useDocumentStore.getState().newDocument({
+      fileType: 'markdown',
+      fileName: 'Draft.md',
+      content: '# Draft',
+    })
+    const [first, second] = useDocumentStore.getState().tabs
+
+    useDocumentStore.getState().switchTab(first.id)
+    useDocumentStore.getState().cycleTab(-1)
+    expect(useDocumentStore.getState().current?.id).toBe(second.id)
+
+    useDocumentStore.getState().cycleTab(1)
+    expect(useDocumentStore.getState().current?.id).toBe(first.id)
+  })
+
   it('saves an untitled active tab to a path and adds it to recent files', async () => {
     resetStore(null)
     useDocumentStore.getState().newDocument({

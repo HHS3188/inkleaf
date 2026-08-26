@@ -13,7 +13,9 @@ import {
 export function App() {
   const settings = useSettingsStore((state) => state.settings)
   const hydrateSettings = useSettingsStore((state) => state.hydrate)
-  const [initialArgs, setInitialArgs] = useState<string[]>([])
+  const [initialArgs, setInitialArgs] = useState<string[] | null>(() =>
+    isElectronRuntime() ? null : [],
+  )
   const [lastSingleInstancePayload, setLastSingleInstancePayload] =
     useState<SingleInstancePayload | null>(null)
 

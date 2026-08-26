@@ -9,6 +9,15 @@ This roadmap tracks the public direction of InkLeaf. It is intentionally practic
 - Expand automated checks around rendering, file operations, and Electron IPC.
 - Continue polishing reading and editing ergonomics.
 
+## Delivered in v0.1.4
+
+- Reader-first opening for existing files.
+- Lazy-loaded Source and Split editors for a smaller reading startup path.
+- File-backed session restore with active-tab recovery.
+- Focused, Comfortable, and Wide reading presets.
+- Keyboard tab cycling with `Ctrl+Tab` and `Ctrl+Shift+Tab`.
+- Safer local-image failure handling and a clean production dependency audit.
+
 ## Near-term priorities
 
 ### 1. Security and reliability
@@ -21,8 +30,7 @@ This roadmap tracks the public direction of InkLeaf. It is intentionally practic
 
 ### 2. Reading and editing experience
 
-- Improve Reader mode typography and spacing presets.
-- Add more polished layout presets for long-form reading.
+- Continue refining Reader typography from real-world feedback.
 - Improve Split mode behavior without reintroducing fragile synchronization.
 - Keep Source mode fast and predictable for daily editing.
 
@@ -44,7 +52,7 @@ This roadmap tracks the public direction of InkLeaf. It is intentionally practic
 
 - Markdown AST source mapping for future Source ↔ Reader selection synchronization.
 - More document export options.
-- Workspace/session restore improvements.
+- Optional folder workspace after the file-based workflow is proven stable.
 - Optional portable build.
 - Better accessibility and keyboard-only navigation.
 

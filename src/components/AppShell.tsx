@@ -29,6 +29,11 @@ import {
   removeRecentFile,
   type RecentFile,
 } from '../features/document/recent-files'
+import {
+  clearSessionSnapshot,
+  readSessionSnapshot,
+  writeSessionSnapshot,
+} from '../features/document/session-state'
 import type { SupportedFileType } from '../features/document/document-types'
 import { useDocumentStore } from '../features/document/document-store'
 import {
@@ -50,8 +55,6 @@ import { MarkdownToolbar } from './MarkdownToolbar'
 import { StatusBar } from './StatusBar'
 import { TabStrip } from './TabStrip'
 import { ReaderView } from '../features/reader/ReaderView'
-import { SourceEditor } from '../features/editor/SourceEditor'
-import { SplitEditor } from '../features/editor/SplitEditor'
 import { OutlineSidebar } from './OutlineSidebar'
 import { SettingsPanel } from '../features/settings/SettingsPanel'
 
@@ -59,9 +62,15 @@ const DiagnosticsPanel = lazy(() =>
   import('../features/diagnostics/DiagnosticsPanel').then((m) => ({ default: m.DiagnosticsPanel })),
 )
 const HelpPanel = lazy(() => import('./HelpPanel').then((m) => ({ default: m.HelpPanel })))
+const SourceEditor = lazy(() =>
+  import('../features/editor/SourceEditor').then((m) => ({ default: m.SourceEditor })),
+)
+const SplitEditor = lazy(() =>
+  import('../features/editor/SplitEditor').then((m) => ({ default: m.SplitEditor })),
+)
 
 type AppShellProps = {
-  initialArgs: string[]
+  initialArgs: string[] | null
   lastSingleInstancePayload: SingleInstancePayload | null
 }
 
@@ -89,6 +98,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const newDocument = useDocumentStore((state) => state.newDocument)
   const openDocument = useDocumentStore((state) => state.openDocument)
   const switchTab = useDocumentStore((state) => state.switchTab)
+  const cycleTab = useDocumentStore((state) => state.cycleTab)
   const closeTab = useDocumentStore((state) => state.closeTab)
   const closeDocument = useDocumentStore((state) => state.closeDocument)
   const saveCurrentDocument = useDocumentStore((state) => state.saveCurrentDocument)
@@ -101,6 +111,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   const requestMarkdownAction = useEditorStore((state) => state.requestMarkdownAction)
   const cursor = useEditorStore((state) => state.cursor)
   const settings = useSettingsStore((state) => state.settings)
+  const settingsHydrated = useSettingsStore((state) => state.hydrated)
   const updateSettings = useSettingsStore((state) => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
@@ -129,9 +140,16 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   })
   const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null)
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
+  const [sessionReady, setSessionReady] = useState(false)
   const handledInitialArgs = useRef(false)
   const handledSingleInstancePayload = useRef<SingleInstancePayload | null>(null)
   const recentCleanupDoneRef = useRef(false)
+  const sessionRestoreStartedRef = useRef(false)
+
+  const sessionSignature = `${tabs
+    .map((tab) => tab.path ?? '')
+    .filter(Boolean)
+    .join('\u001f')}\u001e${currentDocument?.path ?? ''}`
 
   const refreshRecentFiles = useCallback(() => {
     setRecentFiles(getRecentFiles())
@@ -327,7 +345,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
         return
       }
       setTargetLine(undefined)
-      setMode('source')
+      setMode('reader')
       await openDocument(path)
       refreshRecentFiles()
     },
@@ -339,7 +357,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       const selected = await showOpenDialog({ multiple: false, filters: openFileFilters })
       if (typeof selected === 'string') {
         setTargetLine(undefined)
-        setMode('source')
+        setMode('reader')
         await openDocument(selected)
         refreshRecentFiles()
       }
@@ -518,6 +536,13 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
       if (!primary || event.altKey) return
       const key = event.key.toLowerCase()
 
+      if (key === 'tab' && tabs.length > 1) {
+        event.preventDefault()
+        cycleTab(event.shiftKey ? -1 : 1)
+        setTargetLine(undefined)
+        return
+      }
+
       if (key === 'n' && event.shiftKey) {
         event.preventDefault()
         void handleNewTxt()
@@ -594,6 +619,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [
     changeZoom,
+    cycleTab,
     currentDocument,
     handleCloseDocument,
     handleNewMarkdown,
@@ -605,6 +631,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
     saveDocument,
     setMode,
     settings.zoom,
+    tabs.length,
   ])
 
   useEffect(() => {
@@ -679,11 +706,108 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
   }, [])
 
   useEffect(() => {
-    if (handledInitialArgs.current || initialArgs.length === 0) return
+    if (handledInitialArgs.current || initialArgs === null || initialArgs.length === 0) return
     handledInitialArgs.current = true
     const filePath = getFirstOpenableArg(initialArgs)
     if (filePath) void handleOpenPath(filePath)
   }, [handleOpenPath, initialArgs])
+
+  useEffect(() => {
+    if (
+      sessionRestoreStartedRef.current ||
+      !settingsHydrated ||
+      initialArgs === null
+    ) {
+      return
+    }
+
+    const initialFilePath = getFirstOpenableArg(initialArgs)
+    if (!isElectronRuntime() || !settings.reopenLastSession || initialFilePath) {
+      sessionRestoreStartedRef.current = true
+      setSessionReady(true)
+      return
+    }
+
+    if (recoveryDraft) return
+
+    sessionRestoreStartedRef.current = true
+    if (useDocumentStore.getState().tabs.some((tab) => tab.dirty)) {
+      setSessionReady(true)
+      return
+    }
+
+    const snapshot = readSessionSnapshot()
+    if (!snapshot) {
+      setSessionReady(true)
+      return
+    }
+
+    let cancelled = false
+    const restoreSession = async () => {
+      let restoredCount = 0
+      try {
+        for (const path of snapshot.paths) {
+          if (cancelled) return
+          try {
+            if (!(await pathExists(path))) continue
+            await openDocument(path)
+            const opened = useDocumentStore
+              .getState()
+              .tabs.some((tab) => tab.path?.toLowerCase() === path.toLowerCase())
+            if (opened) restoredCount++
+          } catch {
+            // Skip files that became unavailable between sessions.
+          }
+        }
+
+        if (cancelled) return
+        if (snapshot.activePath) {
+          const activeTab = useDocumentStore
+            .getState()
+            .tabs.find(
+              (tab) => tab.path?.toLowerCase() === snapshot.activePath?.toLowerCase(),
+            )
+          if (activeTab) switchTab(activeTab.id)
+        }
+        if (restoredCount > 0) {
+          setMode('reader')
+          setStatusMessage(
+            t('status.sessionRestored').replace('{count}', String(restoredCount)),
+          )
+        }
+      } finally {
+        if (!cancelled) setSessionReady(true)
+      }
+    }
+
+    void restoreSession()
+    return () => {
+      cancelled = true
+    }
+  }, [
+    initialArgs,
+    openDocument,
+    recoveryDraft,
+    settings.reopenLastSession,
+    settingsHydrated,
+    setMode,
+    switchTab,
+    t,
+  ])
+
+  useEffect(() => {
+    if (!sessionReady || !isElectronRuntime()) return
+    if (!settings.reopenLastSession) {
+      clearSessionSnapshot()
+      return
+    }
+
+    const state = useDocumentStore.getState()
+    writeSessionSnapshot(
+      state.tabs.flatMap((tab) => (tab.path ? [tab.path] : [])),
+      state.current?.path ?? null,
+    )
+  }, [sessionReady, sessionSignature, settings.reopenLastSession])
 
   useEffect(() => {
     if (
@@ -843,7 +967,7 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
           <DiagnosticsPanel
             openPanel={diagnosticsOpen}
             onClose={() => setDiagnosticsOpen(false)}
-            initialArgs={initialArgs}
+            initialArgs={initialArgs ?? []}
             lastSingleInstancePayload={lastSingleInstancePayload}
             document={currentDocument}
             settings={settings}
@@ -928,28 +1052,32 @@ export function AppShell({ initialArgs, lastSingleInstancePayload }: AppShellPro
 
     if (mode === 'source') {
       return (
-        <SourceEditor
-          documentPath={currentDocument.path}
-          content={currentDocument.content}
-          wordWrap={settings.wordWrap}
-          targetLine={targetLine}
-          onTargetLineHandled={() => setTargetLine(undefined)}
-          onOpenGotoLine={handleGotoLine}
-        />
+        <Suspense fallback={<div className="loading-state">{t('editor.loading')}</div>}>
+          <SourceEditor
+            documentPath={currentDocument.path}
+            content={currentDocument.content}
+            wordWrap={settings.wordWrap}
+            targetLine={targetLine}
+            onTargetLineHandled={() => setTargetLine(undefined)}
+            onOpenGotoLine={handleGotoLine}
+          />
+        </Suspense>
       )
     }
 
     if (mode === 'split') {
       return (
-        <SplitEditor
-          document={currentDocument}
-          settings={settings}
-          onEditRequest={handleEditRequest}
-          wordWrap={settings.wordWrap}
-          targetLine={targetLine}
-          onTargetLineHandled={() => setTargetLine(undefined)}
-          onOpenGotoLine={handleGotoLine}
-        />
+        <Suspense fallback={<div className="loading-state">{t('editor.loading')}</div>}>
+          <SplitEditor
+            document={currentDocument}
+            settings={settings}
+            onEditRequest={handleEditRequest}
+            wordWrap={settings.wordWrap}
+            targetLine={targetLine}
+            onTargetLineHandled={() => setTargetLine(undefined)}
+            onOpenGotoLine={handleGotoLine}
+          />
+        </Suspense>
       )
     }
 

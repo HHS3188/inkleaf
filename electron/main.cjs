@@ -2,9 +2,9 @@ const { app, BrowserWindow, Menu, dialog, ipcMain, net, protocol, shell } = requ
 const fs = require('fs/promises')
 const path = require('path')
 const crypto = require('crypto')
-const { fileURLToPath, pathToFileURL } = require('url')
+const { fileURLToPath } = require('url')
 const { createOpenPayloadQueue } = require('./open-payload-queue.cjs')
-const { isAllowedExternalUrl, isAllowedAssetPath } = require('./security-utils.cjs')
+const { isAllowedExternalUrl, loadAllowedAsset } = require('./security-utils.cjs')
 
 const isDev = !app.isPackaged
 app.setName('InkLeaf')
@@ -15,13 +15,14 @@ if (!gotLock) {
   app.quit()
 } else {
   app.on('second-instance', (_event, argv, cwd) => {
+    const openArgs = normalizeAppArgs(argv)
     const win = getMainWindow()
     if (win) {
       if (win.isMinimized()) win.restore()
       win.focus()
     }
-    if (hasOpenableArg(argv)) {
-      openPayloadQueue.queueOpenPayload({ args: argv, cwd })
+    if (hasOpenableArg(openArgs)) {
+      openPayloadQueue.queueOpenPayload({ args: openArgs, cwd })
     }
   })
 }
@@ -54,10 +55,13 @@ function buildApplicationMenu(locale = menuLocale) {
   Menu.setApplicationMenu(null)
 }
 
+function normalizeAppArgs(args) {
+  return args.slice(isDev ? 2 : 1)
+}
+
 function hasOpenableArg(args) {
-  return args.some((arg, idx) => {
-    if (idx < (isDev ? 2 : 1)) return false
-    if (!arg || arg.startsWith('-') || arg.startsWith('--')) return false
+  return args.some((arg) => {
+    if (!arg || arg.startsWith('-') || arg.startsWith('/?')) return false
     return arg.length > 1
   })
 }
@@ -235,9 +239,8 @@ ipcMain.handle('open-in-file-manager', async (_event, filePath) => {
 })
 
 ipcMain.handle('get-initial-args', () => {
-  // Return args after the electron app path
-  const args = process.argv.slice(isDev ? 2 : 1)
-  return args
+  // Renderer-facing arguments never include the executable or development app path.
+  return normalizeAppArgs(process.argv)
 })
 
 ipcMain.on('renderer-ready', (event) => {
@@ -355,7 +358,7 @@ function compareVersions(a, b) {
 function createWindow() {
   openPayloadQueue.markRendererUnavailable()
   const appIconPath = isDev
-    ? path.join(__dirname, '..', 'build', 'icon.ico')
+    ? path.join(__dirname, 'inkleaf-icon.ico')
     : path.join(process.resourcesPath, 'icon.ico')
 
   mainWindow = new BrowserWindow({
@@ -377,18 +380,7 @@ function createWindow() {
   if (!assetProtocolRegistered) {
     assetProtocolRegistered = true
     // Custom protocol for local image serving (inkleaf:///path)
-    protocol.handle('inkleaf', (request) => {
-      try {
-        const parsed = new URL(request.url)
-        const filePath = path.resolve(decodeURIComponent(parsed.pathname.replace(/^\/+/, '')))
-        if (!isAllowedAssetPath(filePath)) {
-          return new Response('Forbidden asset type', { status: 403 })
-        }
-        return net.fetch(pathToFileURL(filePath).toString())
-      } catch (error) {
-        return new Response('Failed to load asset: ' + (error instanceof Error ? error.message : String(error)), { status: 500 })
-      }
-    })
+    protocol.handle('inkleaf', (request) => loadAllowedAsset(request.url, (url) => net.fetch(url)))
   }
 
   if (isDev) {
@@ -424,13 +416,6 @@ function createWindow() {
 app.whenReady().then(() => {
   buildApplicationMenu()
   createWindow()
-
-  if (hasOpenableArg(process.argv)) {
-    openPayloadQueue.queueOpenPayload({
-      args: process.argv,
-      cwd: process.cwd(),
-    })
-  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

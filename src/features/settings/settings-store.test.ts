@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { defaultSettings, useSettingsStore } from './settings-store'
+import {
+  defaultSettings,
+  getActiveReadingPreset,
+  readingPresets,
+  useSettingsStore,
+} from './settings-store'
 
 describe('settings store', () => {
   beforeEach(() => {
@@ -13,6 +18,7 @@ describe('settings store', () => {
       allowRemoteImages: true,
       wordWrap: false,
       autoSaveInterval: 60,
+      reopenLastSession: false,
       bodyFont: 'microsoft-yahei',
       monoFont: 'jetbrains-mono',
     })
@@ -23,6 +29,7 @@ describe('settings store', () => {
     expect(useSettingsStore.getState().settings.allowRemoteImages).toBe(true)
     expect(useSettingsStore.getState().settings.wordWrap).toBe(false)
     expect(useSettingsStore.getState().settings.autoSaveInterval).toBe(60)
+    expect(useSettingsStore.getState().settings.reopenLastSession).toBe(false)
     expect(useSettingsStore.getState().settings.bodyFont).toBe('microsoft-yahei')
     expect(useSettingsStore.getState().settings.monoFont).toBe('jetbrains-mono')
   })
@@ -55,5 +62,13 @@ describe('settings store', () => {
     expect(style.getPropertyValue('--editor-font-size')).toBe('48px')
     expect(style.getPropertyValue('--editor-line-height-px')).toBe('65px')
     expect(style.getPropertyValue('--reader-line-height')).toBe('1.7')
+  })
+
+  it('recognizes built-in reading presets and treats manual values as custom', () => {
+    useSettingsStore.getState().updateSettings(readingPresets.focused)
+    expect(getActiveReadingPreset(useSettingsStore.getState().settings)).toBe('focused')
+
+    useSettingsStore.getState().updateSettings({ readingWidth: 760 })
+    expect(getActiveReadingPreset(useSettingsStore.getState().settings)).toBeNull()
   })
 })

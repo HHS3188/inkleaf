@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useT } from '../../i18n'
-import { showMessageDialog, openExternal } from '../../lib/platform-api'
+import { openDefaultAppsSettings, showMessageDialog } from '../../lib/platform-api'
 import { Trash2, X } from 'lucide-react'
 import { clearRecentFiles } from '../document/recent-files'
 import { accentLabels } from '../theme/themes'
 import type { AccentColor, ThemeMode } from '../theme/theme-types'
-import { autoSaveIntervals, useSettingsStore, type AutoSaveInterval } from './settings-store'
+import {
+  autoSaveIntervals,
+  getActiveReadingPreset,
+  readingPresets,
+  useSettingsStore,
+  type AutoSaveInterval,
+  type ReadingPreset,
+} from './settings-store'
 
 type SettingsPanelProps = {
   openPanel: boolean
@@ -15,6 +22,7 @@ type SettingsPanelProps = {
 
 const themeModes: ThemeMode[] = ['system', 'light', 'dark']
 const accentColors: AccentColor[] = ['blue', 'green', 'rose', 'amber']
+const readingPresetOrder: ReadingPreset[] = ['focused', 'comfortable', 'wide']
 
 export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: SettingsPanelProps) {
   const t = useT()
@@ -103,7 +111,7 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
         message: t('settings.defaultOpenerText'),
         kind: 'info',
       })
-      await openExternal('ms-settings:defaultapps')
+      await openDefaultAppsSettings()
     } catch {
       await navigator.clipboard?.writeText(t('settings.defaultOpenerText'))
     }
@@ -112,6 +120,7 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
   const modalStyle = position
     ? { position: 'fixed' as const, left: `${position.x}px`, top: `${position.y}px`, margin: 0 }
     : undefined
+  const activeReadingPreset = getActiveReadingPreset(settings)
 
   return (
     <div className="settings-modal-backdrop" role="presentation" onClick={onClose}>
@@ -211,6 +220,20 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
 
           <section className="settings-section" aria-label={t('toolbar.reader')}>
             <h2>{t('toolbar.reader')}</h2>
+            <div className="reading-preset-group" role="group" aria-label={t('settings.readingPreset')}>
+              {readingPresetOrder.map((preset) => (
+                <button
+                  type="button"
+                  className={`reading-preset${activeReadingPreset === preset ? ' active' : ''}`}
+                  aria-pressed={activeReadingPreset === preset}
+                  onClick={() => updateSettings(readingPresets[preset])}
+                  key={preset}
+                >
+                  <strong>{t(`settings.readingPreset.${preset}`)}</strong>
+                  <span>{t(`settings.readingPreset.${preset}.desc`)}</span>
+                </button>
+              ))}
+            </div>
             <RangeControl
               label={t('settings.readingWidth')}
               value={settings.readingWidth}
@@ -256,6 +279,14 @@ export function SettingsPanel({ openPanel, onClose, onOpenDiagnostics }: Setting
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={settings.reopenLastSession}
+                onChange={(event) => updateSettings({ reopenLastSession: event.target.checked })}
+              />
+              {t('settings.reopenLastSession')}
             </label>
             <button type="button" className="secondary-button wide" onClick={openDefaultApps}>
               {t('settings.setDefaultOpener')}

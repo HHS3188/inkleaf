@@ -35,20 +35,22 @@ InkLeaf（墨笺）是一个面向 Windows 的本地文本阅读与轻量编辑�
 | 文件类型 | Markdown、TXT、HTML |
 | 视图模式 | Reader 阅读、Source 源码、Split 分屏 |
 | 编辑能力 | CodeMirror 6 编辑器、查找、替换、跳转到行、Markdown 工具栏 |
-| 本地工作流 | 多标签页、脏状态、自动保存、草稿恢复、最近文件自动清理 |
+| 本地工作流 | 多标签页、会话恢复、脏状态、自动保存、草稿恢复、最近文件自动清理 |
 | 导航 | 大纲侧边栏、标题跳转、底部状态栏 |
-| 外观 | 浅色/深色主题、70%–300% 缩放、字体和行高设置 |
+| 外观 | 浅色/深色主题、三种阅读预设、70%–300% 缩放、字体和行高设置 |
 | Windows 集成 | 安装包、开始菜单入口、`.txt` / `.md` / `.markdown` 文件关联 |
 | 安全关注面 | Markdown/HTML 清理、外链处理、文件路径、Electron IPC |
 
 ## 功能
 
 - 打开与编辑 Markdown / TXT / HTML 文件。
+- 已有文件默认进入阅读模式，源码编辑器仅在需要时加载。
 - Reader（阅读）、Source（源码）、Split（分屏）三种模式。
-- 多标签页，支持脏状态标记与关闭确认。
+- 多标签页，支持 `Ctrl+Tab` 切换、启动会话恢复、脏状态标记与关闭确认。
 - 查找 / 替换 / 跳转到行。
 - 浅色 / 深色主题切换。
 - 字号、缩放、行高、字体设置。
+- 窄幅、舒适、宽屏三种一键阅读预设。
 - 最近文件列表自动清理不存在的文件。
 - 自动保存与本地草稿恢复。
 - 底部状态栏显示行、列、字符数、文件类型、编码和缩放。
@@ -64,7 +66,7 @@ InkLeaf（墨笺）是一个面向 Windows 的本地文本阅读与轻量编辑�
 
 从 [GitHub Releases](https://github.com/HHS3188/inkleaf/releases) 下载最新版 Windows 安装包：
 
-- **InkLeaf Setup 0.1.3.exe** — 推荐 Windows 10/11 使用。
+- **InkLeaf Setup 0.1.4.exe** — 推荐 Windows 10/11 使用。
 
 下载后运行安装包，按提示完成安装。安装完成后可从开始菜单搜索 **InkLeaf** 启动。
 
@@ -82,6 +84,8 @@ InkLeaf（墨笺）是一个面向 Windows 的本地文本阅读与轻量编辑�
 | `Ctrl+S` | 保存 |
 | `Ctrl+Shift+S` | 另存为 |
 | `Ctrl+W` | 关闭标签页 |
+| `Ctrl+Tab` | 切换到下一个标签页 |
+| `Ctrl+Shift+Tab` | 切换到上一个标签页 |
 
 ### 编辑
 
@@ -165,7 +169,7 @@ pnpm build
 预期输出：
 
 ```text
-release/InkLeaf Setup 0.1.3.exe
+release/InkLeaf Setup 0.1.4.exe
 ```
 
 ## 路线图
@@ -174,12 +178,12 @@ release/InkLeaf Setup 0.1.3.exe
 - 增强大文件处理和渐进式加载能力。
 - 增加文件操作与 Electron IPC 的自动化回归测试。
 - 改进发布自动化和安全检查流程。
-- 增加更多阅读主题和布局预设。
+- 继续改进键盘操作与无障碍体验。
 
 ## 已知限制
 
 - 暂不支持大于 100 MB 的文件。
-- v0.1.3 暂停 Source ↔ Reader 双向选区映射，后续版本将基于 Markdown AST source map 重做。
+- v0.1.4 暂停 Source ↔ Reader 双向选区映射，后续版本将基于 Markdown AST source map 重做。
 
 ## 技术栈
 

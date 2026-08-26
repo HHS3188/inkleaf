@@ -38,6 +38,7 @@ export function HelpPanel({ onClose }: HelpPanelProps) {
                 <tr><td><kbd>Ctrl+S</kbd></td><td>{t('key.save')}</td></tr>
                 <tr><td><kbd>Ctrl+Shift+S</kbd></td><td>{t('key.saveAs')}</td></tr>
                 <tr><td><kbd>Ctrl+W</kbd></td><td>{t('key.closeFile')}</td></tr>
+                <tr><td><kbd>Ctrl+Tab</kbd> / <kbd>Ctrl+Shift+Tab</kbd></td><td>{t('key.switchTab')}</td></tr>
                 <tr><td><kbd>Ctrl+F</kbd></td><td>{t('key.search')}</td></tr>
                 <tr><td><kbd>Ctrl+H</kbd></td><td>{t('key.replace')}</td></tr>
                 <tr><td><kbd>Ctrl+G</kbd></td><td>{t('key.gotoLine')}</td></tr>
